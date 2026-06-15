@@ -15,14 +15,14 @@
         <div class="flex items-center gap-3">
             <i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i>
             <div>
-                <h1 class="text-xl font-bold tracking-wide">Dir. Fuerza Barrial de Aprox. (F.B.A.) Analitica de partes Escritos</h1>
+                <h1 class="text-xl font-bold tracking-wide">Dir. Fuerza Barrial de Aprox. (F.B.A.) Analitica de Actuaciones Sumariales Administrativas (A.S.A.)</h1>
                 <p class="text-xs text-slate-400">Control de Gestión, Siniestralidad y Comparativas Interanuales Globales</p>
             </div>
         </div>
         <div id="statusBadge" class="flex items-center gap-2 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 w-full sm:w-auto">
             <i id="statusIcon" class="fa-solid fa-spinner fa-spin text-amber-400 text-lg"></i>
             <div>
-                <p id="statusText" class="text-sm font-semibold text-amber-300">Conectando con Google Sheets...</p>
+                <p id="statusText" class="text-sm font-semibold text-amber-300">Conectando con Base de Datos...</p>
                 <p id="statusSub" class="text-[10px] text-slate-400">BASE SIREX — carga automática</p>
             </div>
         </div>
@@ -35,7 +35,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Lesiones por Accidente</span>
-                    <h3 class="text-3xl font-black text-red-600 tracking-tight" id="topCountLesiones">0 casos registrados</h3>
+                    <h3 class="text-3xl font-black text-red-600 tracking-tight" id="topCountLesiones">0 actuaciones</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLesiones">Buscando...</p>
@@ -44,7 +44,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-purple-500 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Pta Inf Ley 12569</span>
-                    <h3 class="text-3xl font-black text-purple-600 tracking-tight" id="topCountLey">0 infracciones</h3>
+                    <h3 class="text-3xl font-black text-purple-600 tracking-tight" id="topCountLey">0 actuaciones</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLey">Buscando...</p>
@@ -62,7 +62,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-blue-600 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Móviles Dañados</span>
-                    <h3 class="text-3xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 móviles afectados</h3>
+                    <h3 class="text-3xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 móviles dañados</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionMovil">Buscando...</p>
@@ -99,7 +99,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500 flex flex-col justify-between">
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Mes Máxima Actividad</span>
                 <div class="flex items-baseline justify-between">
-                    <h2 class="text-5xl font-black text-red-600 tracking-tight leading-none my-2" id="kpiMesMaximo">S/D</h2>
+                    <h2 class="text-5xl font-black text-red-600 tracking-tight Stadium leading-none my-2" id="kpiMesMaximo">S/D</h2>
                     <div class="text-red-500 bg-red-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-fire"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100" id="kpiMesMaximoDetalle">0 casos registrados</p>
@@ -134,7 +134,7 @@
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Búsqueda General</label>
                 <div class="relative">
-                    <input type="text" id="searchFilter" placeholder="Expediente, carátula..." class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+                    <input type="text" id="searchFilter" placeholder="Expediente, carátula, nombre, legajo o destino..." class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
                     <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-xs"></i>
                 </div>
             </div>
@@ -434,10 +434,14 @@
                 const matchFba = fbaVal === 'TODOS' || item.fba === fbaVal;
                 const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
+                
+                // Modificación en la Búsqueda General: evalúa expediente, carátula, fba (nombres/legajos) y dependencia (destino)
                 const matchSearch = !searchVal || 
                     item.sirex.toLowerCase().includes(searchVal) ||
                     item.expediente.toLowerCase().includes(searchVal) ||
-                    item.caratula.toLowerCase().includes(searchVal);
+                    item.caratula.toLowerCase().includes(searchVal) ||
+                    item.fba.toLowerCase().includes(searchVal) ||
+                    item.dependencia.toLowerCase().includes(searchVal);
 
                 return matchAno && matchFba && matchDelito && matchControl && matchSearch;
             });
@@ -460,7 +464,6 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            // Tarjetas Superiores de Siniestralidad Líder
             const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "LESIONES POR ACCIDENTE");
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} casos registrados`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
@@ -536,7 +539,6 @@
             for(let m = 1; m <= mesLimiteEnCurso; m++) { arrayMesesIndex.push(m); }
             let dataMesesAnoActual = arrayMesesIndex.map(m => recuentoMesesAnual[m] || 0);
 
-            // GRÁFICO 1: Historial Completo Multi-Año
             const structAnualShed = {};
             rawData.forEach(item => {
                 if(!isNaN(item.año) && !isNaN(item.mes)) {
@@ -581,7 +583,6 @@
                 }
             });
 
-            // GRÁFICO 2: Barras Intervenciones por Mes
             document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500"></i> Intervenciones por Mes (${anoSeleccionado})`;
             if(chartCurrentYear) chartCurrentYear.destroy();
             chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), {
@@ -609,7 +610,6 @@
                 }
             });
 
-            // GRÁFICO 3: Línea de Evolución Unificada
             if(chartEvolution) chartEvolution.destroy();
             chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), {
                 type: 'line',
@@ -632,7 +632,6 @@
                 }
             });
 
-            // GRÁFICO 4: Top Delitos (AGREGADO NUMERO VISIBLE A SIMPLE VISTA)
             let delitosParaAnalizar = [];
             if (delitoFiltro !== 'TODOS') { delitosParaAnalizar = [delitoFiltro]; } 
             else {
@@ -646,7 +645,7 @@
             const baseComparativaCruzada = rawData.filter(item => {
                 return (fbaFiltro === 'TODOS' || item.fba === fbaFiltro) &&
                        (controlFiltro === 'TODOS' || item.control === controlFiltro) &&
-                       (!searchFiltro || item.sirex.toLowerCase().includes(searchFiltro) || item.caratula.toLowerCase().includes(searchFiltro));
+                       (!searchFiltro || item.sirex.toLowerCase().includes(searchFiltro) || item.caratula.toLowerCase().includes(searchFiltro) || item.fba.toLowerCase().includes(searchFiltro) || item.dependencia.toLowerCase().includes(searchFiltro));
             });
 
             delitosParaAnalizar.forEach(delito => {
@@ -701,7 +700,6 @@
                 }
             });
 
-            // GRÁFICO 5: Concentración por FBA (AGREGADO NUMERO VISIBLE A SIMPLE VISTA)
             const fbaCounts = {}; filteredData.forEach(i => { if(i.fba && i.fba !== 'NINGUNO' && i.fba !== 'S/D') fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
             const topFBA = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
             if(chartFBA) chartFBA.destroy();
@@ -725,7 +723,6 @@
                 }
             });
 
-            // GRÁFICO 6: Estado de Control Resolutivo (AGREGADO NUMERO VISIBLE A SIMPLE VISTA)
             const ctrlCounts = {}; filteredData.forEach(i => { if(i.control) ctrlCounts[i.control] = (ctrlCounts[i.control] || 0) + 1; });
             if(chartControl) chartControl.destroy();
             chartControl = new Chart(document.getElementById('chartControl'), {
