@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F.B.A. - Analítica de Partes Escritos v21</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js DataLabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased">
+
+    <!-- Navbar Principal -->
+    <nav class="bg-slate-950 text-white shadow-md px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">Dir. Fuerza Barrial de Aprox. (F.B.A.) Analitica de partes Escritos</h1>
+                <p class="text-xs text-slate-400">Control de Gestión, Siniestralidad y Comparativas Interanuales Globales</p>
+            </div>
+        </div>
+        <!-- Selector Manual de Archivo CSV -->
+        <div class="flex items-center gap-2 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 w-full sm:w-auto">
+            <label for="csvFileInput" class="text-sm cursor-pointer font-medium flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-file-csv text-green-400 text-lg"></i> Cargar CSV SIREX:
+            </label>
+            <input type="file" id="csvFileInput" accept=".csv" class="text-xs text-slate-300 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer w-full">
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal del Dashboard -->
+    <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
+        
+        <!-- SECCIÓN: TARJETAS SUPERIORES DESTACADAS POR DEPENDENCIA LÍDER -->
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Lesiones por Accidente</span>
+                    <h3 class="text-3xl font-black text-red-600 tracking-tight" id="topCountLesiones">0 casos registrados</h3>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100">
+                    <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLesiones">Buscando...</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-purple-500 flex flex-col justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Pta Inf Ley 12569</span>
+                    <h3 class="text-3xl font-black text-purple-600 tracking-tight" id="topCountLey">0 infracciones</h3>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100">
+                    <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLey">Buscando...</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-amber-500 flex flex-col justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Abandono de Servicio</span>
+                    <h3 class="text-3xl font-black text-amber-600 tracking-tight" id="topCountAbandono">0 actuaciones</h3>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100">
+                    <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionAbandono">Buscando...</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-blue-600 flex flex-col justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Móviles Dañados</span>
+                    <h3 class="text-3xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 móviles afectados</h3>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100">
+                    <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionMovil">Buscando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: MÉTRICAS GENERALES CON INCIDENCIA NUMÉRICA EN PRIMER PLANO -->
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Métricas Clave del Flujo Operativo</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <!-- KPI 1: Intervenciones del Año -->
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-600 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1" id="lblKpiAnual">Intervenciones del Año</span>
+                <div class="flex items-baseline justify-between">
+                    <h2 class="text-5xl font-black text-slate-900 tracking-tight leading-none my-2" id="kpiTotalAnual">0</h2>
+                    <div class="text-indigo-500 bg-indigo-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-calendar"></i></div>
+                </div>
+                <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100">Registros consolidados</p>
+            </div>
+            <!-- KPI 2: Año Anterior -->
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-violet-600 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1" id="lblKpiComparativaAnual">Vs. Año Anterior</span>
+                <div class="flex items-baseline justify-between">
+                    <h2 class="text-5xl font-black text-slate-900 tracking-tight leading-none my-2" id="kpiTotalAnoAnterior">0</h2>
+                    <div class="text-violet-500 bg-violet-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-right-left"></i></div>
+                </div>
+                <p class="text-[11px] text-slate-500 font-bold pt-1 border-t border-slate-100" id="kpiVariacionAnual">0% var.</p>
+            </div>
+            <!-- KPI 3: Mes Actual -->
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-emerald-500 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1" id="lblKpiMensual">Intervenciones Mes Actual</span>
+                <div class="flex items-baseline justify-between">
+                    <h2 class="text-5xl font-black text-emerald-600 tracking-tight leading-none my-2" id="kpiTotalMensual">0</h2>
+                    <div class="text-emerald-500 bg-emerald-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-clock"></i></div>
+                </div>
+                <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100">Casos en el periodo operativo</p>
+            </div>
+            <!-- KPI 4: Máxima Actividad -->
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Mes Máxima Actividad</span>
+                <div class="flex items-baseline justify-between">
+                    <h2 class="text-5xl font-black text-red-600 tracking-tight leading-none my-2" id="kpiMesMaximo">S/D</h2>
+                    <div class="text-red-500 bg-red-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-fire"></i></div>
+                </div>
+                <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100" id="kpiMesMaximoDetalle">0 casos registrados</p>
+            </div>
+            <!-- KPI 5: Filtros -->
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Representación de Filtros</span>
+                <div class="flex items-baseline justify-between">
+                    <h2 class="text-5xl font-black text-amber-600 tracking-tight leading-none my-2" id="kpiPorcentajeFiltrado">0%</h2>
+                    <div class="text-amber-500 bg-amber-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-percent"></i></div>
+                </div>
+                <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100" id="kpiPorcentajeDetalle">0 de 0 casos activos</p>
+            </div>
+        </div>
+
+        <!-- Barra de Filtros Transaccionales -->
+        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
+                <select id="anoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">FBA Interviniente</label>
+                <select id="fbaFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Carátula / Delito</label>
+                <select id="delitoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Control</label>
+                <select id="controlFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Búsqueda General</label>
+                <div class="relative">
+                    <input type="text" id="searchFilter" placeholder="Expediente, carátula..." class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN CRONOLÓGICA EN NIVELES VERTICALES EXPANSIBOLES (HASTA EL MES EN CURSO) -->
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Análisis Temporal y de Evolución del Flujo Operativo</h3>
+            <span class="text-[11px] text-blue-600 font-semibold bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100" id="lblMesEnCursoLimit"></span>
+        </div>
+        
+        <div class="flex flex-col gap-6 mb-6">
+            <!-- Nivel 1: Histórico Completo de Todos los Años sin exclusión -->
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
+                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-area text-indigo-500"></i> Métricas Mensuales Históricas Comparadas (Todos los Años de la Base)
+                </h4>
+                <div class="h-80"><canvas id="chartAllYearsMonthly"></canvas></div>
+            </div>
+            <!-- Nivel 2: Intervenciones por mes con Barras Multicolor -->
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
+                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5" id="titleCurrentYearInterventions">
+                    <i class="fa-solid fa-chart-bar text-emerald-500"></i> Intervenciones por Mes (Año Actual)
+                </h4>
+                <div class="h-80"><canvas id="chartCurrentYearMonthly"></canvas></div>
+            </div>
+            <!-- Nivel 3: Línea de Evolución Unificada -->
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
+                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-line-chart text-blue-500"></i> Línea de Evolución Mensual del Año Seleccionado
+                </h4>
+                <div class="h-80"><canvas id="chartEvolutionLine"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Comparativas Cruzadas Mensuales -->
+        <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="text-sm font-bold text-slate-700 uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-business-time text-sky-500"></i> Top Delitos: Mes Año Actual vs Año Anterior
+                    </h4>
+                    <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono font-bold" id="lblGraficoMes">Evolución</span>
+                </div>
+                <div class="h-72"><canvas id="chartMonthComparison"></canvas></div>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
+                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-emerald-600"></i> Evolución Mensual Comparada con Año Anterior
+                </h4>
+                <div class="overflow-y-auto max-h-72">
+                    <table class="w-full text-xs text-left text-slate-600">
+                        <thead class="bg-slate-50 text-slate-700 uppercase font-bold sticky top-0">
+                            <tr>
+                                <th class="p-2">Carátula / Tipificación</th>
+                                <th class="p-2 text-center" id="thAnoAnterior">Mes Año Ant.</th>
+                                <th class="p-2 text-center bg-amber-50" id="thAnoActual">Mes Año Act.</th>
+                                <th class="p-2 text-center">Evolución (% var)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparativeTableBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución Secundaria -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 lg:col-span-2">
+                <h4 class="text-sm font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-palette text-indigo-500"></i> Concentración por FBA Interviniente
+                </h4>
+                <div class="h-64"><canvas id="chartFBA"></canvas></div>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
+                <h4 class="text-sm font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-filter-list text-purple-500"></i> Estado de Control Resolutivo
+                </h4>
+                <div class="h-64 flex justify-center"><canvas id="chartControl"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Tabla Transaccional de Eventos -->
+        <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h4 class="text-sm font-bold text-slate-700 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-database text-blue-600"></i> Registros de Eventos Unificados
+                </h4>
+                <span class="text-xs bg-slate-200 text-slate-800 font-bold px-2.5 py-0.5 rounded-full" id="tableCounter">0 registros</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-500">
+                    <thead class="text-xs text-slate-700 uppercase bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-3">ID SIREX</th>
+                            <th class="px-4 py-3">Fecha Inicio</th>
+                            <th class="px-4 py-3">Expediente N°</th>
+                            <th class="px-4 py-3">Dependencia</th>
+                            <th class="px-4 py-3">FBA Interviniente</th>
+                            <th class="px-4 py-3">Carátula</th>
+                            <th class="px-4 py-3">Elemento Dañado</th>
+                            <th class="px-4 py-3">Control</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
+                </table>
+            </div>
+            <div class="p-4 flex items-center justify-between border-t border-slate-200 bg-slate-50 text-xs">
+                <button id="btnPrev" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-medium disabled:opacity-50 hover:bg-gray-100">Anterior</button>
+                <span id="pageIndicator" class="font-semibold text-gray-600">Página 1 de 1</span>
+                <button id="btnNext" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-medium disabled:opacity-50 hover:bg-gray-100">Siguiente</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pantalla de Bienvenida Inicial -->
+    <div id="welcomeScreen" class="max-w-md mx-auto mt-20 text-center p-8 bg-white rounded-xl shadow-sm border border-slate-200">
+        <i class="fa-solid fa-file-csv text-5xl text-blue-600 mb-4 animate-pulse"></i>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">F.B.A. Analítica de Partes Escritos v21</h2>
+        <p class="text-sm text-slate-500 mb-6">Por favor, cargue su archivo CSV de la base SIREX en el botón de la barra superior para activar los módulos estadísticos locales.</p>
+    </div>
+
+    <script>
+        Chart.register(ChartDataLabels);
+
+        let rawData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        let chartFBA = null, chartControl = null, chartMonthComp = null;
+        let chartAllYears = null, chartCurrentYear = null, chartEvolution = null;
+
+        const colorPalette = [
+            'rgba(59, 130, 246, 0.85)', 'rgba(245, 158, 11, 0.85)', 'rgba(16, 185, 129, 0.85)',
+            'rgba(139, 92, 246, 0.85)', 'rgba(239, 68, 68, 0.85)', 'rgba(236, 72, 153, 0.85)'
+        ];
+
+        // Paleta multicolor explícita de 12 tonos para diferenciar perfectamente cada mes (Ene - Dic)
+        const paletaMulticolor12Meses = [
+            'rgba(59, 130, 246, 0.85)',  // Enero - Azul
+            'rgba(16, 185, 129, 0.85)',  // Febrero - Esmeralda
+            'rgba(245, 158, 11, 0.85)',  // Marzo - Ámbar
+            'rgba(139, 92, 246, 0.85)',  // Abril - Violeta
+            'rgba(239, 68, 68, 0.85)',   // Mayo - Rojo
+            'rgba(6, 182, 212, 0.85)',   // Junio - Cian
+            'rgba(236, 72, 153, 0.85)',  // Julio - Rosa
+            'rgba(100, 116, 139, 0.85)', // Agosto - Pizarra
+            'rgba(168, 85, 247, 0.85)',  // Septiembre - Púrpura
+            'rgba(20, 184, 166, 0.85)',  // Octubre - Teal
+            'rgba(234, 179, 8, 0.85)',   // Noviembre - Amarillo
+            'rgba(249, 115, 22, 0.85)'   // Diciembre - Naranja
+        ];
+
+        const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+        document.getElementById('csvFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) { processCSV(event.target.result); };
+            reader.readAsText(file, 'UTF-8');
+        });
+
+        function parseCSV(text) {
+            const firstLine = text.split('\n')[0];
+            const separator = (firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length ? ';' : ',';
+            let lines = [], row = [""], inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i], next = text[i+1];
+                if (c === '"') {
+                    if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (c === separator && !inQuotes) {
+                    row.push('');
+                } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                    if (c === '\r' && next === '\n') { i++; }
+                    lines.push(row); row = [''];
+                } else { row[row.length - 1] += c; }
+            }
+            if (row.length > 1 || row[0] !== '') lines.push(row);
+            return lines;
+        }
+
+        function processCSV(text) {
+            const rows = parseCSV(text);
+            if (rows.length < 2) return;
+
+            const headers = rows[0].map(h => h.trim().toUpperCase().replace(/\s+/g, ' '));
+            const idxSirex = headers.findIndex(h => h.includes("SIREX"));
+            const idxFecha = headers.findIndex(h => h.includes("FECHA"));
+            const idxExp = headers.findIndex(h => h.includes("EXPEDIENTE"));
+            const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA"));
+            const idxFba = headers.findIndex(h => h.includes("FBA") || h.includes("INTERVINIENTE"));
+            const idxCara = headers.findIndex(h => h.includes("CARATULA"));
+            const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO") || h.includes("DAÑADO"));
+            const idxCont = headers.findIndex(h => h.includes("CONTROL"));
+
+            rawData = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const r = rows[i];
+                if (r.length <= 1 || !r[idxSirex] || r[idxSirex].trim() === "") continue;
+
+                let fechaOriginal = r[idxFecha]?.trim() || '';
+                let partes = fechaOriginal.split('/');
+                let año = NaN, mes = NaN;
+                if(partes.length === 3) {
+                    año = parseInt(partes[2]); mes = parseInt(partes[1]);
+                }
+
+                let caratulaCelda = r[idxCara]?.trim() || 'S/D';
+                let listaCaratulasIndividuales = [];
+
+                if (caratulaCelda.toUpperCase().includes("ISA 21100")) {
+                    listaCaratulasIndividuales.push("ISA 21100");
+                } else if (caratulaCelda.includes(" - ")) {
+                    listaCaratulasIndividuales = caratulaCelda.split(" - ").map(c => c.trim()).filter(c => c !== "");
+                } else {
+                    listaCaratulasIndividuales.push(caratulaCelda);
+                }
+
+                listaCaratulasIndividuales.forEach(delitoUnico => {
+                    rawData.push({
+                        sirex: r[idxSirex].trim(), fecha: fechaOriginal, mes: mes, año: año,
+                        expediente: r[idxExp]?.trim() || 'S/D', dependencia: r[idxDep]?.trim() || 'S/D',
+                        fba: r[idxFba]?.trim() || 'NINGUNO', caratula: delitoUnico,
+                        elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', control: r[idxCont]?.trim() || 'NINGUNO'
+                    });
+                });
+            }
+
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('dashboardContent').classList.remove('hidden');
+
+            populateInitialFilters();
+            applyFilters();
+        }
+
+        function populateInitialFilters() {
+            const anos = new Set(), fbas = new Set(['TODOS']), delitos = new Set(['TODOS']), controles = new Set(['TODOS']);
+
+            rawData.forEach(item => {
+                if(!isNaN(item.año)) anos.add(item.año);
+                if(item.fba && item.fba !== 'NINGUNO') fbas.add(item.fba);
+                if(item.caratula && item.caratula !== 'S/D') delitos.add(item.caratula);
+                if(item.control && item.control !== 'NINGUNO') controles.add(item.control);
+            });
+
+            buildSelectOptions('fbaFilter', fbas, true);
+            buildSelectOptions('delitoFilter', delitos, true);
+            buildSelectOptions('controlFilter', controles, true);
+
+            const selectAno = document.getElementById('anoFilter');
+            selectAno.innerHTML = '';
+            Array.from(anos).sort((a,b)=>b-a).forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
+            });
+
+            document.getElementById('anoFilter').addEventListener('change', applyFilters);
+            document.getElementById('fbaFilter').addEventListener('change', applyFilters);
+            document.getElementById('delitoFilter').addEventListener('change', applyFilters);
+            document.getElementById('controlFilter').addEventListener('change', applyFilters);
+            document.getElementById('searchFilter').addEventListener('input', applyFilters);
+        }
+
+        function buildSelectOptions(selectId, setValues, hasTodos = true) {
+            const select = document.getElementById(selectId); select.innerHTML = '';
+            if(hasTodos) {
+                const opt = document.createElement('option'); opt.value = 'TODOS'; opt.textContent = 'TODOS'; select.appendChild(opt);
+            }
+            Array.from(setValues).sort().forEach(val => {
+                if(val !== 'TODOS') {
+                    const opt = document.createElement('option'); opt.value = val; opt.textContent = val; select.appendChild(opt);
+                }
+            });
+        }
+
+        function applyFilters() {
+            const anoVal = parseInt(document.getElementById('anoFilter').value);
+            const fbaVal = document.getElementById('fbaFilter').value;
+            const delitoVal = document.getElementById('delitoFilter').value;
+            const controlVal = document.getElementById('controlFilter').value;
+            const searchVal = document.getElementById('searchFilter').value.toLowerCase();
+
+            filteredData = rawData.filter(item => {
+                const matchAno = isNaN(anoVal) || item.año === anoVal;
+                const matchFba = fbaVal === 'TODOS' || item.fba === fbaVal;
+                const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
+                const matchControl = controlVal === 'TODOS' || item.control === controlVal;
+                const matchSearch = !searchVal || 
+                    item.sirex.toLowerCase().includes(searchVal) ||
+                    item.expediente.toLowerCase().includes(searchVal) ||
+                    item.caratula.toLowerCase().includes(searchVal);
+
+                return matchAno && matchFba && matchDelito && matchControl && matchSearch;
+            });
+
+            currentPage = 1;
+            renderTable();
+            calculateKPIsYAnalisis(anoVal, delitoVal, fbaVal, controlVal, searchVal);
+        }
+
+        function calculateKPIsYAnalisis(anoSeleccionado, delitoFiltro, fbaFiltro, controlFiltro, searchFiltro) {
+            const dataAnoActualGlobal = rawData.filter(i => i.año === anoSeleccionado);
+            
+            const findTopFbaFijo = (subset, filterFn) => {
+                const filteredSubset = subset.filter(filterFn);
+                const counts = {};
+                filteredSubset.forEach(item => { 
+                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') counts[item.fba] = (counts[item.fba] || 0) + 1; 
+                });
+                const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+                return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
+            };
+
+            // Tarjetas Superiores de Siniestralidad Líder
+            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "LESIONES POR ACCIDENTE");
+            document.getElementById('topCountLesiones').textContent = `${lesiones.total} casos registrados`;
+            document.getElementById('topDivisionLesiones').textContent = lesiones.division;
+
+            const ley = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "PTA INF LEY 12569");
+            document.getElementById('topCountLey').textContent = `${ley.total} infracciones`;
+            document.getElementById('topDivisionLey').textContent = ley.division;
+
+            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "ABANDONO DE SERVICIO");
+            document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
+            document.getElementById('topDivisionAbandono').textContent = abandono.division;
+
+            const movil = findTopFbaFijo(dataAnoActualGlobal, i => {
+                const campoL = (i.elementoDañado || '').toUpperCase().trim();
+                return campoL.includes("MOVIL") || campoL.includes("MÓVIL");
+            });
+            document.getElementById('topCountMovil').textContent = `${movil.total} móviles afectados`;
+            document.getElementById('topDivisionMovil').textContent = movil.division;
+
+            // CONTROL OPERATIVO CRONOLÓGICO (AÑO EN CURSO: 2026 -> JUNIO)
+            const hoy = new Date();
+            const esAñoActualCorriente = (anoSeleccionado === hoy.getFullYear());
+            const mesLimiteEnCurso = esAñoActualCorriente ? (hoy.getMonth() + 1) : 12;
+
+            document.getElementById('lblMesEnCursoLimit').textContent = esAñoActualCorriente 
+                ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` 
+                : `Rango Activo: Año Histórico Completo`;
+
+            const mesesDisponibles = dataAnoActualGlobal.map(i => i.mes).filter(m => !isNaN(m) && m <= mesLimiteEnCurso);
+            const mesActual = mesesDisponibles.length > 0 ? Math.max(...mesesDisponibles) : 1;
+            const nombreMesActual = NOMBRES_MESES[mesActual] || 'S/D';
+
+            const recuentoMesesAnual = {};
+            dataAnoActualGlobal.forEach(i => { 
+                if(!isNaN(i.mes) && i.mes <= mesLimiteEnCurso) recuentoMesesAnual[i.mes] = (recuentoMesesAnual[i.mes] || 0) + 1; 
+            });
+            const mesMaximoOrdenado = Object.entries(recuentoMesesAnual).sort((a,b)=>b[1]-a[1]);
+            
+            // ASIGNACIÓN DE CARD DATA EN PRIMER PLANO (TEXTO ULTRA MASIVO)
+            if(mesMaximoOrdenado.length > 0) {
+                const codigoMesMax = parseInt(mesMaximoOrdenado[0][0]);
+                document.getElementById('kpiMesMaximo').textContent = NOMBRES_MESES[codigoMesMax].substring(0,3).toUpperCase();
+                document.getElementById('kpiMesMaximoDetalle').textContent = `Pico con ${mesMaximoOrdenado[0][1]} casos registrados`;
+            } else {
+                document.getElementById('kpiMesMaximo').textContent = "S/D";
+            }
+
+            const totalAnualNeto = dataAnoActualGlobal.length;
+            document.getElementById('kpiTotalAnual').textContent = totalAnualNeto;
+            document.getElementById('lblKpiAnual').textContent = `Intervenciones del Año (${anoSeleccionado})`;
+
+            const anoAnterior = anoSeleccionado - 1;
+            const dataAnoAnteriorGlobal = rawData.filter(i => i.año === anoAnterior);
+            const totalAnoAnteriorNeto = dataAnoAnteriorGlobal.length;
+            document.getElementById('lblKpiComparativaAnual').textContent = `Vs. Año Anterior (${anoAnterior})`;
+            document.getElementById('kpiTotalAnoAnterior').textContent = totalAnoAnteriorNeto;
+            
+            if (totalAnoAnteriorNeto > 0) {
+                const variacion = Math.round(((totalAnualNeto - totalAnoAnteriorNeto) / totalAnoAnteriorNeto) * 100);
+                document.getElementById('kpiVariacionAnual').textContent = `${variacion >= 0 ? '📈 +' : '📉 '}${variacion}% de variación interanual`;
+                document.getElementById('kpiVariacionAnual').className = variacion >= 0 ? "text-[11px] text-green-600 font-bold border-t border-slate-100 pt-1" : "text-[11px] text-red-600 font-bold border-t border-slate-100 pt-1";
+            } else {
+                document.getElementById('kpiVariacionAnual').textContent = "Sin datos históricos previos";
+                document.getElementById('kpiVariacionAnual').className = "text-[11px] text-slate-400 font-medium border-t border-slate-100 pt-1";
+            }
+
+            document.getElementById('kpiTotalMensual').textContent = dataAnoActualGlobal.filter(i => i.mes === mesActual).length;
+            document.getElementById('lblKpiMensual').textContent = `Intervenciones en ${nombreMesActual}`;
+
+            const totalFiltrados = filteredData.length;
+            document.getElementById('kpiPorcentajeFiltrado').textContent = `${totalAnualNeto > 0 ? Math.round((totalFiltrados / totalAnualNeto) * 100) : 0}%`;
+            document.getElementById('kpiPorcentajeDetalle').textContent = `${totalFiltrados} de ${totalAnualNeto} registros según filtros`;
+
+            // Rango indexado de meses para el año bajo análisis
+            let arrayMesesIndex = [];
+            for(let m = 1; m <= mesLimiteEnCurso; m++) { arrayMesesIndex.push(m); }
+            let dataMesesAnoActual = arrayMesesIndex.map(m => recuentoMesesAnual[m] || 0);
+
+            // REPARACIÓN DEL GRÁFICO 1: ILUSTRACIÓN COMPLETA DE TODOS LOS AÑOS HISTÓRICOS
+            const structAnualShed = {};
+            rawData.forEach(item => {
+                if(!isNaN(item.año) && !isNaN(item.mes)) {
+                    // Si el registro pertenece al año actual corriente (2026), respetamos el tope del mes en curso (Junio). 
+                    // Si es un año histórico anterior, permitimos que se lean todos sus meses (1 al 12).
+                    const limiteMesPorFila = (item.año === hoy.getFullYear()) ? (hoy.getMonth() + 1) : 12;
+                    if(item.mes <= limiteMesPorFila) {
+                        if(!structAnualShed[item.año]) structAnualShed[item.año] = Array(13).fill(0);
+                        structAnualShed[item.año][item.mes]++;
+                    }
+                }
+            });
+
+            // Generar datasets individuales para cada año detectado en la base de datos
+            const añosDetectadosEnCSV = Object.keys(structAnualShed).sort((a,b)=>parseInt(a)-parseInt(b));
+            
+            // El eje X del gráfico multiaño mostrará hasta el máximo de meses necesario (12 para historial completo)
+            let maxMesEjeXHistorial = Math.max(...añosDetectadosEnCSV.map(y => (parseInt(y) === hoy.getFullYear() ? (hoy.getMonth() + 1) : 12)));
+            let arrayMesesEjeXHistorial = [];
+            for(let m = 1; m <= maxMesEjeXHistorial; m++) { arrayMesesEjeXHistorial.push(m); }
+
+            const datasetsMultiano = añosDetectadosEnCSV.map((yr, idx) => ({
+                label: `Año Histórico ${yr}`,
+                data: arrayMesesEjeXHistorial.map(m => structAnualShed[yr][m] || 0),
+                borderColor: colorPalette[idx % colorPalette.length],
+                backgroundColor: colorPalette[idx % colorPalette.length],
+                tension: 0.15,
+                fill: false
+            }));
+
+            if(chartAllYears) chartAllYears.destroy();
+            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), {
+                type: 'line',
+                data: { labels: arrayMesesEjeXHistorial.map(m => NOMBRES_MESES[m]), datasets: datasetsMultiano },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { weight: 'bold' } } },
+                        datalabels: {
+                            display: true, align: 'top', y: -4,
+                            font: { weight: 'bold', size: 10 },
+                            formatter: (val) => val > 0 ? val : ''
+                        }
+                    },
+                    scales: { y: { beginAtZero: true, grid: { display: false } } }
+                }
+            });
+
+            // REPARACIÓN DEL GRÁFICO 2: BARRAS MULTICOLOR PARA CADA MES
+            document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500"></i> Intervenciones por Mes (${anoSeleccionado})`;
+            if(chartCurrentYear) chartCurrentYear.destroy();
+            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), {
+                type: 'bar',
+                data: {
+                    labels: arrayMesesIndex.map(m => NOMBRES_MESES[m]),
+                    datasets: [{ 
+                        data: dataMesesAnoActual, 
+                        // Mapeamos un color diferenciado para cada mes transcurrido
+                        backgroundColor: arrayMesesIndex.map(m => paletaMulticolor12Meses[(m - 1) % 12]), 
+                        borderRadius: 5 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            display: true, align: 'end', anchor: 'end',
+                            font: { weight: 'black', size: 11 },
+                            formatter: (val) => val
+                        }
+                    },
+                    scales: { y: { beginAtZero: true, grid: { display: false } } }
+                }
+            });
+
+            // Gráfico 3: Línea de Evolución del Año Seleccionado
+            if(chartEvolution) chartEvolution.destroy();
+            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), {
+                type: 'line',
+                data: {
+                    labels: arrayMesesIndex.map(m => NOMBRES_MESES[m]),
+                    datasets: [{ data: dataMesesAnoActual, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.05)', fill: true, tension: 0.2 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            display: true, align: 'top', y: -5, color: '#1d4ed8',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: (val) => val
+                        }
+                    },
+                    scales: { y: { beginAtZero: true, grid: { display: false } } }
+                }
+            });
+
+            // Tabla Cruzada Top Delitos Mensual
+            let delitosParaAnalizar = [];
+            if (delitoFiltro !== 'TODOS') { delitosParaAnalizar = [delitoFiltro]; } 
+            else {
+                const counts = {}; filteredData.forEach(i => { counts[i.caratula] = (counts[i.caratula] || 0) + 1; });
+                delitosParaAnalizar = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 10).map(e => e[0]);
+            }
+
+            let dataBarrasAnoAnterior = [], dataBarrasAnoActual = [];
+            const tableBody = document.getElementById('comparativeTableBody'); tableBody.innerHTML = '';
+
+            const baseComparativaCruzada = rawData.filter(item => {
+                return (fbaFiltro === 'TODOS' || item.fba === fbaFiltro) &&
+                       (controlFiltro === 'TODOS' || item.control === controlFiltro) &&
+                       (!searchFiltro || item.sirex.toLowerCase().includes(searchFiltro) || item.caratula.toLowerCase().includes(searchFiltro));
+            });
+
+            delitosParaAnalizar.forEach(delito => {
+                const cMesAnoAnt = baseComparativaCruzada.filter(i => i.caratula === delito && i.mes === mesActual && i.año === anoAnterior).length;
+                const cMesAnoAct = baseComparativaCruzada.filter(i => i.caratula === delito && i.mes === mesActual && i.año === anoSeleccionado).length;
+
+                dataBarrasAnoAnterior.push(cMesAnoAnt); dataBarrasAnoActual.push(cMesAnoAct);
+
+                let tendencia = '═ Estable (0%)', colorClase = 'text-gray-500 font-medium';
+                if (cMesAnoAnt > 0) {
+                    const pctVar = Math.round(((cMesAnoAct - cMesAnoAnt) / cMesAnoAnt) * 100);
+                    if (cMesAnoAct > cMesAnoAnt) { tendencia = `📈 Subió (+${pctVar}%)`; colorClase = 'text-green-600 font-bold'; }
+                    else if (cMesAnoAct < cMesAnoAnt) { tendencia = `📉 Bajó (${pctVar}%)`; colorClase = 'text-red-600 font-bold'; }
+                } else if (cMesAnoAct > 0) { tendencia = '📈 Subió (+100%)'; colorClase = 'text-green-600 font-bold'; }
+
+                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `<td class="p-2 font-medium text-slate-900 max-w-[220px] truncate" title="${delito}">${delito}</td>
+                                <td class="p-2 text-center font-mono">${cMesAnoAnt}</td>
+                                <td class="p-2 text-center font-mono bg-amber-50 font-semibold">${cMesAnoAct}</td>
+                                <td class="p-2 text-center text-[11px] ${colorClase}">${tendencia}</td>`;
+                tableBody.appendChild(tr);
+            });
+
+            document.getElementById('thAnoAnterior').textContent = `${NOMBRES_MESES[mesActual].substring(0,3)} (${anoAnterior})`;
+            document.getElementById('thAnoActual').textContent = `${NOMBRES_MESES[mesActual].substring(0,3)} (${anoSeleccionado})`;
+            document.getElementById('lblGraficoMes').textContent = `${NOMBRES_MESES[mesActual]}: ${anoSeleccionado} vs ${anoAnterior}`;
+
+            if (chartMonthComp) chartMonthComp.destroy();
+            chartMonthComp = new Chart(document.getElementById('chartMonthComparison'), {
+                type: 'bar',
+                data: {
+                    labels: delitosParaAnalizar.map(d => d.length > 18 ? d.substring(0, 16) + '...' : d),
+                    datasets: [
+                        { label: `${NOMBRES_MESES[mesActual]} (${anoAnterior})`, data: dataBarrasAnoAnterior, backgroundColor: '#94a3b8', borderRadius: 4 },
+                        { label: `${NOMBRES_MESES[mesActual]} (${anoSeleccionado})`, data: dataBarrasAnoActual, backgroundColor: '#f59e0b', borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+            });
+
+            // Gráfico FBA Secundario
+            const fbaCounts = {}; filteredData.forEach(i => { if(i.fba !== 'NINGUNO') fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
+            const topFBA = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
+            if(chartFBA) chartFBA.destroy();
+            chartFBA = new Chart(document.getElementById('chartFBA'), {
+                type: 'bar',
+                data: { labels: topFBA.map(f => f[0]), datasets: [{ data: topFBA.map(f => f[1]), backgroundColor: colorPalette, borderWidth: 1, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } }
+            });
+
+            // Gráfico Control Interno Secundario
+            const ctrlCounts = {}; filteredData.forEach(i => { ctrlCounts[i.control] = (ctrlCounts[i.control] || 0) + 1; });
+            if(chartControl) chartControl.destroy();
+            chartControl = new Chart(document.getElementById('chartControl'), {
+                type: 'pie',
+                data: { labels: Object.keys(ctrlCounts), datasets: [{ data: Object.values(ctrlCounts), backgroundColor: ['#6366f1', '#ef4444', '#10b981', '#f59e0b'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const pageData = filteredData.slice(start, start + rowsPerPage);
+
+            document.getElementById('tableCounter').textContent = `${filteredData.length} registros`;
+            document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Sin registros para la combinación de filtros aplicada</td></tr>`; return;
+            }
+
+            pageData.forEach(item => {
+                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-semibold text-blue-600 whitespace-nowrap text-xs">${item.sirex}</td>
+                    <td class="px-4 py-3 text-xs whitespace-nowrap">${item.fecha}</td>
+                    <td class="px-4 py-3 text-xs font-mono">${item.expediente}</td>
+                    <td class="px-4 py-3 text-xs truncate max-w-[150px]" title="${item.dependencia}">${item.dependencia}</td>
+                    <td class="px-4 py-3 text-xs font-medium text-slate-700">${item.fba}</td>
+                    <td class="px-4 py-3 text-xs text-slate-900 font-semibold truncate max-w-[200px]" title="${item.caratula}">${item.caratula}</td>
+                    <td class="px-4 py-3 text-xs truncate max-w-[150px]" title="${item.elementoDañado}">${item.elementoDañado}</td>
+                    <td class="px-4 py-3 text-xs">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.control === 'AGAI' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-800'}">${item.control}</span>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('btnPrev').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
+        document.getElementById('btnNext').addEventListener('click', () => { if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) { currentPage++; renderTable(); } });
+    </script>
+</body>
+</html>
