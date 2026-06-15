@@ -134,7 +134,7 @@
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Búsqueda General</label>
                 <div class="relative">
-                    <input type="text" id="searchFilter" placeholder="Buscar por nombres, apellidos o legajo..." class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+                    <input type="text" id="searchFilter" placeholder="Buscar en toda la base de datos..." class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
                     <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-xs"></i>
                 </div>
             </div>
@@ -219,17 +219,19 @@
                 <span class="text-xs bg-slate-200 text-slate-800 font-bold px-2.5 py-0.5 rounded-full" id="tableCounter">0 registros</span>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-slate-500">
+                <table class="w-full text-sm text-left text-slate-500 min-w-[1400px]">
                     <thead class="text-xs text-slate-700 uppercase bg-gray-100">
                         <tr>
-                            <th class="px-4 py-3">ID SIREX</th>
-                            <th class="px-4 py-3">Fecha Inicio</th>
-                            <th class="px-4 py-3">Expediente N°</th>
-                            <th class="px-4 py-3">Dependencia</th>
-                            <th class="px-4 py-3">FBA Interviniente</th>
-                            <th class="px-4 py-3">Carátula</th>
-                            <th class="px-4 py-3">Elemento Dañado</th>
-                            <th class="px-4 py-3">Control</th>
+                            <th class="px-4 py-3">SIREX N°</th>
+                            <th class="px-4 py-3">FECHA DE INICIO</th>
+                            <th class="px-4 py-3">EXPEDIENTE N°</th>
+                            <th class="px-4 py-3">DEPENDENCIA INSTRUCTORA</th>
+                            <th class="px-4 py-3">FBA INTERVINIENTE</th>
+                            <th class="px-4 py-3">CARATULA PENAL - ADMINISTRATIVA</th>
+                            <th class="px-4 py-3">VICTIMA/DESTINO DE LA VICTIMA</th>
+                            <th class="px-4 py-3">IMPUTADO</th>
+                            <th class="px-4 py-3">DESTINO DEL IMPUTADO</th>
+                            <th class="px-4 py-3">CONTROL</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
@@ -266,18 +268,10 @@
         ];
 
         const paletaMulticolor12Meses = [
-            'rgba(59, 130, 246, 0.85)',  // Enero - Azul
-            'rgba(16, 185, 129, 0.85)',  // Febrero - Esmeralda
-            'rgba(245, 158, 11, 0.85)',  // Marzo - Ámbar
-            'rgba(139, 92, 246, 0.85)',  // Abril - Violeta
-            'rgba(239, 68, 68, 0.85)',   // Mayo - Rojo
-            'rgba(6, 182, 212, 0.85)',   // Junio - Cian
-            'rgba(236, 72, 153, 0.85)',  // Julio - Rosa
-            'rgba(100, 116, 139, 0.85)', // Agosto - Pizarra
-            'rgba(168, 85, 247, 0.85)',  // Septiembre - Púrpura
-            'rgba(20, 184, 166, 0.85)',  // Octubre - Teal
-            'rgba(234, 179, 8, 0.85)',   // Noviembre - Amarillo
-            'rgba(249, 115, 22, 0.85)'   // Diciembre - Naranja
+            'rgba(59, 130, 246, 0.85)', 'rgba(16, 185, 129, 0.85)', 'rgba(245, 158, 11, 0.85)', 
+            'rgba(139, 92, 246, 0.85)', 'rgba(239, 68, 68, 0.85)', 'rgba(6, 182, 212, 0.85)', 
+            'rgba(236, 72, 153, 0.85)', 'rgba(100, 116, 139, 0.85)', 'rgba(168, 85, 247, 0.85)', 
+            'rgba(20, 184, 166, 0.85)', 'rgba(234, 179, 8, 0.85)', 'rgba(249, 115, 22, 0.85)'
         ];
 
         const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -340,6 +334,10 @@
             const idxCara = headers.findIndex(h => h.includes("CARATULA"));
             const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO") || h.includes("DAÑADO"));
             const idxCont = headers.findIndex(h => h.includes("CONTROL"));
+            
+            // Índices para columnas adicionales o mapeos alternativos para completar la solicitud
+            const idxVictima = headers.findIndex(h => h.includes("VICTIMA"));
+            const idxImputado = headers.findIndex(h => h.includes("IMPUTADO"));
 
             rawData = [];
 
@@ -367,10 +365,19 @@
 
                 listaCaratulasIndividuales.forEach(delitoUnico => {
                     rawData.push({
-                        sirex: r[idxSirex].trim(), fecha: fechaOriginal, mes: mes, año: año,
-                        expediente: r[idxExp]?.trim() || 'S/D', dependencia: r[idxDep]?.trim() || 'S/D',
-                        fba: r[idxFba]?.trim() || 'NINGUNO', caratula: delitoUnico,
-                        elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', control: r[idxCont]?.trim() || 'NINGUNO'
+                        sirex: r[idxSirex].trim(), 
+                        fecha: fechaOriginal, 
+                        mes: mes, 
+                        año: año,
+                        expediente: r[idxExp]?.trim() || 'S/D', 
+                        dependencia: r[idxDep]?.trim() || 'S/D',
+                        fba: r[idxFba]?.trim() || 'NINGUNO', 
+                        caratula: delitoUnico,
+                        elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', 
+                        control: r[idxCont]?.trim() || 'NINGUNO',
+                        // Mapeo adaptativo para campos extendidos del listado
+                        victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
+                        imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D'
                     });
                 });
             }
@@ -422,15 +429,17 @@
             });
         }
 
+        function normalizarTexto(texto) {
+            return (texto || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
         function applyFilters() {
             const anoVal = parseInt(document.getElementById('anoFilter').value);
             const fbaVal = document.getElementById('fbaFilter').value;
             const delitoVal = document.getElementById('delitoFilter').value;
             const controlVal = document.getElementById('controlFilter').value;
             
-            // Normalización del valor ingresado por el usuario (Búsqueda General)
-            const searchInput = document.getElementById('searchFilter').value.toLowerCase();
-            const searchVal = searchInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const searchVal = normalizarTexto(document.getElementById('searchFilter').value);
 
             filteredData = rawData.filter(item => {
                 const matchAno = isNaN(anoVal) || item.año === anoVal;
@@ -438,9 +447,11 @@
                 const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
-                // Normalización del campo en la base de datos para comparar limpiamente
-                const fbaNormalizado = item.fba.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                const matchSearch = !searchVal || fbaNormalizado.includes(searchVal);
+                // Búsqueda General Cruzada: une todas las propiedades en una sola cadena limpia
+                let todoElRegistroConcat = normalizarTexto(
+                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.victima} ${item.imputado} ${item.control}`
+                );
+                const matchSearch = !searchVal || todoElRegistroConcat.includes(searchVal);
 
                 return matchAno && matchFba && matchDelito && matchControl && matchSearch;
             });
@@ -641,12 +652,13 @@
             let dataBarrasAnoAnterior = [], dataBarrasAnoActual = [];
             const tableBody = document.getElementById('comparativeTableBody'); tableBody.innerHTML = '';
 
-            // Aplicación de normalización en el cruce de gráficos compartidos
             const baseComparativaCruzada = rawData.filter(item => {
-                const fbaNormalizado = item.fba.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                let todoElRegistroConcat = normalizarTexto(
+                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.victima} ${item.imputado} ${item.control}`
+                );
                 return (fbaFiltro === 'TODOS' || item.fba === fbaFiltro) &&
                        (controlFiltro === 'TODOS' || item.control === controlFiltro) &&
-                       (!searchFiltro || fbaNormalizado.includes(searchFiltro));
+                       (!searchFiltro || todoElRegistroConcat.includes(searchFiltro));
             });
 
             delitosParaAnalizar.forEach(delito => {
@@ -756,7 +768,7 @@
             document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
 
             if (pageData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Sin registros para la combinación de filtros aplicada</td></tr>`; return;
+                tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">Sin registros para la combinación de filtros aplicada</td></tr>`; return;
             }
 
             pageData.forEach(item => {
@@ -765,10 +777,12 @@
                     <td class="px-4 py-3 font-semibold text-blue-600 whitespace-nowrap text-xs">${item.sirex}</td>
                     <td class="px-4 py-3 text-xs whitespace-nowrap">${item.fecha}</td>
                     <td class="px-4 py-3 text-xs font-mono">${item.expediente}</td>
-                    <td class="px-4 py-3 text-xs truncate max-w-[150px]" title="${item.dependencia}">${item.dependencia}</td>
+                    <td class="px-4 py-3 text-xs truncate max-w-[180px]" title="${item.dependencia}">${item.dependencia}</td>
                     <td class="px-4 py-3 text-xs font-medium text-slate-700">${item.fba}</td>
-                    <td class="px-4 py-3 text-xs text-slate-900 font-semibold truncate max-w-[200px]" title="${item.caratula}">${item.caratula}</td>
-                    <td class="px-4 py-3 text-xs truncate max-w-[150px]" title="${item.elementoDañado}">${item.elementoDañado}</td>
+                    <td class="px-4 py-3 text-xs text-slate-900 font-semibold truncate max-w-[220px]" title="${item.caratula}">${item.caratula}</td>
+                    <td class="px-4 py-3 text-xs font-medium text-slate-600">${item.victima}</td>
+                    <td class="px-4 py-3 text-xs font-medium text-slate-600">${item.imputado}</td>
+                    <td class="px-4 py-3 text-xs text-slate-400 italic">Mapeado en Origen</td>
                     <td class="px-4 py-3 text-xs">
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.control === 'AGAI' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-800'}">${item.control}</span>
                     </td>`;
