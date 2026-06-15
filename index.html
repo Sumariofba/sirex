@@ -262,6 +262,10 @@
         let chartFBA = null, chartControl = null, chartMonthComp = null;
         let chartAllYears = null, chartCurrentYear = null, chartEvolution = null;
 
+        // Variables auxiliares para almacenar las carátulas top por contexto dinámico
+        let topCaratulasPorFBA = {};
+        let topCaratulasPorMesActual = {};
+
         const colorPalette = [
             'rgba(59, 130, 246, 0.85)', 'rgba(245, 158, 11, 0.85)', 'rgba(16, 185, 129, 0.85)',
             'rgba(139, 92, 246, 0.85)', 'rgba(239, 68, 68, 0.85)', 'rgba(236, 72, 153, 0.85)'
@@ -335,7 +339,6 @@
             const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO") || h.includes("DAÑADO"));
             const idxCont = headers.findIndex(h => h.includes("CONTROL"));
             
-            // Índices para columnas adicionales o mapeos alternativos para completar la solicitud
             const idxVictima = headers.findIndex(h => h.includes("VICTIMA"));
             const idxImputado = headers.findIndex(h => h.includes("IMPUTADO"));
 
@@ -375,7 +378,6 @@
                         caratula: delitoUnico,
                         elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', 
                         control: r[idxCont]?.trim() || 'NINGUNO',
-                        // Mapeo adaptativo para campos extendidos del listado
                         victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
                         imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D'
                     });
@@ -447,7 +449,6 @@
                 const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
-                // Búsqueda General Cruzada: une todas las propiedades en una sola cadena limpia
                 let todoElRegistroConcat = normalizarTexto(
                     `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.victima} ${item.imputado} ${item.control}`
                 );
@@ -459,6 +460,17 @@
             currentPage = 1;
             renderTable();
             calculateKPIsYAnalisis(anoVal, delitoVal, fbaVal, controlVal, searchVal);
+        }
+
+        // Función para calcular la carátula líder (más incidencias) para un subconjunto específico
+        function obtenerCaratulaLider(dataArray) {
+            if (!dataArray || dataArray.length === 0) return "Ninguna";
+            const conteos = {};
+            dataArray.forEach(i => {
+                if(i.caratula) conteos[i.caratula] = (conteos[i.caratula] || 0) + 1;
+            });
+            const listaOrdenada = Object.entries(conteos).sort((a,b) => b[1] - a[1]);
+            return listaOrdenada.length > 0 ? `${listaOrdenada[0][0]} (${listaOrdenada[0][1]} casos)` : "Ninguna";
         }
 
         function calculateKPIsYAnalisis(anoSeleccionado, delitoFiltro, fbaFiltro, controlFiltro, searchFiltro) {
@@ -549,6 +561,13 @@
             for(let m = 1; m <= mesLimiteEnCurso; m++) { arrayMesesIndex.push(m); }
             let dataMesesAnoActual = arrayMesesIndex.map(m => recuentoMesesAnual[m] || 0);
 
+            // Mapeo dinámico de carátulas principales por cada mes (para el gráfico de barras mensual)
+            topCaratulasPorMesActual = {};
+            arrayMesesIndex.forEach(m => {
+                const casosDelMes = filteredData.filter(i => i.mes === m && i.año === anoSeleccionado);
+                topCaratulasPorMesActual[m] = obtenerCaratulaLider(casosDelMes);
+            });
+
             const structAnualShed = {};
             rawData.forEach(item => {
                 if(!isNaN(item.año) && !isNaN(item.mes)) {
@@ -614,6 +633,14 @@
                             display: true, align: 'end', anchor: 'end',
                             font: { weight: 'black', size: 11 },
                             formatter: (val) => val
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterBody: function(context) {
+                                    const indexMes = arrayMesesIndex[context[0].dataIndex];
+                                    return `Carátula Líder:\n ${topCaratulasPorMesActual[indexMes] || 'Sin Datos'}`;
+                                }
+                            }
                         }
                     },
                     scales: { y: { beginAtZero: true, grid: { display: false } } }
@@ -713,8 +740,17 @@
                 }
             });
 
+            // Procesar FBA e identificar sus carátulas principales
             const fbaCounts = {}; filteredData.forEach(i => { if(i.fba && i.fba !== 'NINGUNO' && i.fba !== 'S/D') fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
             const topFBA = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
+            
+            topCaratulasPorFBA = {};
+            topFBA.forEach(fbaItem => {
+                const nombreFBA = fbaItem[0];
+                const registrosDelFBA = filteredData.filter(i => i.fba === nombreFBA);
+                topCaratulasPorFBA[nombreFBA] = obtenerCaratulaLider(registrosDelFBA);
+            });
+
             if(chartFBA) chartFBA.destroy();
             chartFBA = new Chart(document.getElementById('chartFBA'), {
                 type: 'bar',
@@ -730,13 +766,24 @@
                             align: 'top',
                             font: { weight: 'bold', size: 11 },
                             formatter: (val) => val
-                        } 
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterBody: function(context) {
+                                    const fbaLabel = context[0].label;
+                                    return `Carátula Líder:\n ${topCaratulasPorFBA[fbaLabel] || 'Sin Datos'}`;
+                                }
+                            }
+                        }
                     },
                     scales: { y: { beginAtZero: true } }
                 }
             });
 
+            // Procesamiento de Control Resolutivo con volumen y porcentaje representativo en etiqueta fija
             const ctrlCounts = {}; filteredData.forEach(i => { if(i.control) ctrlCounts[i.control] = (ctrlCounts[i.control] || 0) + 1; });
+            const totalControlCasos = Object.values(ctrlCounts).reduce((a,b) => a + b, 0);
+
             if(chartControl) chartControl.destroy();
             chartControl = new Chart(document.getElementById('chartControl'), {
                 type: 'pie',
@@ -747,9 +794,13 @@
                     plugins: { 
                         datalabels: { 
                             display: true,
-                            color: '#fff',
-                            font: { weight: 'black', size: 12 },
-                            formatter: (val) => val
+                            color: '#ffffff',
+                            font: { weight: 'black', size: 11 },
+                            formatter: (val) => {
+                                if (totalControlCasos === 0) return val;
+                                const pct = Math.round((val / totalControlCasos) * 100);
+                                return `${val}\n(${pct}%)`; // Muestra cantidad e impacto porcentual integrado
+                            }
                         } 
                     } 
                 }
