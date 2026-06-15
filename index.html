@@ -156,14 +156,14 @@
                 </h4>
                 <div class="overflow-y-auto max-h-72">
                     <table class="w-full text-xs text-left text-slate-600">
-                        <head class="bg-slate-50 text-slate-700 uppercase font-bold sticky top-0">
+                        <thead class="bg-slate-50 text-slate-700 uppercase font-bold sticky top-0">
                             <tr>
                                 <th class="p-2">Carátula / Tipificación</th>
                                 <th class="p-2 text-center" id="thAnoAnterior">Mes Año Ant.</th>
                                 <th class="p-2 text-center bg-amber-50" id="thAnoActual">Mes Año Act.</th>
                                 <th class="p-2 text-center">Evolución (%)</th>
                             </tr>
-                        </head>
+                        </thead>
                         <tbody id="comparativeTableBody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
@@ -427,7 +427,10 @@
             const fbaVal = document.getElementById('fbaFilter').value;
             const delitoVal = document.getElementById('delitoFilter').value;
             const controlVal = document.getElementById('controlFilter').value;
-            const searchVal = document.getElementById('searchFilter').value.toLowerCase();
+            
+            // Normalización del valor ingresado por el usuario (Búsqueda General)
+            const searchInput = document.getElementById('searchFilter').value.toLowerCase();
+            const searchVal = searchInput.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
             filteredData = rawData.filter(item => {
                 const matchAno = isNaN(anoVal) || item.año === anoVal;
@@ -435,9 +438,9 @@
                 const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
-                // Modificación en Búsqueda General: Evalúa exclusivamente sobre la propiedad 'fba'
-                // que es la columna unificada que contiene "Nombres y Apellidos" (texto) y "Legajo" (números)
-                const matchSearch = !searchVal || item.fba.toLowerCase().includes(searchVal);
+                // Normalización del campo en la base de datos para comparar limpiamente
+                const fbaNormalizado = item.fba.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const matchSearch = !searchVal || fbaNormalizado.includes(searchVal);
 
                 return matchAno && matchFba && matchDelito && matchControl && matchSearch;
             });
@@ -638,10 +641,12 @@
             let dataBarrasAnoAnterior = [], dataBarrasAnoActual = [];
             const tableBody = document.getElementById('comparativeTableBody'); tableBody.innerHTML = '';
 
+            // Aplicación de normalización en el cruce de gráficos compartidos
             const baseComparativaCruzada = rawData.filter(item => {
+                const fbaNormalizado = item.fba.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                 return (fbaFiltro === 'TODOS' || item.fba === fbaFiltro) &&
                        (controlFiltro === 'TODOS' || item.control === controlFiltro) &&
-                       (!searchFiltro || item.fba.toLowerCase().includes(searchFiltro));
+                       (!searchFiltro || fbaNormalizado.includes(searchFiltro));
             });
 
             delitosParaAnalizar.forEach(delito => {
