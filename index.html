@@ -35,7 +35,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Lesiones por Accidente</span>
-                    <h3 class="text-3xl font-black text-red-600 tracking-tight" id="topCountLesiones">0 actuaciones</h3>
+                    <h3 class="text-3xl font-black text-red-600 tracking-tight" id="topCountLesiones">0 actuacion/es</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLesiones">Buscando...</p>
@@ -44,7 +44,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-purple-500 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Pta Inf Ley 12569</span>
-                    <h3 class="text-3xl font-black text-purple-600 tracking-tight" id="topCountLey">0 actuaciones</h3>
+                    <h3 class="text-3xl font-black text-purple-600 tracking-tight" id="topCountLey">0 actuacion/es</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLey">Buscando...</p>
@@ -62,7 +62,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-blue-600 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Móviles Dañados</span>
-                    <h3 class="text-3xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 móviles dañados</h3>
+                    <h3 class="text-3xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 moviles dañados</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionMovil">Buscando...</p>
@@ -359,8 +359,9 @@
 
                 if (caratulaCelda.toUpperCase().includes("ISA 21100")) {
                     listaCaratulasIndividuales.push("ISA 21100");
-                } else if (caratulaCelda.includes(" - ")) {
-                    listaCaratulasIndividuales = caratulaCelda.split(" - ").map(c => c.trim()).filter(c => c !== "");
+                } else if (caratulaCelda.includes(",")) {
+                    // Separación por coma configurada correctamente
+                    listaCaratulasIndividuales = caratulaCelda.split(",").map(c => c.trim()).filter(c => c !== "");
                 } else {
                     listaCaratulasIndividuales.push(caratulaCelda);
                 }
@@ -435,7 +436,6 @@
                 const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
-                // Modificación en la Búsqueda General: evalúa expediente, carátula, fba (nombres/legajos) y dependencia (destino)
                 const matchSearch = !searchVal || 
                     item.sirex.toLowerCase().includes(searchVal) ||
                     item.expediente.toLowerCase().includes(searchVal) ||
@@ -464,12 +464,13 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
+            // Frases adaptadas para "actuacion/es" y "moviles dañados" según lo solicitado
             const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "LESIONES POR ACCIDENTE");
-            document.getElementById('topCountLesiones').textContent = `${lesiones.total} casos registrados`;
+            document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
             const ley = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "PTA INF LEY 12569");
-            document.getElementById('topCountLey').textContent = `${ley.total} infracciones`;
+            document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "ABANDONO DE SERVICIO");
@@ -480,7 +481,7 @@
                 const campoL = (i.elementoDañado || '').toUpperCase().trim();
                 return campoL.includes("MOVIL") || campoL.includes("MÓVIL");
             });
-            document.getElementById('topCountMovil').textContent = `${movil.total} móviles afectados`;
+            document.getElementById('topCountMovil').textContent = `${movil.total} moviles dañados`;
             document.getElementById('topDivisionMovil').textContent = movil.division;
 
             const hoy = new Date();
@@ -493,7 +494,7 @@
 
             const mesesDisponibles = dataAnoActualGlobal.map(i => i.mes).filter(m => !isNaN(m) && m <= mesLimiteEnCurso);
             const mesActual = mesesDisponibles.length > 0 ? Math.max(...mesesDisponibles) : 1;
-            const nombreMesActual = NOMBRES_MESES[mesActual] || 'S/D';
+            const ExtMesActual = NOMBRES_MESES[mesActual] || 'S/D';
 
             const recuentoMesesAnual = {};
             dataAnoActualGlobal.forEach(i => { 
@@ -504,7 +505,7 @@
             if(mesMaximoOrdenado.length > 0) {
                 const codigoMesMax = parseInt(mesMaximoOrdenado[0][0]);
                 document.getElementById('kpiMesMaximo').textContent = NOMBRES_MESES[codigoMesMax].substring(0,3).toUpperCase();
-                document.getElementById('kpiMesMaximoDetalle').textContent = `Pico con ${mesMaximoOrdenado[0][1]} casos registrados`;
+                document.getElementById('kpiMesMaximoDetalle').textContent = `Pico con ${mesMaximoOrdenado[0][1]} actuacion/es`;
             } else {
                 document.getElementById('kpiMesMaximo').textContent = "S/D";
             }
@@ -529,7 +530,7 @@
             }
 
             document.getElementById('kpiTotalMensual').textContent = dataAnoActualGlobal.filter(i => i.mes === mesActual).length;
-            document.getElementById('lblKpiMensual').textContent = `Intervenciones en ${nombreMesActual}`;
+            document.getElementById('lblKpiMensual').textContent = `Intervenciones en ${ExtMesActual}`;
 
             const totalFiltrados = filteredData.length;
             document.getElementById('kpiPorcentajeFiltrado').textContent = `${totalAnualNeto > 0 ? Math.round((totalFiltrados / totalAnualNeto) * 100) : 0}%`;
