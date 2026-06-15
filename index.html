@@ -134,7 +134,7 @@
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Búsqueda General</label>
                 <div class="relative">
-                    <input type="text" id="searchFilter" placeholder="Expediente, carátula, nombre, legajo o destino..." class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
+                    <input type="text" id="searchFilter" placeholder="Buscar por nombres, apellidos o legajo..." class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
                     <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-xs"></i>
                 </div>
             </div>
@@ -360,7 +360,6 @@
                 if (caratulaCelda.toUpperCase().includes("ISA 21100")) {
                     listaCaratulasIndividuales.push("ISA 21100");
                 } else if (caratulaCelda.includes(",")) {
-                    // Separación por coma configurada correctamente
                     listaCaratulasIndividuales = caratulaCelda.split(",").map(c => c.trim()).filter(c => c !== "");
                 } else {
                     listaCaratulasIndividuales.push(caratulaCelda);
@@ -436,12 +435,9 @@
                 const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
-                const matchSearch = !searchVal || 
-                    item.sirex.toLowerCase().includes(searchVal) ||
-                    item.expediente.toLowerCase().includes(searchVal) ||
-                    item.caratula.toLowerCase().includes(searchVal) ||
-                    item.fba.toLowerCase().includes(searchVal) ||
-                    item.dependencia.toLowerCase().includes(searchVal);
+                // Modificación en Búsqueda General: Evalúa exclusivamente sobre la propiedad 'fba'
+                // que es la columna unificada que contiene "Nombres y Apellidos" (texto) y "Legajo" (números)
+                const matchSearch = !searchVal || item.fba.toLowerCase().includes(searchVal);
 
                 return matchAno && matchFba && matchDelito && matchControl && matchSearch;
             });
@@ -464,7 +460,6 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            // Frases adaptadas para "actuacion/es" y "moviles dañados" según lo solicitado
             const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "LESIONES POR ACCIDENTE");
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
@@ -474,14 +469,14 @@
             document.getElementById('topDivisionLey').textContent = ley.division;
 
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "ABANDONO DE SERVICIO");
-            document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
+            document.getElementById('topCountAbandono').textContent = `${abandono.total} actuacion/es`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
             const movil = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const campoL = (i.elementoDañado || '').toUpperCase().trim();
                 return campoL.includes("MOVIL") || campoL.includes("MÓVIL");
             });
-            document.getElementById('topCountMovil').textContent = `${movil.total} moviles dañados`;
+            document.getElementById('topCountMovil').textContent = `${movil.total} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = movil.division;
 
             const hoy = new Date();
@@ -646,7 +641,7 @@
             const baseComparativaCruzada = rawData.filter(item => {
                 return (fbaFiltro === 'TODOS' || item.fba === fbaFiltro) &&
                        (controlFiltro === 'TODOS' || item.control === controlFiltro) &&
-                       (!searchFiltro || item.sirex.toLowerCase().includes(searchFiltro) || item.caratula.toLowerCase().includes(searchFiltro) || item.fba.toLowerCase().includes(searchFiltro) || item.dependencia.toLowerCase().includes(searchFiltro));
+                       (!searchFiltro || item.fba.toLowerCase().includes(searchFiltro));
             });
 
             delitosParaAnalizar.forEach(delito => {
