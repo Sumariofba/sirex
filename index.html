@@ -347,7 +347,6 @@
             const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO") || h.includes("DAÑADO"));
             const idxCont = headers.findIndex(h => h.includes("CONTROL"));
             
-            // MODIFICACIÓN: Captura estricta e indexación de columnas de víctimas, imputados y sus respectivos destinos correlativos
             const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
             const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA") || h.includes("DESTINO VICTIMA"));
             const idxImputado = headers.findIndex(h => h.trim() === "IMPUTADO");
@@ -366,35 +365,24 @@
                     año = parseInt(partes[2]); mes = parseInt(partes[1]);
                 }
 
+                // MODIFICACIÓN: Extrae la celda de la carátula completa tal como figura en la base, sin dividirla por comas
                 let caratulaCelda = r[idxCara]?.trim() || 'S/D';
-                let listaCaratulasIndividuales = [];
 
-                if (caratulaCelda.toUpperCase().includes("ISA 21100")) {
-                    listaCaratulasIndividuales.push("ISA 21100");
-                } else if (caratulaCelda.includes(",")) {
-                    listaCaratulasIndividuales = caratulaCelda.split(",").map(c => c.trim()).filter(c => c !== "");
-                } else {
-                    listaCaratulasIndividuales.push(caratulaCelda);
-                }
-
-                listaCaratulasIndividuales.forEach(delitoUnico => {
-                    rawData.push({
-                        sirex: r[idxSirex].trim(), 
-                        fecha: fechaOriginal, 
-                        mes: mes, 
-                        año: año,
-                        expediente: r[idxExp]?.trim() || 'S/D', 
-                        dependencia: r[idxDep]?.trim() || 'S/D',
-                        fba: r[idxFba]?.trim() || 'NINGUNO', 
-                        caratula: delitoUnico,
-                        elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', 
-                        control: r[idxCont]?.trim() || 'NINGUNO',
-                        // Mapeo correlativo de variables individuales de destino
-                        victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
-                        destinoVictima: idxDestinoVictima !== -1 ? (r[idxDestinoVictima]?.trim() || 'S/D') : 'S/D',
-                        imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D',
-                        destinoImputado: idxDestinoImputado !== -1 ? (r[idxDestinoImputado]?.trim() || 'S/D') : 'S/D'
-                    });
+                rawData.push({
+                    sirex: r[idxSirex].trim(), 
+                    fecha: fechaOriginal, 
+                    mes: mes, 
+                    año: año,
+                    expediente: r[idxExp]?.trim() || 'S/D', 
+                    dependencia: r[idxDep]?.trim() || 'S/D',
+                    fba: r[idxFba]?.trim() || 'NINGUNO', 
+                    caratula: caratulaCelda,
+                    elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', 
+                    control: r[idxCont]?.trim() || 'NINGUNO',
+                    victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
+                    destinoVictima: idxDestinoVictima !== -1 ? (r[idxDestinoVictima]?.trim() || 'S/D') : 'S/D',
+                    imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D',
+                    destinoImputado: idxDestinoImputado !== -1 ? (r[idxDestinoImputado]?.trim() || 'S/D') : 'S/D'
                 });
             }
 
@@ -459,7 +447,8 @@
             filteredData = rawData.filter(item => {
                 const matchAno = (searchVal !== "") || isNaN(anoVal) || item.año === anoVal;
                 const matchFba = fbaVal === 'TODOS' || item.fba === fbaVal;
-                const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
+                // MODIFICACIÓN: Ajustado para que evalúe de manera flexible si contiene el delito seleccionado si la celda posee múltiples carátulas agrupadas
+                const matchDelito = delitoVal === 'TODOS' || item.caratula.includes(delitoVal);
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
                 let todoElRegistroConcat = normalizarTexto(
@@ -872,7 +861,6 @@
                 if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
                 if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
 
-                // MODIFICACIÓN: Composición integral de cadenas uniendo Sujeto + Destino y remoción del bloque HTML de Móvil Dañado
                 const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' 
                     ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` 
                     : item.victima;
@@ -881,6 +869,7 @@
                     ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
                     : item.imputado;
 
+                // MODIFICACIÓN: En la columna de CARÁTULA se inyecta la propiedad 'item.caratula' de forma íntegra para mostrar todas las carátulas juntas
                 tr.innerHTML = `
                     <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
                     <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
