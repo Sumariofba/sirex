@@ -31,11 +31,11 @@
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Lesiones por Accidente</span>
-                    <h3 class="text-3xl font-black text-red-600 tracking-tight" id="topCountLesiones">0 actuacion/es</h3>
+                    <h3 class="text-2xl font-black text-red-600 tracking-tight" id="topCountLesiones">0 actuacion/es</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLesiones">Buscando...</p>
@@ -44,7 +44,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-purple-500 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Pta Inf Ley 12569</span>
-                    <h3 class="text-3xl font-black text-purple-600 tracking-tight" id="topCountLey">0 actuacion/es</h3>
+                    <h3 class="text-2xl font-black text-purple-600 tracking-tight" id="topCountLey">0 actuacion/es</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLey">Buscando...</p>
@@ -53,7 +53,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-amber-500 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Abandono de Servicio</span>
-                    <h3 class="text-3xl font-black text-amber-600 tracking-tight" id="topCountAbandono">0 actuaciones</h3>
+                    <h3 class="text-2xl font-black text-amber-600 tracking-tight" id="topCountAbandono">0 actuaciones</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionAbandono">Buscando...</p>
@@ -62,10 +62,19 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-blue-600 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Móviles Dañados</span>
-                    <h3 class="text-3xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 moviles dañado/s</h3>
+                    <h3 class="text-2xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 moviles dañado/s</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionMovil">Buscando...</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-emerald-500 flex flex-col justify-between">
+                <div>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Cria Instructora Líder</span>
+                    <h3 class="text-2xl font-black text-emerald-600 tracking-tight" id="topCountDependencia">0 actuaciones</h3>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100">
+                    <p class="text-xs font-bold text-slate-700 truncate" id="topNombreDependencia" title="Buscando...">Buscando...</p>
                 </div>
             </div>
         </div>
@@ -99,7 +108,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500 flex flex-col justify-between">
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Mes Máxima Actividad</span>
                 <div class="flex items-baseline justify-between">
-                    <h2 class="text-5xl font-black text-red-600 tracking-tight Stadium leading-none my-2" id="kpiMesMaximo">S/D</h2>
+                    <h2 class="text-5xl font-black text-red-600 tracking-tight leading-none my-2" id="kpiMesMaximo">S/D</h2>
                     <div class="text-red-500 bg-red-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-fire"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100" id="kpiMesMaximoDetalle">0 actuacion/es</p>
@@ -262,7 +271,6 @@
         let chartFBA = null, chartControl = null, chartMonthComp = null;
         let chartAllYears = null, chartCurrentYear = null, chartEvolution = null;
 
-        // Variables auxiliares para almacenar las carátulas top por contexto dinámico
         let topCaratulasPorFBA = {};
         let topCaratulasPorMesActual = {};
 
@@ -440,7 +448,6 @@
             const fbaVal = document.getElementById('fbaFilter').value;
             const delitoVal = document.getElementById('delitoFilter').value;
             const controlVal = document.getElementById('controlFilter').value;
-            
             const searchVal = normalizarTexto(document.getElementById('searchFilter').value);
 
             filteredData = rawData.filter(item => {
@@ -462,7 +469,6 @@
             calculateKPIsYAnalisis(anoVal, delitoVal, fbaVal, controlVal, searchVal);
         }
 
-        // Función para calcular la carátula líder (más incidencias) para un subconjunto específico
         function obtenerCaratulaLider(dataArray) {
             if (!dataArray || dataArray.length === 0) return "Ninguna";
             const conteos = {};
@@ -486,18 +492,30 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "Lesiones por accidente. art 331");
+            // 1. Lesiones por Accidente
+            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => 
+                (i.caratula || '').toLowerCase().includes("lesiones por accidente. art 331")
+            );
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            const ley = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "Presunta Infraccion Ley 12569");
+            // 2. Presunta Infracción Ley 12569 (Búsqueda por texto actualizado)
+            const ley = findTopFbaFijo(dataAnoActualGlobal, i => 
+                (i.caratula || '').toLowerCase().includes("presunta infraccion ley 12569")
+            );
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "abandono de servicio más de 72 horas. art 198 inc a");
-            document.getElementById('topCountAbandono').textContent = `${abandono.total} actuacion/es`;
+            // 3. Abandono de Servicio (Búsqueda integrada flexibilizada)
+            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
+                const caratulaNorm = (i.caratula || '').toLowerCase();
+                return caratulaNorm.includes("abandono de servicio") || 
+                       caratulaNorm.includes("abandono de servicio mas de 72 horas. art 198 inc a");
+            });
+            document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
+            // 4. Móviles Dañados
             const movil = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const campoL = (i.elementoDañado || '').toUpperCase().trim();
                 return campoL.includes("MOVIL") || campoL.includes("MÓVIL");
@@ -505,273 +523,179 @@
             document.getElementById('topCountMovil').textContent = `${movil.total} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = movil.division;
 
+            // 5. NUEVA LÓGICA: Dependencia Instructora con más actuaciones comunicadas
+            const depCounts = {};
+            dataAnoActualGlobal.forEach(item => {
+                const dep = item.dependencia ? item.dependencia.trim() : 'S/D';
+                if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '') {
+                    depCounts[dep] = (depCounts[dep] || 0) + 1;
+                }
+            });
+            const sortedDeps = Object.entries(depCounts).sort((a, b) => b[1] - a[1]);
+            
+            if (sortedDeps.length > 0) {
+                document.getElementById('topCountDependencia').textContent = `${sortedDeps[0][1]} actuaciones`;
+                document.getElementById('topNombreDependencia').textContent = sortedDeps[0][0];
+                document.getElementById('topNombreDependencia').setAttribute('title', sortedDeps[0][0]);
+            } else {
+                document.getElementById('topCountDependencia').textContent = `0 actuaciones`;
+                document.getElementById('topNombreDependencia').textContent = `Ninguna`;
+                document.getElementById('topNombreDependencia').setAttribute('title', `Ninguna`);
+            }
+
             const hoy = new Date();
             const esAñoActualCorriente = (anoSeleccionado === hoy.getFullYear());
             const mesLimiteEnCurso = esAñoActualCorriente ? (hoy.getMonth() + 1) : 12;
 
             document.getElementById('lblMesEnCursoLimit').textContent = esAñoActualCorriente 
                 ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` 
-                : `Rango Activo: Año Histórico Completo`;
+                : `Rango Activo: Periodo Anual Consolidado (Enero - Diciembre)`;
 
-            const mesesDisponibles = dataAnoActualGlobal.map(i => i.mes).filter(m => !isNaN(m) && m <= mesLimiteEnCurso);
-            const mesActual = mesesDisponibles.length > 0 ? Math.max(...mesesDisponibles) : 1;
-            const ExtMesActual = NOMBRES_MESES[mesActual] || 'S/D';
-
-            const recuentoMesesAnual = {};
-            dataAnoActualGlobal.forEach(i => { 
-                if(!isNaN(i.mes) && i.mes <= mesLimiteEnCurso) recuentoMesesAnual[i.mes] = (recuentoMesesAnual[i.mes] || 0) + 1; 
-            });
-            const mesMaximoOrdenado = Object.entries(recuentoMesesAnual).sort((a,b)=>b[1]-a[1]);
+            const totalAñoActualFiltrado = filteredData.length;
+            const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
+            const datosMesActualFiltrados = filteredData.filter(i => i.mes === mesLimiteEnCurso);
             
-            if(mesMaximoOrdenado.length > 0) {
-                const codigoMesMax = parseInt(mesMaximoOrdenado[0][0]);
-                document.getElementById('kpiMesMaximo').textContent = NOMBRES_MESES[codigoMesMax].substring(0,3).toUpperCase();
-                document.getElementById('kpiMesMaximoDetalle').textContent = `Pico con ${mesMaximoOrdenado[0][1]} actuacion/es`;
+            document.getElementById('lblKpiAnual').textContent = `Intervenciones Año ${anoSeleccionado}`;
+            document.getElementById('kpiTotalAnual').textContent = totalAñoActualFiltrado.toLocaleString('es-AR');
+
+            document.getElementById('lblKpiComparativaAnual').textContent = `Vs. Año Anterior (${anoSeleccionado - 1})`;
+            document.getElementById('kpiTotalAnoAnterior').textContent = totalAñoAnteriorGlobal.toLocaleString('es-AR');
+
+            let variacionPorcentual = 0;
+            if (totalAñoAnteriorGlobal > 0) {
+                variacionPorcentual = ((totalAñoActualFiltrado - totalAñoAnteriorGlobal) / totalAñoAnteriorGlobal) * 100;
+            }
+            const signoVar = variacionPorcentual >= 0 ? '+' : '';
+            const elKpiVariacion = document.getElementById('kpiVariacionAnual');
+            elKpiVariacion.textContent = `${signoVar}${variacionPorcentual.toFixed(1)}% var.`;
+            if (variacionPorcentual > 0) {
+                elKpiVariacion.className = "text-[11px] text-red-600 font-bold pt-1 border-t border-slate-100";
             } else {
-                document.getElementById('kpiMesMaximo').textContent = "S/D";
+                elKpiVariacion.className = "text-[11px] text-emerald-600 font-bold pt-1 border-t border-slate-100";
             }
 
-            const totalAnualNeto = dataAnoActualGlobal.length;
-            document.getElementById('kpiTotalAnual').textContent = totalAnualNeto;
-            document.getElementById('lblKpiAnual').textContent = `Intervenciones del Año (${anoSeleccionado})`;
+            document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
+            document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
 
-            const anoAnterior = anoSeleccionado - 1;
-            const dataAnoAnteriorGlobal = rawData.filter(i => i.año === anoAnterior);
-            const totalAnoAnteriorNeto = dataAnoAnteriorGlobal.length;
-            document.getElementById('lblKpiComparativaAnual').textContent = `Vs. Año Anterior (${anoAnterior})`;
-            document.getElementById('kpiTotalAnoAnterior').textContent = totalAnoAnteriorNeto;
+            const conteoPorMes = Array(13).fill(0);
+            filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
+            let mesMaximo = 1, valorMaximo = 0;
+            for(let m = 1; m <= 12; m++) {
+                if(conteoPorMes[m] > valorMaximo) {
+                    valorMaximo = conteoPorMes[m];
+                    mesMaximo = m;
+                }
+            }
+            document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].substring(0,3).toUpperCase() : 'S/D';
+            document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
+
+            const totalBaseGeneral = rawData.length;
+            const porcFiltrado = totalBaseGeneral > 0 ? ((totalAñoActualFiltrado / totalBaseGeneral) * 100) : 0;
+            document.getElementById('kpiPorcentajeFiltrado').textContent = `${porcFiltrado.toFixed(1)}%`;
+            document.getElementById('kpiPorcentajeDetalle').textContent = `${totalAñoActualFiltrado.toLocaleString('es-AR')} de ${totalBaseGeneral.toLocaleString('es-AR')} globales`;
+
+            document.getElementById('lblGraficoMes').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].toUpperCase()} ${anoSeleccionado}`;
+            document.getElementById('thAnoAnterior').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].substring(0,3)}. ${anoSeleccionado - 1}`;
+            document.getElementById('thAnoActual').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].substring(0,3)}. ${anoSeleccionado}`;
+
+            const dataMesAñoActualGlobal = rawData.filter(i => i.año === anoSeleccionado && i.mes === mesLimiteEnCurso);
+            const dataMesAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1) && i.mes === mesLimiteEnCurso);
+
+            const conteoDelitosActual = {}, conteoDelitosAnterior = {};
+            dataMesAñoActualGlobal.forEach(i => { if(i.caratula) conteoDelitosActual[i.caratula] = (conteoDelitosActual[i.caratula] || 0) + 1; });
+            dataMesAñoAnteriorGlobal.forEach(i => { if(i.caratula) conteoDelitosAnterior[i.caratula] = (conteoDelitosAnterior[i.caratula] || 0) + 1; });
+
+            const todasLasCaratulasMes = new Set([...Object.keys(conteoDelitosActual), ...Object.keys(conteoDelitosAnterior)]);
+            const listaComparativaOrdenada = Array.from(todasLasCaratulasMes).map(caratula => {
+                const act = conteoDelitosActual[caratula] || 0;
+                const ant = conteoDelitosAnterior[caratula] || 0;
+                let difPorc = 0;
+                if (ant > 0) difPorc = ((act - ant) / ant) * 100;
+                else if (act > 0) difPorc = 100; 
+                return { caratula, act, ant, difPorc };
+            }).sort((a, b) => b.act - a.act);
+
+            const tbodyComparativo = document.getElementById('comparativeTableBody');
+            tbodyComparativo.innerHTML = '';
             
-            if (totalAnoAnteriorNeto > 0) {
-                const variacion = Math.round(((totalAnualNeto - totalAnoAnteriorNeto) / totalAnoAnteriorNeto) * 100);
-                document.getElementById('kpiVariacionAnual').textContent = `${variacion >= 0 ? '📈 +' : '📉 '}${variacion}% de variación interanual`;
-                document.getElementById('kpiVariacionAnual').className = variacion >= 0 ? "text-[11px] text-green-600 font-bold border-t border-slate-100 pt-1" : "text-[11px] text-red-600 font-bold border-t border-slate-100 pt-1";
-            } else {
-                document.getElementById('kpiVariacionAnual').textContent = "Sin datos históricos previos";
-                document.getElementById('kpiVariacionAnual').className = "text-[11px] text-slate-400 font-medium border-t border-slate-100 pt-1";
-            }
+            const top5Comparativa = listaComparativaOrdenada.slice(0, 5);
 
-            document.getElementById('kpiTotalMensual').textContent = dataAnoActualGlobal.filter(i => i.mes === mesActual).length;
-            document.getElementById('lblKpiMensual').textContent = `Intervenciones en ${ExtMesActual}`;
+            listaComparativaOrdenada.forEach(fila => {
+                const tr = document.createElement('tr');
+                let badgeClase = 'bg-gray-100 text-gray-700';
+                let stringPorc = `${fila.difPorc >= 0 ? '+' : ''}${fila.difPorc.toFixed(0)}%`;
+                
+                if (fila.ant === 0 && fila.act > 0) stringPorc = 'Nuevo';
+                if (fila.difPorc > 0) badgeClase = 'bg-red-50 text-red-600 font-bold';
+                if (fila.difPorc < 0) badgeClase = 'bg-emerald-50 text-emerald-600 font-bold';
 
-            const totalFiltrados = filteredData.length;
-            document.getElementById('kpiPorcentajeFiltrado').textContent = `${totalAnualNeto > 0 ? Math.round((totalFiltrados / totalAnualNeto) * 100) : 0}%`;
-            document.getElementById('kpiPorcentajeDetalle').textContent = `${totalFiltrados} de ${totalAnualNeto} registros según filtros`;
-
-            let arrayMesesIndex = [];
-            for(let m = 1; m <= mesLimiteEnCurso; m++) { arrayMesesIndex.push(m); }
-            let dataMesesAnoActual = arrayMesesIndex.map(m => recuentoMesesAnual[m] || 0);
-
-            // Mapeo dinámico de carátulas principales por cada mes (para el gráfico de barras mensual)
-            topCaratulasPorMesActual = {};
-            arrayMesesIndex.forEach(m => {
-                const casosDelMes = filteredData.filter(i => i.mes === m && i.año === anoSeleccionado);
-                topCaratulasPorMesActual[m] = obtenerCaratulaLider(casosDelMes);
+                tr.innerHTML = `
+                    <td class="p-2 font-medium truncate max-w-xs text-slate-800">${fila.caratula}</td>
+                    <td class="p-2 text-center font-semibold">${fila.ant}</td>
+                    <td class="p-2 text-center font-bold bg-amber-50/60">${fila.act}</td>
+                    <td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${stringPorc}</span></td>
+                `;
+                tbodyComparativo.appendChild(tr);
             });
-
-            const structAnualShed = {};
-            rawData.forEach(item => {
-                if(!isNaN(item.año) && !isNaN(item.mes)) {
-                    const limiteMesPorFila = (item.año === hoy.getFullYear()) ? (hoy.getMonth() + 1) : 12;
-                    if(item.mes <= limiteMesPorFila) {
-                        if(!structAnualShed[item.año]) structAnualShed[item.año] = Array(13).fill(0);
-                        structAnualShed[item.año][item.mes]++;
-                    }
-                }
-            });
-
-            const añosDetectadosEnCSV = Object.keys(structAnualShed).sort((a,b)=>parseInt(a)-parseInt(b));
-            let maxMesEjeXHistorial = Math.max(...añosDetectadosEnCSV.map(y => (parseInt(y) === hoy.getFullYear() ? (hoy.getMonth() + 1) : 12)));
-            let arrayMesesEjeXHistorial = [];
-            for(let m = 1; m <= maxMesEjeXHistorial; m++) { arrayMesesEjeXHistorial.push(m); }
-
-            const datasetsMultiano = añosDetectadosEnCSV.map((yr, idx) => ({
-                label: `Año Histórico ${yr}`,
-                data: arrayMesesEjeXHistorial.map(m => structAnualShed[yr][m] || 0),
-                borderColor: colorPalette[idx % colorPalette.length],
-                backgroundColor: colorPalette[idx % colorPalette.length],
-                tension: 0.15,
-                fill: false
-            }));
-
-            if(chartAllYears) chartAllYears.destroy();
-            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), {
-                type: 'line',
-                data: { labels: arrayMesesEjeXHistorial.map(m => NOMBRES_MESES[m]), datasets: datasetsMultiano },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top', labels: { boxWidth: 12, font: { weight: 'bold' } } },
-                        datalabels: {
-                            display: true, align: 'top', y: -4,
-                            font: { weight: 'bold', size: 10 },
-                            formatter: (val) => val > 0 ? val : ''
-                        }
-                    },
-                    scales: { y: { beginAtZero: true, grid: { display: false } } }
-                }
-            });
-
-            document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500"></i> Intervenciones por Mes (${anoSeleccionado})`;
-            if(chartCurrentYear) chartCurrentYear.destroy();
-            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), {
-                type: 'bar',
-                data: {
-                    labels: arrayMesesIndex.map(m => NOMBRES_MESES[m]),
-                    datasets: [{ 
-                        data: dataMesesAnoActual, 
-                        backgroundColor: arrayMesesIndex.map(m => paletaMulticolor12Meses[(m - 1) % 12]), 
-                        borderRadius: 5 
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            display: true, align: 'end', anchor: 'end',
-                            font: { weight: 'black', size: 11 },
-                            formatter: (val) => val
-                        },
-                        tooltip: {
-                            callbacks: {
-                                afterBody: function(context) {
-                                    const indexMes = arrayMesesIndex[context[0].dataIndex];
-                                    return `Carátula Líder:\n ${topCaratulasPorMesActual[indexMes] || 'Sin Datos'}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: { y: { beginAtZero: true, grid: { display: false } } }
-                }
-            });
-
-            if(chartEvolution) chartEvolution.destroy();
-            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), {
-                type: 'line',
-                data: {
-                    labels: arrayMesesIndex.map(m => NOMBRES_MESES[m]),
-                    datasets: [{ data: dataMesesAnoActual, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.05)', fill: true, tension: 0.2 }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            display: true, align: 'top', y: -5, color: '#1d4ed8',
-                            font: { weight: 'bold', size: 11 },
-                            formatter: (val) => val
-                        }
-                    },
-                    scales: { y: { beginAtZero: true, grid: { display: false } } }
-                }
-            });
-
-            let delitosParaAnalizar = [];
-            if (delitoFiltro !== 'TODOS') { delitosParaAnalizar = [delitoFiltro]; } 
-            else {
-                const counts = {}; filteredData.forEach(i => { counts[i.caratula] = (counts[i.caratula] || 0) + 1; });
-                delitosParaAnalizar = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 10).map(e => e[0]);
-            }
-
-            let dataBarrasAnoAnterior = [], dataBarrasAnoActual = [];
-            const tableBody = document.getElementById('comparativeTableBody'); tableBody.innerHTML = '';
-
-            const baseComparativaCruzada = rawData.filter(item => {
-                let todoElRegistroConcat = normalizarTexto(
-                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.victima} ${item.imputado} ${item.control}`
-                );
-                return (fbaFiltro === 'TODOS' || item.fba === fbaFiltro) &&
-                       (controlFiltro === 'TODOS' || item.control === controlFiltro) &&
-                       (!searchFiltro || todoElRegistroConcat.includes(searchFiltro));
-            });
-
-            delitosParaAnalizar.forEach(delito => {
-                const cMesAnoAnt = baseComparativaCruzada.filter(i => i.caratula === delito && i.mes === mesActual && i.año === anoAnterior).length;
-                const cMesAnoAct = baseComparativaCruzada.filter(i => i.caratula === delito && i.mes === mesActual && i.año === anoSeleccionado).length;
-
-                dataBarrasAnoAnterior.push(cMesAnoAnt); dataBarrasAnoActual.push(cMesAnoAct);
-
-                let tendencia = '═ Estable (0%)', colorClase = 'text-gray-500 font-medium';
-                if (cMesAnoAnt > 0) {
-                    const pctVar = Math.round(((cMesAnoAct - cMesAnoAnt) / cMesAnoAnt) * 100);
-                    if (cMesAnoAct > cMesAnoAnt) { tendencia = `📈 Subió (+${pctVar}%)`; colorClase = 'text-green-600 font-bold'; }
-                    else if (cMesAnoAct < cMesAnoAnt) { tendencia = `📉 Bajó (${pctVar}%)`; colorClase = 'text-red-600 font-bold'; }
-                } else if (cMesAnoAct > 0) { tendencia = '📈 Subió (+100%)'; colorClase = 'text-green-600 font-bold'; }
-
-                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors";
-                tr.innerHTML = `<td class="p-2 font-medium text-slate-900 max-w-[220px] truncate" title="${delito}">${delito}</td>
-                                <td class="p-2 text-center font-mono">${cMesAnoAnt}</td>
-                                <td class="p-2 text-center font-mono bg-amber-50 font-semibold">${cMesAnoAct}</td>
-                                <td class="p-2 text-center text-[11px] ${colorClase}">${tendencia}</td>`;
-                tableBody.appendChild(tr);
-            });
-
-            document.getElementById('thAnoAnterior').textContent = `${NOMBRES_MESES[mesActual].substring(0,3)} (${anoAnterior})`;
-            document.getElementById('thAnoActual').textContent = `${NOMBRES_MESES[mesActual].substring(0,3)} (${anoSeleccionado})`;
-            document.getElementById('lblGraficoMes').textContent = `${NOMBRES_MESES[mesActual]}: ${anoSeleccionado} vs ${anoAnterior}`;
 
             if (chartMonthComp) chartMonthComp.destroy();
             chartMonthComp = new Chart(document.getElementById('chartMonthComparison'), {
                 type: 'bar',
                 data: {
-                    labels: delitosParaAnalizar.map(d => d.length > 18 ? d.substring(0, 16) + '...' : d),
+                    labels: top5Comparativa.map(x => x.caratula.substring(0, 25) + (x.caratula.length > 25 ? '...' : '')),
                     datasets: [
-                        { label: `${NOMBRES_MESES[mesActual]} (${anoAnterior})`, data: dataBarrasAnoAnterior, backgroundColor: '#94a3b8', borderRadius: 4 },
-                        { label: `${NOMBRES_MESES[mesActual]} (${anoSeleccionado})`, data: dataBarrasAnoActual, backgroundColor: '#f59e0b', borderRadius: 4 }
+                        {
+                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`,
+                            data: top5Comparativa.map(x => x.ant),
+                            backgroundColor: 'rgba(148, 163, 184, 0.65)'
+                        },
+                        {
+                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`,
+                            data: top5Comparativa.map(x => x.act),
+                            backgroundColor: 'rgba(245, 158, 11, 0.85)'
+                        }
                     ]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
+                options: {
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { 
-                        datalabels: { 
-                            display: true, 
-                            anchor: 'end',
-                            align: 'end',
-                            offset: -2,
-                            font: { weight: 'bold', size: 10 },
-                            formatter: (val) => val > 0 ? val : '0'
-                        } 
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+                        datalabels: { anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' } }
                     },
-                    scales: { y: { beginAtZero: true } }
+                    scales: { y: { beginAtZero: true, grid: { display: false } } }
                 }
             });
 
-            // Procesar FBA e identificar sus carátulas principales
-            const fbaCounts = {}; filteredData.forEach(i => { if(i.fba && i.fba !== 'NINGUNO' && i.fba !== 'S/D') fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
-            const topFBA = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
-            
-            topCaratulasPorFBA = {};
-            topFBA.forEach(fbaItem => {
-                const nombreFBA = fbaItem[0];
-                const registrosDelFBA = filteredData.filter(i => i.fba === nombreFBA);
-                topCaratulasPorFBA[nombreFBA] = obtenerCaratulaLider(registrosDelFBA);
+            const fbaCounts = {};
+            filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
+            const sortedFba = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
+
+            sortedFba.forEach(([fbaName]) => {
+                const subfba = filteredData.filter(i => i.fba === fbaName);
+                topCaratulasPorFBA[fbaName] = obtenerCaratulaLider(subfba);
             });
 
-            if(chartFBA) chartFBA.destroy();
+            if (chartFBA) chartFBA.destroy();
             chartFBA = new Chart(document.getElementById('chartFBA'), {
                 type: 'bar',
-                data: { labels: topFBA.map(f => f[0]), datasets: [{ data: topFBA.map(f => f[1]), backgroundColor: colorPalette, borderWidth: 1, borderRadius: 4 }] },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { display: false }, 
-                        datalabels: { 
-                            display: true,
-                            anchor: 'end',
-                            align: 'top',
-                            font: { weight: 'bold', size: 11 },
-                            formatter: (val) => val
-                        },
+                data: {
+                    labels: sortedFba.map(x => x[0]),
+                    datasets: [{
+                        label: 'Actuaciones Registradas',
+                        data: sortedFba.map(x => x[1]),
+                        backgroundColor: colorPalette
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
                         tooltip: {
                             callbacks: {
-                                afterBody: function(context) {
-                                    const fbaLabel = context[0].label;
-                                    return `Carátula Líder:\n ${topCaratulasPorFBA[fbaLabel] || 'Sin Datos'}`;
+                                afterBody: (context) => {
+                                    const fbaKey = context[0].label;
+                                    return `Top Delito: ${topCaratulasPorFBA[fbaKey] || 'S/D'}`;
                                 }
                             }
                         }
@@ -780,69 +704,193 @@
                 }
             });
 
-            // Procesamiento de Control Resolutivo con volumen y porcentaje representativo en etiqueta fija
-            const ctrlCounts = {}; filteredData.forEach(i => { if(i.control) ctrlCounts[i.control] = (ctrlCounts[i.control] || 0) + 1; });
-            const totalControlCasos = Object.values(ctrlCounts).reduce((a,b) => a + b, 0);
-
-            if(chartControl) chartControl.destroy();
+            const controlCounts = {};
+            filteredData.forEach(i => { if(i.control) controlCounts[i.control] = (controlCounts[i.control] || 0) + 1; });
+            
+            if (chartControl) chartControl.destroy();
             chartControl = new Chart(document.getElementById('chartControl'), {
-                type: 'pie',
-                data: { labels: Object.keys(ctrlCounts), datasets: [{ data: Object.values(ctrlCounts), backgroundColor: ['#6366f1', '#ef4444', '#10b981', '#f59e0b', '#ec44a3'] }] },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        datalabels: { 
-                            display: true,
-                            color: '#ffffff',
-                            font: { weight: 'black', size: 11 },
-                            formatter: (val) => {
-                                if (totalControlCasos === 0) return val;
-                                const pct = Math.round((val / totalControlCasos) * 100);
-                                return `${val}\n(${pct}%)`; // Muestra cantidad e impacto porcentual integrado
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(controlCounts),
+                    datasets: [{
+                        data: Object.values(controlCounts),
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6']
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                let sum = 0;
+                                let dataArr = ctx.chart.data.datasets[0].data;
+                                dataArr.map(data => { sum += data; });
+                                return `${((value*100) / sum).toFixed(0)}%`;
+                            },
+                            color: '#fff', font: { weight: 'bold', size: 11 }
+                        }
+                    }
+                }
+            });
+
+            const matrizAnos = {};
+            rawData.forEach(item => {
+                if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) {
+                    if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0);
+                    matrizAnos[item.año][item.mes]++;
+                }
+            });
+
+            const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, index) => {
+                return {
+                    label: `Año ${año}`,
+                    data: matrizAnos[año].slice(1),
+                    borderColor: paletaMulticolor12Meses[index % paletaMulticolor12Meses.length],
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    pointRadius: 3
+                };
+            });
+
+            if (chartAllYears) chartAllYears.destroy();
+            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), {
+                type: 'line',
+                data: {
+                    labels: NOMBRES_MESES.slice(1),
+                    datasets: datasetsHistoricos
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+                        datalabels: { display: false }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500"></i> Distribución de Carga Mensual Unificada (Año ${anoSeleccionado})`;
+            const datasetMesesFiltrado = Array(13).fill(0);
+            filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
+
+            for (let m = 1; m <= 12; m++) {
+                const submes = filteredData.filter(i => i.mes === m);
+                topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(submes);
+            }
+
+            if (chartCurrentYear) chartCurrentYear.destroy();
+            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), {
+                type: 'bar',
+                data: {
+                    labels: NOMBRES_MESES.slice(1),
+                    datasets: [{
+                        label: 'Actuaciones',
+                        data: datasetMesesFiltrado.slice(1),
+                        backgroundColor: paletaMulticolor12Meses
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
+                        tooltip: {
+                            callbacks: {
+                                afterBody: (context) => {
+                                    const mesKey = context[0].label;
+                                    return `Líder: ${topCaratulasPorMesActual[mesKey] || 'S/D'}`;
+                                }
                             }
-                        } 
-                    } 
+                        }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            if (chartEvolution) chartEvolution.destroy();
+            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), {
+                type: 'line',
+                data: {
+                    labels: NOMBRES_MESES.slice(1),
+                    datasets: [{
+                        label: `Evolución ${anoSeleccionado}`,
+                        data: datasetMesesFiltrado.slice(1),
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#1E3A8A',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top' } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
 
         function renderTable() {
-            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
-            if (currentPage > totalPages) currentPage = totalPages;
-
             const start = (currentPage - 1) * rowsPerPage;
-            const pageData = filteredData.slice(start, start + rowsPerPage);
+            const end = start + rowsPerPage;
+            const paginatedItems = filteredData.slice(start, end);
 
-            document.getElementById('tableCounter').textContent = `${filteredData.length} registros`;
-            document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
 
-            if (pageData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">Sin registros para la combinación de filtros aplicada</td></tr>`; return;
+            document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
+
+            if(paginatedItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
+                document.getElementById('pageIndicator').textContent = "Página 0 de 0";
+                document.getElementById('btnPrev').disabled = true;
+                document.getElementById('btnNext').disabled = true;
+                return;
             }
 
-            pageData.forEach(item => {
-                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors";
+            paginatedItems.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                
+                let badgeControlClase = "bg-slate-100 text-slate-700";
+                const ctrlNorm = (item.control || '').toUpperCase();
+                if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-100 text-emerald-800 font-semibold";
+                if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
+                if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
+
                 tr.innerHTML = `
-                    <td class="px-4 py-3 font-semibold text-blue-600 whitespace-nowrap text-xs">${item.sirex}</td>
-                    <td class="px-4 py-3 text-xs whitespace-nowrap">${item.fecha}</td>
-                    <td class="px-4 py-3 text-xs font-mono">${item.expediente}</td>
-                    <td class="px-4 py-3 text-xs truncate max-w-[180px]" title="${item.dependencia}">${item.dependencia}</td>
-                    <td class="px-4 py-3 text-xs font-medium text-slate-700">${item.fba}</td>
-                    <td class="px-4 py-3 text-xs text-slate-900 font-semibold truncate max-w-[220px]" title="${item.caratula}">${item.caratula}</td>
-                    <td class="px-4 py-3 text-xs font-medium text-slate-600">${item.victima}</td>
-                    <td class="px-4 py-3 text-xs font-medium text-slate-600">${item.imputado}</td>
-                    <td class="px-4 py-3 text-xs text-slate-400 italic">Mapeado en Origen</td>
-                    <td class="px-4 py-3 text-xs">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.control === 'AGAI' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-800'}">${item.control}</span>
-                    </td>`;
+                    <td class="px-4 py-3 font-mono font-bold text-slate-900">${item.sirex}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">${item.fecha}</td>
+                    <td class="px-4 py-3 font-medium text-slate-700">${item.expediente}</td>
+                    <td class="px-4 py-3 truncate max-w-[220px]" title="${item.dependencia}">${item.dependencia}</td>
+                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-xs font-medium">${item.fba}</span></td>
+                    <td class="px-4 py-3 font-semibold text-slate-800 max-w-[280px] truncate" title="${item.caratula}">${item.caratula}</td>
+                    <td class="px-4 py-3 truncate max-w-[180px]" title="${item.victima}">${item.victima}</td>
+                    <td class="px-4 py-3 truncate max-w-[180px]" title="${item.imputado}">${item.imputado}</td>
+                    <td class="px-4 py-3 text-xs text-slate-500">${item.elementoDañado}</td>
+                    <td class="px-4 py-3"><span class="px-2 py-1 rounded-sm text-xs ${badgeControlClase}">${item.control}</span></td>
+                `;
                 tbody.appendChild(tr);
             });
+
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
+            document.getElementById('btnPrev').disabled = (currentPage === 1);
+            document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
         }
 
-        document.getElementById('btnPrev').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
-        document.getElementById('btnNext').addEventListener('click', () => { if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) { currentPage++; renderTable(); } });
+        document.getElementById('btnPrev').addEventListener('click', () => {
+            if (currentPage > 1) { currentPage--; renderTable(); }
+        });
+
+        document.getElementById('btnNext').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < totalPages) { currentPage++; renderTable(); }
+        });
     </script>
 </body>
 </html>
