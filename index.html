@@ -490,11 +490,11 @@
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            const ley = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "Presunta infraccion Ley 12569");
+            const ley = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "Presunta Infraccion Ley 12569");
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "Abandono de servicio. art 198 inc a");
+            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "abandono de servicio más de 72 horas. art 198 inc a");
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuacion/es`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
