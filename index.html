@@ -451,7 +451,8 @@
             const searchVal = normalizarTexto(document.getElementById('searchFilter').value);
 
             filteredData = rawData.filter(item => {
-                const matchAno = isNaN(anoVal) || item.año === anoVal;
+                // MODIFICACIÓN: Si la búsqueda general tiene texto, ignoramos el filtro de año ('matchAno' pasa a ser true automáticamente)
+                const matchAno = (searchVal !== "") || isNaN(anoVal) || item.año === anoVal;
                 const matchFba = fbaVal === 'TODOS' || item.fba === fbaVal;
                 const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
@@ -582,7 +583,7 @@
             let mesMaximo = 1, valorMaximo = 0;
             for(let m = 1; m <= 12; m++) {
                 if(conteoPorMes[m] > valorMaximo) {
-                    valorMaximo = conteoPorMes[m];
+                    valueMaximo = conteoPorMes[m];
                     mesMaximo = m;
                 }
             }
