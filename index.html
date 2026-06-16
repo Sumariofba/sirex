@@ -451,7 +451,6 @@
             const searchVal = normalizarTexto(document.getElementById('searchFilter').value);
 
             filteredData = rawData.filter(item => {
-                // MODIFICACIÓN: Si la búsqueda general tiene texto, ignoramos el filtro de año ('matchAno' pasa a ser true automáticamente)
                 const matchAno = (searchVal !== "") || isNaN(anoVal) || item.año === anoVal;
                 const matchFba = fbaVal === 'TODOS' || item.fba === fbaVal;
                 const matchDelito = delitoVal === 'TODOS' || item.caratula === delitoVal;
@@ -524,12 +523,15 @@
             document.getElementById('topCountMovil').textContent = `${movil.total} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = movil.division;
 
-            // 5. NUEVA LÓGICA: Dependencia Instructora con más actuaciones comunicadas
+            // 5. NUEVA LÓGICA MODIFICADA: Dependencia Instructora Líder (Filtra excluídos y procesa "CRIA")
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
-                const dep = item.dependencia ? item.dependencia.trim() : 'S/D';
+                const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
                 if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '') {
-                    depCounts[dep] = (depCounts[dep] || 0) + 1;
+                    // Excluye las que inicien con DIR FBA o FBA, y valida que contenga o diga CRIA
+                    if (!dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && dep.includes("CRIA")) {
+                        depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1;
+                    }
                 }
             });
             const sortedDeps = Object.entries(depCounts).sort((a, b) => b[1] - a[1]);
@@ -578,22 +580,24 @@
             document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
 
+            // MODIFICACIÓN 1: "Mes Máxima Actividad" calculada exclusivamente sobre 'dataAnoActualGlobal' (Ignora búsqueda general en este KPI)
             const conteoPorMes = Array(13).fill(0);
-            filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
+            dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
             let mesMaximo = 1, valorMaximo = 0;
             for(let m = 1; m <= 12; m++) {
                 if(conteoPorMes[m] > valorMaximo) {
-                    valueMaximo = conteoPorMes[m];
+                    valorMaximo = conteoPorMes[m];
                     mesMaximo = m;
                 }
             }
             document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].substring(0,3).toUpperCase() : 'S/D';
             document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
 
-            const totalBaseGeneral = rawData.length;
-            const porcFiltrado = totalBaseGeneral > 0 ? ((totalAñoActualFiltrado / totalBaseGeneral) * 100) : 0;
+            // MODIFICACIÓN 2: "Representación de Filtros" calculada exclusivamente respecto al total del año seleccionado ('dataAnoActualGlobal.length')
+            const totalDelAñoSeleccionado = dataAnoActualGlobal.length;
+            const porcFiltrado = totalDelAñoSeleccionado > 0 ? ((totalAñoActualFiltrado / totalDelAñoSeleccionado) * 100) : 0;
             document.getElementById('kpiPorcentajeFiltrado').textContent = `${porcFiltrado.toFixed(1)}%`;
-            document.getElementById('kpiPorcentajeDetalle').textContent = `${totalAñoActualFiltrado.toLocaleString('es-AR')} de ${totalBaseGeneral.toLocaleString('es-AR')} globales`;
+            document.getElementById('kpiPorcentajeDetalle').textContent = `${totalAñoActualFiltrado.toLocaleString('es-AR')} de ${totalDelAñoSeleccionado.toLocaleString('es-AR')} del ${anoSeleccionado}`;
 
             document.getElementById('lblGraficoMes').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].toUpperCase()} ${anoSeleccionado}`;
             document.getElementById('thAnoAnterior').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].substring(0,3)}. ${anoSeleccionado - 1}`;
