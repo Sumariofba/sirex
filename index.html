@@ -486,15 +486,15 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "LESIONES POR ACCIDENTE");
+            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "Lesiones por accidente. art 331");
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            const ley = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "PTA INF LEY 12569");
+            const ley = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "Presunta infraccion Ley 12569");
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "ABANDONO DE SERVICIO");
+            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => i.caratula === "Abandono de servicio. art 198 inc a");
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuacion/es`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
