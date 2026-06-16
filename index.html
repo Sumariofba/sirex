@@ -74,7 +74,7 @@
                     <h3 class="text-2xl font-black text-emerald-600 tracking-tight" id="topCountDependencia">0 actuaciones</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
-                    <p class="text-xs font-bold text-slate-700 truncate" id="topNombreDependencia" title="Buscando...">Buscando...</p>
+                    <p class="text-[10px] font-bold text-slate-700 leading-tight whitespace-normal break-words" id="topNombreDependencia" title="Buscando...">Buscando...</p>
                 </div>
             </div>
         </div>
@@ -228,19 +228,19 @@
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-slate-500 min-w-[1400px]">
+                <table class="w-full text-xs text-left text-slate-500 min-w-[1500px] table-fixed">
                     <thead class="text-xs text-slate-700 uppercase bg-gray-100">
                         <tr>
-                            <th class="px-4 py-3">SIREX N°</th>
-                            <th class="px-4 py-3">FECHA DE INICIO</th>
-                            <th class="px-4 py-3">EXPEDIENTE N°</th>
-                            <th class="px-4 py-3">DEPENDENCIA INSTRUCTORA</th>
-                            <th class="px-4 py-3">FBA INTERVINIENTE</th>
-                            <th class="px-4 py-3">CARATULA PENAL - ADMINISTRATIVA</th>
-                            <th class="px-4 py-3">VICTIMA/DESTINO DE LA VICTIMA</th>
-                            <th class="px-4 py-3">IMPUTADO</th>
-                            <th class="px-4 py-3">DESTINO DEL IMPUTADO</th>
-                            <th class="px-4 py-3">CONTROL</th>
+                            <th class="px-3 py-3 w-[100px]">SIREX N°</th>
+                            <th class="px-3 py-3 w-[110px]">FECHA INICIO</th>
+                            <th class="px-3 py-3 w-[120px]">EXPEDIENTE N°</th>
+                            <th class="px-3 py-3 w-[200px]">DEP. INSTRUCTORA</th>
+                            <th class="px-3 py-3 w-[120px]">FBA INTERV.</th>
+                            <th class="px-3 py-3 w-[250px]">CARATULA</th>
+                            <th class="px-3 py-3 w-[250px]">VICTIMA / DESTINO</th>
+                            <th class="px-3 py-3 w-[250px]">IMPUTADO / DESTINO</th>
+                            <th class="px-3 py-3 w-[130px]">MOVIL DAÑADO</th>
+                            <th class="px-3 py-3 w-[120px]">CONTROL</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
@@ -443,7 +443,6 @@
             return (texto || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         }
 
-        // Mantiene la lógica previa sin alterar los IDs del DOM de los eventListeners
         function applyFilters() {
             const anoVal = parseInt(document.getElementById('anoFilter').value);
             const fbaVal = document.getElementById('fbaFilter').value;
@@ -500,14 +499,14 @@
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            // 2. Presunta Infracción Ley 12569 (Búsqueda por texto actualizado)
+            // 2. Presunta Infracción Ley 12569
             const ley = findTopFbaFijo(dataAnoActualGlobal, i => 
                 (i.caratula || '').toLowerCase().includes("presunta infraccion ley 12569")
             );
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            // 3. Abandono de Servicio (Búsqueda integrada flexibilizada)
+            // 3. Abandono de Servicio
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const caratulaNorm = (i.caratula || '').toLowerCase();
                 return caratulaNorm.includes("abandono de servicio") || 
@@ -867,17 +866,19 @@
                 if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
                 if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
 
+                // MODIFICACIÓN: Se removieron clases 'truncate' y se configuraron 'whitespace-normal', 'break-words' y tamaño text-[11px] 
+                // específico para VÍCTIMA e IMPUTADO para que los nombres bajen de renglón y se muestren completos.
                 tr.innerHTML = `
-                    <td class="px-4 py-3 font-mono font-bold text-slate-900">${item.sirex}</td>
-                    <td class="px-4 py-3 whitespace-nowrap">${item.fecha}</td>
-                    <td class="px-4 py-3 font-medium text-slate-700">${item.expediente}</td>
-                    <td class="px-4 py-3 truncate max-w-[220px]" title="${item.dependencia}">${item.dependencia}</td>
-                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-xs font-medium">${item.fba}</span></td>
-                    <td class="px-4 py-3 font-semibold text-slate-800 max-w-[280px] truncate" title="${item.caratula}">${item.caratula}</td>
-                    <td class="px-4 py-3 truncate max-w-[180px]" title="${item.victima}">${item.victima}</td>
-                    <td class="px-4 py-3 truncate max-w-[180px]" title="${item.imputado}">${item.imputado}</td>
-                    <td class="px-4 py-3 text-xs text-slate-500">${item.elementoDañado}</td>
-                    <td class="px-4 py-3"><span class="px-2 py-1 rounded-sm text-xs ${badgeControlClase}">${item.control}</span></td>
+                    <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
+                    <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
+                    <td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td>
+                    <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
+                    <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
+                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td>
+                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${item.victima}</td>
+                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${item.imputado}</td>
+                    <td class="px-3 py-3 text-xs text-slate-500 whitespace-normal break-words">${item.elementoDañado}</td>
+                    <td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
