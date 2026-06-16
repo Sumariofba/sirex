@@ -123,7 +123,7 @@
             </div>
         </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100">
+        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end border border-slate-100">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
                 <select id="anoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
@@ -139,13 +139,6 @@
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Control</label>
                 <select id="controlFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Búsqueda General</label>
-                <div class="relative">
-                    <input type="text" id="searchFilter" placeholder="Buscar en toda la base de datos..." class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden">
-                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-xs"></i>
-                </div>
             </div>
         </div>
 
@@ -221,11 +214,18 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h4 class="text-sm font-bold text-slate-700 uppercase flex items-center gap-2">
-                    <i class="fa-solid fa-database text-blue-600"></i> Registros de Eventos Unificados
-                </h4>
-                <span class="text-xs bg-slate-200 text-slate-800 font-bold px-2.5 py-0.5 rounded-full" id="tableCounter">0 registros</span>
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-slate-50 gap-4">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <h4 class="text-sm font-bold text-slate-700 uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-database text-blue-600"></i> Registros de Eventos Unificados
+                    </h4>
+                    <span class="text-xs bg-slate-200 text-slate-800 font-bold px-2.5 py-0.5 rounded-full" id="tableCounter">0 registros</span>
+                </div>
+                
+                <div class="w-full sm:w-72 relative">
+                    <input type="text" id="searchFilter" placeholder="Buscar en toda la base de datos..." class="w-full bg-white border border-slate-200 text-slate-900 text-xs rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden shadow-xs">
+                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-[10px]"></i>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left text-slate-500 min-w-[1400px]">
@@ -443,6 +443,7 @@
             return (texto || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         }
 
+        // Mantiene la lógica previa sin alterar los IDs del DOM de los eventListeners
         function applyFilters() {
             const anoVal = parseInt(document.getElementById('anoFilter').value);
             const fbaVal = document.getElementById('fbaFilter').value;
@@ -523,12 +524,11 @@
             document.getElementById('topCountMovil').textContent = `${movil.total} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = movil.division;
 
-            // 5. NUEVA LÓGICA MODIFICADA: Dependencia Instructora Líder (Filtra excluídos y procesa "CRIA")
+            // 5. Dependencia Instructora Líder
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
                 if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '') {
-                    // Excluye las que inicien con DIR FBA o FBA, y valida que contenga o diga CRIA
                     if (!dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && dep.includes("CRIA")) {
                         depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1;
                     }
@@ -580,7 +580,7 @@
             document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
 
-            // MODIFICACIÓN 1: "Mes Máxima Actividad" calculada exclusivamente sobre 'dataAnoActualGlobal' (Ignora búsqueda general en este KPI)
+            // Mes Máxima Actividad
             const conteoPorMes = Array(13).fill(0);
             dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
             let mesMaximo = 1, valorMaximo = 0;
@@ -593,7 +593,7 @@
             document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].substring(0,3).toUpperCase() : 'S/D';
             document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
 
-            // MODIFICACIÓN 2: "Representación de Filtros" calculada exclusivamente respecto al total del año seleccionado ('dataAnoActualGlobal.length')
+            // Representación de Filtros
             const totalDelAñoSeleccionado = dataAnoActualGlobal.length;
             const porcFiltrado = totalDelAñoSeleccionado > 0 ? ((totalAñoActualFiltrado / totalDelAñoSeleccionado) * 100) : 0;
             document.getElementById('kpiPorcentajeFiltrado').textContent = `${porcFiltrado.toFixed(1)}%`;
