@@ -227,8 +227,9 @@
                     <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-[10px]"></i>
                 </div>
             </div>
+            
             <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-slate-500 min-w-[1500px] table-fixed">
+                <table class="w-full text-xs text-left text-slate-500 min-w-[1400px] table-fixed">
                     <thead class="text-xs text-slate-700 uppercase bg-gray-100">
                         <tr>
                             <th class="px-3 py-3 w-[100px]">SIREX N°</th>
@@ -237,9 +238,8 @@
                             <th class="px-3 py-3 w-[200px]">DEP. INSTRUCTORA</th>
                             <th class="px-3 py-3 w-[120px]">FBA INTERV.</th>
                             <th class="px-3 py-3 w-[250px]">CARATULA</th>
-                            <th class="px-3 py-3 w-[250px]">VICTIMA / DESTINO</th>
-                            <th class="px-3 py-3 w-[250px]">IMPUTADO / DESTINO</th>
-                            <th class="px-3 py-3 w-[130px]">MOVIL DAÑADO</th>
+                            <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
+                            <th class="px-3 py-3 w-[290px]">IMPUTADO / DESTINO DEL IMPUTADO</th>
                             <th class="px-3 py-3 w-[120px]">CONTROL</th>
                         </tr>
                     </thead>
@@ -347,8 +347,11 @@
             const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO") || h.includes("DAÑADO"));
             const idxCont = headers.findIndex(h => h.includes("CONTROL"));
             
-            const idxVictima = headers.findIndex(h => h.includes("VICTIMA"));
-            const idxImputado = headers.findIndex(h => h.includes("IMPUTADO"));
+            // MODIFICACIÓN: Captura estricta e indexación de columnas de víctimas, imputados y sus respectivos destinos correlativos
+            const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
+            const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA") || h.includes("DESTINO VICTIMA"));
+            const idxImputado = headers.findIndex(h => h.trim() === "IMPUTADO");
+            const idxDestinoImputado = headers.findIndex(h => h.includes("DESTINO DEL IMPUTADO") || h.includes("DESTINO IMPUTADO"));
 
             rawData = [];
 
@@ -386,8 +389,11 @@
                         caratula: delitoUnico,
                         elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', 
                         control: r[idxCont]?.trim() || 'NINGUNO',
+                        // Mapeo correlativo de variables individuales de destino
                         victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
-                        imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D'
+                        destinoVictima: idxDestinoVictima !== -1 ? (r[idxDestinoVictima]?.trim() || 'S/D') : 'S/D',
+                        imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D',
+                        destinoImputado: idxDestinoImputado !== -1 ? (r[idxDestinoImputado]?.trim() || 'S/D') : 'S/D'
                     });
                 });
             }
@@ -457,7 +463,7 @@
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
                 let todoElRegistroConcat = normalizarTexto(
-                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.victima} ${item.imputado} ${item.control}`
+                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.victima} ${item.destinoVictima} ${item.imputado} ${item.destinoImputado} ${item.control}`
                 );
                 const matchSearch = !searchVal || todoElRegistroConcat.includes(searchVal);
 
@@ -849,7 +855,7 @@
             document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
 
             if(paginatedItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
                 document.getElementById('pageIndicator').textContent = "Página 0 de 0";
                 document.getElementById('btnPrev').disabled = true;
                 document.getElementById('btnNext').disabled = true;
@@ -866,8 +872,15 @@
                 if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
                 if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
 
-                // MODIFICACIÓN: Se removieron clases 'truncate' y se configuraron 'whitespace-normal', 'break-words' y tamaño text-[11px] 
-                // específico para VÍCTIMA e IMPUTADO para que los nombres bajen de renglón y se muestren completos.
+                // MODIFICACIÓN: Composición integral de cadenas uniendo Sujeto + Destino y remoción del bloque HTML de Móvil Dañado
+                const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' 
+                    ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` 
+                    : item.victima;
+
+                const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' 
+                    ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
+                    : item.imputado;
+
                 tr.innerHTML = `
                     <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
                     <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
@@ -875,9 +888,8 @@
                     <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
                     <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
                     <td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td>
-                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${item.victima}</td>
-                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${item.imputado}</td>
-                    <td class="px-3 py-3 text-xs text-slate-500 whitespace-normal break-words">${item.elementoDañado}</td>
+                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td>
+                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td>
                     <td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>
                 `;
                 tbody.appendChild(tr);
