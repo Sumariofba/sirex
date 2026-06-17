@@ -478,6 +478,7 @@
             return listaOrdenada.length > 0 ? `${listaOrdenada[0][0]} (${listaOrdenada[0][1]} casos)` : "Ninguna";
         }
 
+        // Lógica matemática y analítica del Tablero
         function calculateKPIsYAnalisis(anoSeleccionado, delitoFiltro, fbaFiltro, controlFiltro, searchFiltro) {
             const dataAnoActualGlobal = rawData.filter(i => i.año === anoSeleccionado);
             
@@ -514,24 +515,39 @@
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            // 4. SOLUCIÓN CORREGIDA: Cálculo directo basado UNICAMENTE en filteredData (Fiel reflejo de los filtros activos)
+            // 4. NUEVA LOGICA RIGUROSA BASADA EN TU FORMULA QUERY
+            // Filtramos la BASE completa usando el año (A3) y buscando '%movil%' en Elemento Dañado (Columna L)
             let acumuladorSiniestrosMovil = 0;
             const conteoPorFbaMovil = {};
             
-            filteredData.forEach(item => {
-                if (normalizarTexto(item.elementoDañado).includes("movil")) {
-                    acumuladorSiniestrosMovil++; 
-                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') {
+            rawData.forEach(item => {
+                // YEAR(B) = A3 AND LOWER(L) LIKE '%movil%'
+                if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("movil")) {
+                    acumuladorSiniestrosMovil++; // Cuenta global del año para los móviles
+                    
+                    // Agrupamos por columna E (FBA Interviniente) descartando vacíos o S/D
+                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D' && item.fba.trim() !== '') {
                         conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1;
                     }
                 }
             });
 
+            // ORDER BY COUNT(E) DESC LIMIT 1
             const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
-            const fbaMasAfectado = fbaSiniestradoOrdenado.length > 0 ? fbaSiniestradoOrdenado[0][0] : 'Ninguno';
+            
+            // Extraemos la dependencia líder y su total anual específico
+            let fbaMasAfectado = 'Ninguna';
+            let conteoFbaEspecifico = 0;
 
-            document.getElementById('topCountMovil').textContent = `${acumuladorSiniestrosMovil} moviles dañado/s`;
+            if (fbaSiniestradoOrdenado.length > 0) {
+                fbaMasAfectado = fbaSiniestradoOrdenado[0][0];      // Dependencia (E)
+                conteoFbaEspecifico = fbaSiniestradoOrdenado[0][1]; // Total Anual (COUNT(E))
+            }
+
+            // Reflejamos los resultados exactos de la consulta QUERY en la tarjeta
+            document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
+
 
             // 5. Dependencia Instructora Líder
             const depCounts = {};
