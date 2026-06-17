@@ -28,6 +28,12 @@
         </div>
     </nav>
 
+    <nav class="bg-slate-900 text-white shadow-xs px-6 py-2 flex flex-wrap justify-between items-center border-t border-slate-800 gap-2">
+        <div class="flex items-center gap-4">
+            <span class="text-xs font-mono text-slate-400">Panel de Control Operativo</span>
+        </div>
+    </nav>
+
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
@@ -508,13 +514,13 @@
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            // 4. NUEVA LÓGICA CORREGIDA PARA MÓVILES DAÑADOS
+            // 4. MODIFICACIÓN: Cálculo directo basado UNICAMENTE en la columna elementoDañado (independiente de la carátula)
             let acumuladorSiniestrosMovil = 0;
             const conteoPorFbaMovil = {};
             
             dataAnoActualGlobal.forEach(item => {
                 if (normalizarTexto(item.elementoDañado).includes("movil")) {
-                    acumuladorSiniestrosMovil++; // Sumatoria del numérico real absoluto
+                    acumuladorSiniestrosMovil++; 
                     if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') {
                         conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1;
                     }
@@ -583,7 +589,7 @@
             document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
 
-            // Mes Máxima Actividad (Nombre completo sin abreviaturas)
+            // Mes Máxima Actividad
             const conteoPorMes = Array(13).fill(0);
             dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
             let mesMaximo = 1, valorMaximo = 0;
@@ -784,7 +790,6 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
-                        // MODIFICACIÓN COMPLETA: Muestra a simple vista todos los numéricos en el gráfico histórico local
                         datalabels: { 
                             display: true, 
                             align: 'top', 
