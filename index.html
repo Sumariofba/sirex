@@ -53,7 +53,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-amber-500 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Abandono de Servicio</span>
-                    <h3 class="text-2xl font-black text-amber-600 tracking-tight" id="topCountAbandono">0 actuacion/es</h3>
+                    <h3 class="text-2xl font-black text-amber-600 tracking-tight" id="topCountAbandono">0 actuaciones</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionAbandono">Buscando...</p>
@@ -62,7 +62,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-blue-600 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Móviles Dañados</span>
-                    <h3 class="text-2xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 móviles dañado/s</h3>
+                    <h3 class="text-2xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 moviles dañado/s</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionMovil">Buscando...</p>
@@ -71,7 +71,7 @@
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-emerald-500 flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Cria Instructora Líder</span>
-                    <h3 class="text-2xl font-black text-emerald-600 tracking-tight" id="topCountDependencia">0 actuacion/es</h3>
+                    <h3 class="text-2xl font-black text-emerald-600 tracking-tight" id="topCountDependencia">0 actuaciones</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
                     <p class="text-[10px] font-bold text-slate-700 leading-tight whitespace-normal break-words" id="topNombreDependencia" title="Buscando...">Buscando...</p>
@@ -219,7 +219,7 @@
                     <h4 class="text-sm font-bold text-slate-700 uppercase flex items-center gap-2">
                         <i class="fa-solid fa-database text-blue-600"></i> Registros de Eventos Unificados
                     </h4>
-                    <span class="text-xs bg-slate-200 text-slate-800 font-bold px-2.5 py-0.5 rounded-full" id="tableCounter">0 registro/s</span>
+                    <span class="text-xs bg-slate-200 text-slate-800 font-bold px-2.5 py-0.5 rounded-full" id="tableCounter">0 registros</span>
                 </div>
                 
                 <div class="w-full sm:w-72 relative">
@@ -505,16 +505,27 @@
                 return caratulaNorm.includes("abandono de servicio") || 
                        caratulaNorm.includes("abandono de servicio mas de 72 horas. art 198 inc a");
             });
-            document.getElementById('topCountAbandono').textContent = `${abandono.total} actuacion/es`;
+            document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            // 4. MODIFICACIÓN: Motor de búsqueda optimizado para "Móviles Dañados" insensible a mayúsculas, minúsculas y tildes mediante normalizarTexto()
-            const movil = findTopFbaFijo(dataAnoActualGlobal, i => {
-                const campoNormalizado = normalizarTexto(i.elementoDañado);
-                return campoNormalizado.includes("movil");
+            // 4. NUEVA LÓGICA CORREGIDA PARA MÓVILES DAÑADOS
+            let acumuladorSiniestrosMovil = 0;
+            const conteoPorFbaMovil = {};
+            
+            dataAnoActualGlobal.forEach(item => {
+                if (normalizarTexto(item.elementoDañado).includes("movil")) {
+                    acumuladorSiniestrosMovil++; // Sumatoria del numérico real absoluto
+                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') {
+                        conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1;
+                    }
+                }
             });
-            document.getElementById('topCountMovil').textContent = `${movil.total} moviles dañado/s`;
-            document.getElementById('topDivisionMovil').textContent = movil.division;
+
+            const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
+            const fbaMasAfectado = fbaSiniestradoOrdenado.length > 0 ? fbaSiniestradoOrdenado[0][0] : 'Ninguno';
+
+            document.getElementById('topCountMovil').textContent = `${acumuladorSiniestrosMovil} moviles dañado/s`;
+            document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
 
             // 5. Dependencia Instructora Líder
             const depCounts = {};
@@ -529,11 +540,11 @@
             const sortedDeps = Object.entries(depCounts).sort((a, b) => b[1] - a[1]);
             
             if (sortedDeps.length > 0) {
-                document.getElementById('topCountDependencia').textContent = `${sortedDeps[0][1]} actuacion/es`;
+                document.getElementById('topCountDependencia').textContent = `${sortedDeps[0][1]} actuaciones`;
                 document.getElementById('topNombreDependencia').textContent = sortedDeps[0][0];
                 document.getElementById('topNombreDependencia').setAttribute('title', sortedDeps[0][0]);
             } else {
-                document.getElementById('topCountDependencia').textContent = `0 actuacion/es`;
+                document.getElementById('topCountDependencia').textContent = `0 actuaciones`;
                 document.getElementById('topNombreDependencia').textContent = `Ninguna`;
                 document.getElementById('topNombreDependencia').setAttribute('title', `Ninguna`);
             }
@@ -562,7 +573,7 @@
             }
             const signoVar = variacionPorcentual >= 0 ? '+' : '';
             const elKpiVariacion = document.getElementById('kpiVariacionAnual');
-            elKpiVariacion.textContent = `${signoVar}${variacionPorcentual.toFixed(1)}%.`;
+            elKpiVariacion.textContent = `${signoVar}${variacionPorcentual.toFixed(1)}% var.`;
             if (variacionPorcentual > 0) {
                 elKpiVariacion.className = "text-[11px] text-red-600 font-bold pt-1 border-t border-slate-100";
             } else {
@@ -572,7 +583,7 @@
             document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
 
-            // MODIFICACIÓN: Mes Máxima Actividad ahora muestra el nombre del mes completo sin abreviar
+            // Mes Máxima Actividad (Nombre completo sin abreviaturas)
             const conteoPorMes = Array(13).fill(0);
             dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
             let mesMaximo = 1, valorMaximo = 0;
@@ -583,7 +594,7 @@
                 }
             }
             document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].toUpperCase() : 'S/D';
-            document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuacion/es';
+            document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
 
             // Representación de Filtros
             const totalDelAñoSeleccionado = dataAnoActualGlobal.length;
@@ -773,13 +784,14 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
-                        // MODIFICACIÓN: Se activaron las etiquetas numéricas visibles directas sobre la línea de tiempo histórica
+                        // MODIFICACIÓN COMPLETA: Muestra a simple vista todos los numéricos en el gráfico histórico local
                         datalabels: { 
                             display: true, 
                             align: 'top', 
                             anchor: 'end',
-                            font: { size: 9, weight: 'semibold' },
-                            offset: 2
+                            color: '#1e293b',
+                            font: { size: 10, weight: 'bold' },
+                            offset: 4
                         }
                     },
                     scales: { y: { beginAtZero: true } }
