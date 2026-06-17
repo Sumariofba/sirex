@@ -514,11 +514,11 @@
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            // 4. MODIFICACIÓN: Cálculo directo basado UNICAMENTE en la columna elementoDañado (independiente de la carátula)
+            // 4. SOLUCIÓN CORREGIDA: Cálculo directo basado UNICAMENTE en filteredData (Fiel reflejo de los filtros activos)
             let acumuladorSiniestrosMovil = 0;
             const conteoPorFbaMovil = {};
             
-            dataAnoActualGlobal.forEach(item => {
+            filteredData.forEach(item => {
                 if (normalizarTexto(item.elementoDañado).includes("movil")) {
                     acumuladorSiniestrosMovil++; 
                     if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') {
