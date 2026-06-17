@@ -506,7 +506,7 @@
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            // 3. Abandono de Servicio
+            // 3. Abandon1o de Servicio
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const caratulaNorm = (i.caratula || '').toLowerCase();
                 return caratulaNorm.includes("abandono de servicio") || 
@@ -521,8 +521,8 @@
             const conteoPorFbaMovil = {};
             
             rawData.forEach(item => {
-                // YEAR(B) = A3 AND LOWER(L) LIKE '%movil%'
-                if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("movil")) {
+                // YEAR(B) = A3 AND LOWER(L) LIKE '%MOVIL%'
+                if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("MOVIL")) {
                     acumuladorSiniestrosMovil++; // Cuenta global del año para los móviles
                     
                     // Agrupamos por columna E (FBA Interviniente) descartando vacíos o S/D
