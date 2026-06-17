@@ -345,12 +345,15 @@
 
             const headers = rows[0].map(h => h.trim().toUpperCase().replace(/\s+/g, ' '));
             const idxSirex = headers.findIndex(h => h.includes("SIREX"));
-            const idxFecha = headers.findIndex(h => h.includes("FECHA"));
+            const idxFecha = headers.findIndex(h => h.includes("FECHA") || h.includes("F INICIO"));
             const idxExp = headers.findIndex(h => h.includes("EXPEDIENTE"));
             const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA"));
             const idxFba = headers.findIndex(h => h.includes("FBA") || h.includes("INTERVINIENTE"));
             const idxCara = headers.findIndex(h => h.includes("CARATULA"));
-            const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO") || h.includes("DAÑADO"));
+            
+            // ACTUALIZACION CRITICA: Mapeo exacto excluyendo la columna 'ELEMENTO INCAUTADO'
+            const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO DAÑADO") || (h.includes("DAÑADO") && !h.includes("INCAUTADO")));
+            
             const idxCont = headers.findIndex(h => h.includes("CONTROL"));
             
             const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
@@ -478,7 +481,6 @@
             return listaOrdenada.length > 0 ? `${listaOrdenada[0][0]} (${listaOrdenada[0][1]} casos)` : "Ninguna";
         }
 
-        // Lógica matemática y analítica del Tablero
         function calculateKPIsYAnalisis(anoSeleccionado, delitoFiltro, fbaFiltro, controlFiltro, searchFiltro) {
             const dataAnoActualGlobal = rawData.filter(i => i.año === anoSeleccionado);
             
@@ -506,7 +508,7 @@
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            // 3. Abandon1o de Servicio
+            // 3. Abandono de Servicio
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const caratulaNorm = (i.caratula || '').toLowerCase();
                 return caratulaNorm.includes("abandono de servicio") || 
@@ -515,17 +517,15 @@
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            // 4. NUEVA LOGICA RIGUROSA BASADA EN TU FORMULA QUERY
-            // Filtramos la BASE completa usando el año (A3) y buscando '%movil%' en Elemento Dañado (Columna L)
+            // 4. LÓGICA DE FÓRMULA QUERY CON ARREGLO DE COLUMNA CORREGIDA
             let acumuladorSiniestrosMovil = 0;
             const conteoPorFbaMovil = {};
             
             rawData.forEach(item => {
-                // YEAR(B) = A3 AND LOWER(L) LIKE '%MOVIL%'
-                if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("MOVIL")) {
-                    acumuladorSiniestrosMovil++; // Cuenta global del año para los móviles
+                // CONDICIONES QUERY: YEAR(B) = AñoSeleccionado AND LOWER(ELEMENTO_DAÑADO) LIKE '%movil%'
+                if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("movil")) {
+                    acumuladorSiniestrosMovil++;
                     
-                    // Agrupamos por columna E (FBA Interviniente) descartando vacíos o S/D
                     if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D' && item.fba.trim() !== '') {
                         conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1;
                     }
@@ -534,17 +534,14 @@
 
             // ORDER BY COUNT(E) DESC LIMIT 1
             const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
-            
-            // Extraemos la dependencia líder y su total anual específico
             let fbaMasAfectado = 'Ninguna';
             let conteoFbaEspecifico = 0;
 
             if (fbaSiniestradoOrdenado.length > 0) {
-                fbaMasAfectado = fbaSiniestradoOrdenado[0][0];      // Dependencia (E)
-                conteoFbaEspecifico = fbaSiniestradoOrdenado[0][1]; // Total Anual (COUNT(E))
+                fbaMasAfectado = fbaSiniestradoOrdenado[0][0];      
+                conteoFbaEspecifico = fbaSiniestradoOrdenado[0][1]; 
             }
 
-            // Reflejamos los resultados exactos de la consulta QUERY en la tarjeta
             document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
 
