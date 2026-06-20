@@ -8,6 +8,15 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos de impresión optimizados para la exportación limpia a PDF */
+        @media print {
+            body * { visibility: hidden; }
+            #printableTableSection, #printableTableSection * { visibility: visible; }
+            #printableTableSection { position: absolute; left: 0; top: 0; width: 100%; }
+            #searchFilter, #btnPDF, #btnPrev, #btnNext, #pageIndicator { display: none !important; }
+        }
+    </style>
 </head>
 <body class="bg-slate-50 text-gray-800 font-sans antialiased">
 
@@ -36,6 +45,75 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
+        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
+                <select id="anoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Dep. Instructora</label>
+                <select id="depFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">FBA Interviniente</label>
+                <select id="fbaFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Carátula / Delito</label>
+                <select id="delitoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Control</label>
+                <select id="controlFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6" id="printableTableSection">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-slate-50 gap-4">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <h4 class="text-sm font-bold text-slate-700 uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-database text-blue-600"></i> Registros de Eventos Unificados
+                    </h4>
+                    <span class="text-xs bg-slate-200 text-slate-800 font-bold px-2.5 py-0.5 rounded-full" id="tableCounter">0 registros</span>
+                </div>
+                
+                <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-2 items-center">
+                    <div class="w-full sm:w-72 relative">
+                        <input type="text" id="searchFilter" placeholder="Buscar en toda la base de datos..." class="w-full bg-white border border-slate-200 text-slate-900 text-xs rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden shadow-xs">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-[10px]"></i>
+                    </div>
+                    <button id="btnPDF" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer">
+                        <i class="fa-solid fa-file-pdf text-sm"></i> Exportar PDF
+                    </button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left text-slate-500 min-w-[1550px] table-fixed">
+                    <thead class="text-xs text-slate-700 uppercase bg-gray-100">
+                        <tr>
+                            <th class="px-3 py-3 w-[100px]">SIREX N°</th>
+                            <th class="px-3 py-3 w-[110px]">FECHA INICIO</th>
+                            <th class="px-3 py-3 w-[120px]">EXPEDIENTE N°</th>
+                            <th class="px-3 py-3 w-[200px]">DEP. INSTRUCTORA</th>
+                            <th class="px-3 py-3 w-[120px]">FBA INTERV.</th>
+                            <th class="px-3 py-3 w-[250px]">CARATULA</th>
+                            <th class="px-3 py-3 w-[150px]">ELEMENTO DAÑADO</th>
+                            <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
+                            <th class="px-3 py-3 w-[290px]">IMPUTADO / DESTINO DEL IMPUTADO</th>
+                            <th class="px-3 py-3 w-[120px]">CONTROL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
+                </table>
+            </div>
+            <div class="p-4 flex items-center justify-between border-t border-slate-200 bg-slate-50 text-xs">
+                <button id="btnPrev" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-medium disabled:opacity-50 hover:bg-gray-100">Anterior</button>
+                <span id="pageIndicator" class="font-semibold text-gray-600">Página 1 de 1</span>
+                <button id="btnNext" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-medium disabled:opacity-50 hover:bg-gray-100">Siguiente</button>
+            </div>
+        </div>
+
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
@@ -129,30 +207,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN DE FILTROS ACTUALIZADA: Grid de 5 columnas para alojar el nuevo filtro de Dependencia -->
-        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100">
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
-                <select id="anoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Dep. Instructora</label>
-                <select id="depFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">FBA Interviniente</label>
-                <select id="fbaFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Carátula / Delito</label>
-                <select id="delitoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Control</label>
-                <select id="controlFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-        </div>
-
         <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
                 <div class="flex justify-between items-center mb-3">
@@ -221,47 +275,6 @@
                     <i class="fa-solid fa-line-chart text-blue-500"></i> Línea de Evolución Mensual del Año Seleccionado
                 </h4>
                 <div class="h-80"><canvas id="chartEvolutionLine"></canvas></div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6">
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-slate-50 gap-4">
-                <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <h4 class="text-sm font-bold text-slate-700 uppercase flex items-center gap-2">
-                        <i class="fa-solid fa-database text-blue-600"></i> Registros de Eventos Unificados
-                    </h4>
-                    <span class="text-xs bg-slate-200 text-slate-800 font-bold px-2.5 py-0.5 rounded-full" id="tableCounter">0 registros</span>
-                </div>
-                
-                <div class="w-full sm:w-72 relative">
-                    <input type="text" id="searchFilter" placeholder="Buscar en toda la base de datos..." class="w-full bg-white border border-slate-200 text-slate-900 text-xs rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden shadow-xs">
-                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-[10px]"></i>
-                </div>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-slate-500 min-w-[1550px] table-fixed">
-                    <thead class="text-xs text-slate-700 uppercase bg-gray-100">
-                        <tr>
-                            <th class="px-3 py-3 w-[100px]">SIREX N°</th>
-                            <th class="px-3 py-3 w-[110px]">FECHA INICIO</th>
-                            <th class="px-3 py-3 w-[120px]">EXPEDIENTE N°</th>
-                            <th class="px-3 py-3 w-[200px]">DEP. INSTRUCTORA</th>
-                            <th class="px-3 py-3 w-[120px]">FBA INTERV.</th>
-                            <th class="px-3 py-3 w-[250px]">CARATULA</th>
-                            <th class="px-3 py-3 w-[150px]">ELEMENTO DAÑADO</th>
-                            <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
-                            <th class="px-3 py-3 w-[290px]">IMPUTADO / DESTINO DEL IMPUTADO</th>
-                            <th class="px-3 py-3 w-[120px]">CONTROL</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
-                </table>
-            </div>
-            <div class="p-4 flex items-center justify-between border-t border-slate-200 bg-slate-50 text-xs">
-                <button id="btnPrev" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-medium disabled:opacity-50 hover:bg-gray-100">Anterior</button>
-                <span id="pageIndicator" class="font-semibold text-gray-600">Página 1 de 1</span>
-                <button id="btnNext" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-medium disabled:opacity-50 hover:bg-gray-100">Siguiente</button>
             </div>
         </div>
     </main>
@@ -414,7 +427,6 @@
         }
 
         function populateInitialFilters() {
-            // AGREGADO: Set de dependencias instructoras para el filtro select
             const anos = new Set(), deps = new Set(['TODOS']), fbas = new Set(['TODOS']), delitos = new Set(['TODOS']), controles = new Set(['TODOS']);
 
             rawData.forEach(item => {
@@ -472,7 +484,7 @@
 
             filteredData = rawData.filter(item => {
                 const matchAno = (searchVal !== "") || isNaN(anoVal) || item.año === anoVal;
-                const matchDep = depVal === 'TODOS' || item.dependencia === depVal; // AGREGADO: Validación de filtro de dependencia
+                const matchDep = depVal === 'TODOS' || item.dependencia === depVal;
                 const matchFba = fbaVal === 'TODOS' || item.fba === fbaVal;
                 const matchDelito = delitoVal === 'TODOS' || item.caratula.includes(delitoVal);
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
@@ -958,6 +970,11 @@
         document.getElementById('btnNext').addEventListener('click', () => {
             const totalPages = Math.ceil(filteredData.length / rowsPerPage);
             if (currentPage < totalPages) { currentPage++; renderTable(); }
+        });
+
+        // 📊 MANEJADOR ASOCIADO PARA CREAR EL ARCHIVO PDF LOCAL DE FORMA LIMPIA
+        document.getElementById('btnPDF').addEventListener('click', () => {
+            window.print();
         });
     </script>
 </body>
