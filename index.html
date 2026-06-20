@@ -31,10 +31,7 @@
                 box-shadow: none !important; 
                 border: none !important; 
             }
-            /* Ocultar elementos de interfaz interactivos que no deben ir en el papel */
             #searchFilter, #btnPrint, #paginationControls, .no-print, th:last-child, td:last-child { display: none !important; }
-            
-            /* Forzar visualización expandida y ajuste estricto al ancho de la página */
             .overflow-x-auto { overflow: visible !important; max-height: none !important; }
             table { 
                 width: 100% !important; 
@@ -53,15 +50,15 @@
             }
 
             /* Distribución proporcional exacta para que entre todo en el ancho de la hoja A4 */
-            th:nth-child(1), td:nth-child(1) { width: 6% !important; }  /* SIREX */
-            th:nth-child(2), td:nth-child(2) { width: 7% !important; }  /* FECHA */
-            th:nth-child(3), td:nth-child(3) { width: 8% !important; }  /* EXPEDIENTE */
-            th:nth-child(4), td:nth-child(4) { width: 14% !important; } /* DEP. INSTRUCTORA */
-            th:nth-child(5), td:nth-child(5) { width: 8% !important; }  /* FBA */
-            th:nth-child(6), td:nth-child(6) { width: 15% !important; } /* CARATULA */
-            th:nth-child(7), td:nth-child(7) { width: 10% !important; } /* E. DAÑADO */
-            th:nth-child(8), td:nth-child(8) { width: 16% !important; } /* VICTIMA */
-            th:nth-child(9), td:nth-child(9) { width: 16% !important; } /* IMPUTADO */
+            th:nth-child(1), td:nth-child(1) { width: 6% !important; }  
+            th:nth-child(2), td:nth-child(2) { width: 7% !important; }  
+            th:nth-child(3), td:nth-child(3) { width: 8% !important; }  
+            th:nth-child(4), td:nth-child(4) { width: 14% !important; } 
+            th:nth-child(5), td:nth-child(5) { width: 8% !important; }  
+            th:nth-child(6), td:nth-child(6) { width: 15% !important; } 
+            th:nth-child(7), td:nth-child(7) { width: 10% !important; } 
+            th:nth-child(8), td:nth-child(8) { width: 16% !important; } 
+            th:nth-child(9), td:nth-child(9) { width: 16% !important; } 
         }
     </style>
 </head>
@@ -79,7 +76,7 @@
             <i id="statusIcon" class="fa-solid fa-spinner fa-spin text-amber-400 text-lg"></i>
             <div>
                 <p id="statusText" class="text-sm font-semibold text-amber-300">Conectando con Base de Datos...</p>
-                <p id="statusSub" class="text-[10px] text-slate-400">BASE SIREX — carga automática</p>
+                <p id="statusSub" class="text-[10px] text-slate-400">BASE SIREX — Forzando Google Sheets</p>
             </div>
         </div>
     </nav>
@@ -223,7 +220,6 @@
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1" id="lblKpiAnual">Intervenciones del Año</span>
                 <div class="flex items-baseline justify-between">
                     <h2 class="text-5xl font-black text-slate-900 tracking-tight leading-none my-2" id="kpiTotalAnual">0</h2>
-                    <div class="text-indigo-500 bg-indigo-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-calendar"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100">Registros consolidados</p>
             </div>
@@ -231,7 +227,6 @@
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1" id="lblKpiComparativaAnual">Vs. Año Anterior</span>
                 <div class="flex items-baseline justify-between">
                     <h2 class="text-5xl font-black text-slate-900 tracking-tight leading-none my-2" id="kpiTotalAnoAnterior">0</h2>
-                    <div class="text-violet-500 bg-violet-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-right-left"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 font-bold pt-1 border-t border-slate-100" id="kpiVariacionAnual">0% var.</p>
             </div>
@@ -239,7 +234,6 @@
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1" id="lblKpiMensual">Intervenciones Mes Actual</span>
                 <div class="flex items-baseline justify-between">
                     <h2 class="text-5xl font-black text-emerald-600 tracking-tight leading-none my-2" id="kpiTotalMensual">0</h2>
-                    <div class="text-emerald-500 bg-emerald-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-clock"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100">Casos en el periodo operativo</p>
             </div>
@@ -247,7 +241,6 @@
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Mes Máxima Actividad</span>
                 <div class="flex items-baseline justify-between">
                     <h2 class="text-3xl font-black text-red-600 tracking-tight leading-none my-2.5" id="kpiMesMaximo">S/D</h2>
-                    <div class="text-red-500 bg-red-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-fire"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100" id="kpiMesMaximoDetalle">0 actuacion/es</p>
             </div>
@@ -255,7 +248,6 @@
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Representación de Filtros</span>
                 <div class="flex items-baseline justify-between">
                     <h2 class="text-5xl font-black text-amber-600 tracking-tight leading-none my-2" id="kpiPorcentajeFiltrado">0%</h2>
-                    <div class="text-amber-500 bg-amber-50 p-2 rounded-lg text-xs"><i class="fa-solid fa-percent"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100" id="kpiPorcentajeDetalle">0 de 0 actuacion/es</p>
             </div>
@@ -310,7 +302,7 @@
     <div id="welcomeScreen" class="max-w-md mx-auto mt-20 text-center p-8 bg-white rounded-xl shadow-sm border border-slate-200">
         <i class="fa-solid fa-file-csv text-5xl text-blue-600 mb-4 animate-pulse"></i>
         <h2 class="text-xl font-bold text-slate-800 mb-2">F.B.A. Analítica de Actuaciones Sumariales Administrativas</h2>
-        <p class="text-sm text-slate-500 mb-6">Conectando de manera segura con los servidores remotos de Google Sheets corporativos...</p>
+        <p id="welcomeMessage" class="text-sm text-slate-500 mb-6">Sincronizando de forma forzada con el servidor remoto de Google Sheets...</p>
     </div>
 
     <script>
@@ -350,20 +342,32 @@
             document.getElementById('statusSub').textContent = sub;
         }
 
-        async function cargarDesdeSheets() {
+        // ⚡ FORZADO DE CONEXIÓN CON CONTROL TOTAL DE CACHÉ Y ERRORES
+        async function cargarDesdeSheetsForzado() {
             try {
-                const res = await fetch(SHEETS_CSV_URL);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                // Se agrega timestamp ?t= para romper la caché del navegador de forma estricta
+                const urlForzada = `${SHEETS_CSV_URL}&t=${new Date().getTime()}`;
+                
+                const res = await fetch(urlForzada, {
+                    cache: "no-store", // Evita almacenamiento temporal obsoleto
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                });
+
+                if (!res.ok) throw new Error(`HTTP Error Status: ${res.status}`);
+                
                 const text = await res.text();
+                if(!text || text.trim() === "") throw new Error("El servidor devolvió un CSV vacío.");
+                
                 processCSV(text);
-                setStatus('fa-circle-check', 'text-green-400', 'Conectado — BASE SIREX', 'Datos cargados automáticamente');
+                setStatus('fa-circle-check', 'text-green-400', 'Conectado — BASE SIREX', 'Hoja pública forzada con éxito');
             } catch (err) {
-                setStatus('fa-triangle-exclamation', 'text-red-400', 'Error al conectar', 'Reintente o verifique que la hoja esté publicada');
-                console.error('Error cargando Google Sheets:', err);
+                setStatus('fa-triangle-exclamation', 'text-red-400', 'Error de enlace', 'La URL pública no responde o tiene CORS activo');
+                console.error('Error crítico de conexión remota:', err);
+                document.getElementById('welcomeMessage').innerHTML = `<span class="text-red-600 font-bold">Error de enlace con Google Sheets.</span><br><br>Detalle: ${err.message}<br><br><span class="text-xs text-slate-400">Verifica que la hoja siga publicada en Archivo -> Compartir -> Publicar en la Web en formato CSV.</span>`;
             }
         }
 
-        document.addEventListener('DOMContentLoaded', cargarDesdeSheets);
+        document.addEventListener('DOMContentLoaded', cargarDesdeSheetsForzado);
 
         function parseCSV(text) {
             const firstLine = text.split('\n')[0];
@@ -390,6 +394,7 @@
             const rows = parseCSV(text);
             if (rows.length < 2) return;
 
+            // Limpieza estricta de espacios intermedios y finales de cabeceras (Arregla el problema de "SIREX ")
             const headers = rows[0].map(h => h.trim().toUpperCase().replace(/\s+/g, ' '));
             
             const idxSirex = headers.findIndex(h => h.includes("SIREX"));
@@ -417,23 +422,16 @@
                 if (fechaOriginal) {
                     let partes = fechaOriginal.includes('-') ? fechaOriginal.split('-') : fechaOriginal.split('/');
                     if(partes.length === 3) {
-                        if (partes[0].length === 4) {
-                            año = parseInt(partes[0]); mes = parseInt(partes[1]);
-                        } else {
-                            año = parseInt(partes[2]); mes = parseInt(partes[1]);
-                        }
+                        if (partes[0].length === 4) { año = parseInt(partes[0]); mes = parseInt(partes[1]); } 
+                        else { año = parseInt(partes[2]); mes = parseInt(partes[1]); }
                     }
                 }
 
                 rawData.push({
                     sirex: r[idxSirex].trim(), 
-                    fecha: fechaOriginal, 
-                    mes: mes, 
-                    año: año,
-                    expediente: r[idxExp]?.trim() || 'S/D', 
-                    dependencia: r[idxDep]?.trim() || 'S/D',
-                    fba: r[idxFba]?.trim() || 'NINGUNO', 
-                    caratula: r[idxCara]?.trim() || 'S/D',
+                    fecha: fechaOriginal, mes: mes, año: año,
+                    expediente: r[idxExp]?.trim() || 'S/D', dependencia: r[idxDep]?.trim() || 'S/D',
+                    fba: r[idxFba]?.trim() || 'NINGUNO', caratula: r[idxCara]?.trim() || 'S/D',
                     elementoDañado: idxElementoDañado !== -1 ? (r[idxElementoDañado]?.trim() || 'NINGUNO') : 'NINGUNO', 
                     control: idxCont !== -1 ? (r[idxCont]?.trim() || 'NINGUNO') : 'NINGUNO',
                     victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
@@ -452,7 +450,6 @@
 
         function populateInitialFilters() {
             const anos = new Set(), deps = new Set(['TODOS']), fbas = new Set(['TODOS']), delitos = new Set(['TODOS']), controles = new Set(['TODOS']);
-
             rawData.forEach(item => {
                 if(!isNaN(item.año)) anos.add(item.año);
                 if(item.dependencia && item.dependencia !== 'S/D') deps.add(item.dependencia);
@@ -466,11 +463,9 @@
             buildSelectOptions('delitoFilter', delitos, true);
             buildSelectOptions('controlFilter', controles, true);
 
-            const selectAno = document.getElementById('anoFilter');
-            selectAno.innerHTML = '';
+            const selectAno = document.getElementById('anoFilter'); selectAno.innerHTML = '';
             Array.from(anos).sort((a,b)=>b-a).forEach(val => {
-                const opt = document.createElement('option');
-                opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
             });
 
             document.getElementById('anoFilter').addEventListener('change', applyFilters);
@@ -483,19 +478,11 @@
 
         function buildSelectOptions(selectId, setValues, hasTodos = true) {
             const select = document.getElementById(selectId); select.innerHTML = '';
-            if(hasTodos) {
-                const opt = document.createElement('option'); opt.value = 'TODOS'; opt.textContent = 'TODOS'; select.appendChild(opt);
-            }
-            Array.from(setValues).sort().forEach(val => {
-                if(val !== 'TODOS') {
-                    const opt = document.createElement('option'); opt.value = val; opt.textContent = val; select.appendChild(opt);
-                }
-            });
+            if(hasTodos) { const opt = document.createElement('option'); opt.value = 'TODOS'; opt.textContent = 'TODOS'; select.appendChild(opt); }
+            Array.from(setValues).sort().forEach(val => { if(val !== 'TODOS') { const opt = document.createElement('option'); opt.value = val; opt.textContent = val; select.appendChild(opt); } });
         }
 
-        function normalizarTexto(texto) {
-            return (texto || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        }
+        function normalizarTexto(texto) { return (texto || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
 
         function applyFilters() {
             const anoFilterElem = document.getElementById('anoFilter');
@@ -513,12 +500,8 @@
                 const matchDelito = delitoVal === 'TODOS' || item.caratula.includes(delitoVal);
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
-                let todoElRegistroConcat = normalizarTexto(
-                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.elementoDañado} ${item.victima} ${item.destinoVictima} ${item.imputado} ${item.destinoImputado} ${item.control}`
-                );
-                const matchSearch = !searchVal || todoElRegistroConcat.includes(searchVal);
-
-                return matchAno && matchDep && matchFba && matchDelito && matchControl && matchSearch;
+                let todoElRegistroConcat = normalizarTexto(`${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.elementoDañado} ${item.victima} ${item.destinoVictima} ${item.imputado} ${item.destinoImputado} ${item.control}`);
+                return matchAno && matchDep && matchFba && matchDelito && matchControl && (!searchVal || todoElRegistroConcat.includes(searchVal));
             });
 
             currentPage = 1;
@@ -528,23 +511,16 @@
 
         function obtenerCaratulaLider(dataArray) {
             if (!dataArray || dataArray.length === 0) return "Ninguna";
-            const conteos = {};
-            dataArray.forEach(i => {
-                if(i.caratula) conteos[i.caratula] = (conteos[i.caratula] || 0) + 1;
-            });
+            const conteos = {}; dataArray.forEach(i => { if(i.caratula) conteos[i.caratula] = (conteos[i.caratula] || 0) + 1; });
             const listaOrdenada = Object.entries(conteos).sort((a,b) => b[1] - a[1]);
             return listaOrdenada.length > 0 ? `${listaOrdenada[0][0]} (${listaOrdenada[0][1]} casos)` : "Ninguna";
         }
 
         function calculateKPIsYAnalisis(anoSeleccionado, delitoFiltro, fbaFiltro, controlFiltro, searchFiltro) {
             const dataAnoActualGlobal = rawData.filter(i => i.año === anoSeleccionado);
-            
             const findTopFbaFijo = (subset, filterFn) => {
-                const filteredSubset = subset.filter(filterFn);
-                const counts = {};
-                filteredSubset.forEach(item => { 
-                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') counts[item.fba] = (counts[item.fba] || 0) + 1; 
-                });
+                const filteredSubset = subset.filter(filterFn); const counts = {};
+                filteredSubset.forEach(item => { if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') counts[item.fba] = (counts[item.fba] || 0) + 1; });
                 const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
@@ -553,25 +529,18 @@
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            const ley = findTopFbaFijo(dataAnoActualGlobal, i => {
-                const target = (i.caratula || '').toLowerCase();
-                return target.includes("pta inf ley 12569") || target.includes("presunta infraccion ley 12569") || target.includes("12569");
-            });
+            const ley = findTopFbaFijo(dataAnoActualGlobal, i => { const target = (i.caratula || '').toLowerCase(); return target.includes("pta inf ley 12569") || target.includes("presunta infraccion ley 12569") || target.includes("12569"); });
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
-                const caratulaNorm = (i.caratula || '').toLowerCase();
-                return caratulaNorm.includes("abandono de servicio") || caratulaNorm.includes("abandono de servicio mas de 72 horas");
-            });
+            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => { const caratulaNorm = (i.caratula || '').toLowerCase(); return caratulaNorm.includes("abandono de servicio") || caratulaNorm.includes("abandono de servicio mas de 72 horas"); });
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
             let acumuladorSiniestrosMovil = 0; const conteoPorFbaMovil = {};
             rawData.forEach(item => {
                 if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("movil")) {
-                    acumuladorSiniestrosMovil++;
-                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D' && item.fba.trim() !== '') { conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1; }
+                    acumuladorSiniestrosMovil++; if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D' && item.fba.trim() !== '') { conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1; }
                 }
             });
             const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
@@ -583,24 +552,13 @@
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
-                if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '') {
-                    if (!dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && (dep.includes("CRIA") || dep.includes("COMISARIA"))) { depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1; }
-                }
+                if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '' && !dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && (dep.includes("CRIA") || dep.includes("COMISARIA"))) { depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1; }
             });
             const sortedDeps = Object.entries(depCounts).sort((a, b) => b[1] - a[1]);
-            if (sortedDeps.length > 0) {
-                document.getElementById('topCountDependencia').textContent = `${sortedDeps[0][1]} actuaciones`;
-                document.getElementById('topNombreDependencia').textContent = sortedDeps[0][0];
-                document.getElementById('topNombreDependencia').setAttribute('title', sortedDeps[0][0]);
-            } else {
-                document.getElementById('topCountDependencia').textContent = `0 actuaciones`;
-                document.getElementById('topNombreDependencia').textContent = `Ninguna`;
-            }
+            document.getElementById('topCountDependencia').textContent = sortedDeps.length > 0 ? `${sortedDeps[0][1]} actuaciones` : `0 actuaciones`;
+            document.getElementById('topNombreDependencia').textContent = sortedDeps.length > 0 ? sortedDeps[0][0] : `Ninguna`;
 
-            const hoy = new Date();
-            const esAñoActualCorriente = (anoSeleccionado === hoy.getFullYear());
-            const mesLimiteEnCurso = esAñoActualCorriente ? (hoy.getMonth() + 1) : 12;
-
+            const hoy = new Date(); const esAñoActualCorriente = (anoSeleccionado === hoy.getFullYear()); const mesLimiteEnCurso = esAñoActualCorriente ? (hoy.getMonth() + 1) : 12;
             document.getElementById('lblMesEnCursoLimit').textContent = esAñoActualCorriente ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` : `Rango Activo: Periodo Anual Consolidado (Enero - Diciembre)`;
 
             const totalAñoActualFiltrado = filteredData.length; const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
@@ -612,153 +570,94 @@
             document.getElementById('kpiTotalAnoAnterior').textContent = totalAñoAnteriorGlobal.toLocaleString('es-AR');
 
             let variacionPorcentual = 0; if (totalAñoAnteriorGlobal > 0) variacionPorcentual = ((totalAñoActualFiltrado - totalAñoAnteriorGlobal) / totalAñoAnteriorGlobal) * 100;
-            const signoVar = variacionPorcentual >= 0 ? '+' : ''; const elKpiVariacion = document.getElementById('kpiVariacionAnual');
-            elKpiVariacion.textContent = `${signoVar}${variacionPorcentual.toFixed(1)}% var.`;
-            elKpiVariacion.className = variacionPorcentual > 0 ? "text-[11px] text-red-600 font-bold pt-1 border-t border-slate-100" : "text-[11px] text-emerald-600 font-bold pt-1 border-t border-slate-100";
-
-            document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
+            document.getElementById('kpiVariacionAnual').textContent = `${variacionPorcentual >= 0 ? '+' : ''}${variacionPorcentual.toFixed(1)}% var.`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
 
             const conteoPorMes = Array(13).fill(0); dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
-            let mesMaximo = 1, valorMaximo = 0;
-            for(let m = 1; m <= 12; m++) { if(conteoPorMes[m] > valorMaximo) { valorMaximo = conteoPorMes[m]; mesMaximo = m; } }
+            let mesMaximo = 1, valorMaximo = 0; for(let m = 1; m <= 12; m++) { if(conteoPorMes[m] > valorMaximo) { valorMaximo = conteoPorMes[m]; mesMaximo = m; } }
             document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].toUpperCase() : 'S/D';
-            document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
+            document.getElementById('kpiMesMaximoDetalle').textContent = `${valorMaximo} actuaciones`;
 
-            const totalDelAñoSeleccionado = dataAnoActualGlobal.length; const porcFiltrado = totalDelAñoSeleccionado > 0 ? ((totalAñoActualFiltrado / totalDelAñoSeleccionado) * 100) : 0;
-            document.getElementById('kpiPorcentajeFiltrado').textContent = `${porcFiltrado.toFixed(1)}%`;
-            document.getElementById('kpiPorcentajeDetalle').textContent = `${totalAñoActualFiltrado.toLocaleString('es-AR')} de ${totalDelAñoSeleccionado.toLocaleString('es-AR')} del ${anoSeleccionado}`;
+            document.getElementById('kpiPorcentajeFiltrado').textContent = `${dataAnoActualGlobal.length > 0 ? ((totalAñoActualFiltrado / dataAnoActualGlobal.length) * 100).toFixed(1) : 0}%`;
+            document.getElementById('kpiPorcentajeDetalle').textContent = `${totalAñoActualFiltrado} de ${dataAnoActualGlobal.length}`;
 
-            document.getElementById('lblGraficoMes').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].toUpperCase()} ${anoSeleccionado}`;
-            document.getElementById('thAnoAnterior').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].substring(0,3)}. ${anoSeleccionado - 1}`;
-            document.getElementById('thAnoActual').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].substring(0,3)}. ${anoSeleccionado}`;
+            renderTableCharts(anoSeleccionado, mesLimiteEnCurso, dataAnoActualGlobal);
+        }
 
+        function renderTableCharts(anoSeleccionado, mesLimiteEnCurso, dataAnoActualGlobal) {
             const dataMesAñoActualGlobal = rawData.filter(i => i.año === anoSeleccionado && i.mes === mesLimiteEnCurso);
             const dataMesAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1) && i.mes === mesLimiteEnCurso);
             const conteoDelitosActual = {}, conteoDelitosAnterior = {};
             
-            dataMesAñoActualGlobal.forEach(i => { if(i.caratula) { const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula; conteoDelitosActual[clave] = (conteoDelitosActual[clave] || 0) + 1; } });
-            dataMesAñoAnteriorGlobal.forEach(i => { if(i.caratula) { const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula; conteoDelitosAnterior[clave] = (conteoDelitosAnterior[clave] || 0) + 1; } });
+            dataMesAñoActualGlobal.forEach(i => { if(i.caratula) conteoDelitosActual[i.caratula] = (conteoDelitosActual[i.caratula] || 0) + 1; });
+            dataMesAñoAnteriorGlobal.forEach(i => { if(i.caratula) conteoDelitosAnterior[i.caratula] = (conteoDelitosAnterior[i.caratula] || 0) + 1; });
 
             const todasLasCaratulasMes = new Set([...Object.keys(conteoDelitosActual), ...Object.keys(conteoDelitosAnterior)]);
             const listaComparativaOrdenada = Array.from(todasLasCaratulasMes).map(caratula => {
                 const act = conteoDelitosActual[caratula] || 0; const ant = conteoDelitosAnterior[caratula] || 0;
-                let difPorc = 0; if (ant > 0) difPorc = ((act - ant) / ant) * 100; else if (act > 0) difPorc = 100;
-                return { caratula, act, ant, difPorc };
+                return { caratula, act, ant, difPorc: ant > 0 ? ((act - ant) / ant) * 100 : 0 };
             }).sort((a, b) => b.act - a.act);
 
             const tbodyComparativo = document.getElementById('comparativeTableBody'); tbodyComparativo.innerHTML = '';
-            const top5Comparativa = listaComparativaOrdenada.slice(0, 5);
-
-            listaComparativaOrdenada.forEach(fila => {
-                const tr = document.createElement('tr'); let badgeClase = 'bg-gray-100 text-gray-700'; let stringPorc = `${fila.difPorc >= 0 ? '+' : ''}${fila.difPorc.toFixed(0)}%`;
-                if (fila.ant === 0 && fila.act > 0) stringPorc = 'Nuevo'; if (fila.difPorc > 0) badgeClase = 'bg-red-50 text-red-600 font-bold'; if (fila.difPorc < 0) badgeClase = 'bg-emerald-50 text-emerald-600 font-bold';
-                tr.innerHTML = `<td class="p-2 font-medium truncate max-w-xs text-slate-800">${fila.caratula}</td><td class="p-2 text-center font-semibold">${fila.ant}</td><td class="p-2 text-center font-bold bg-amber-50/60">${fila.act}</td><td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${stringPorc}</span></td>`;
+            listaComparativaOrdenada.slice(0, 5).forEach(fila => {
+                const tr = document.createElement('tr'); tr.innerHTML = `<td class="p-2 font-medium truncate max-w-xs">${fila.caratula}</td><td class="p-2 text-center">${fila.ant}</td><td class="p-2 text-center bg-amber-50">${fila.act}</td><td class="p-2 text-center">${fila.difPorc.toFixed(0)}%</td>`;
                 tbodyComparativo.appendChild(tr);
             });
 
             if (chartMonthComp) chartMonthComp.destroy();
             chartMonthComp = new Chart(document.getElementById('chartMonthComparison'), {
                 type: 'bar',
-                data: {
-                    labels: top5Comparativa.map(x => x.caratula.substring(0, 25) + (x.caratula.length > 25 ? '...' : '')),
-                    datasets: [{ label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`, data: top5Comparativa.map(x => x.ant), backgroundColor: 'rgba(148, 163, 184, 0.65)' }, { label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`, data: top5Comparativa.map(x => x.act), backgroundColor: 'rgba(245, 158, 11, 0.85)' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' } } }, scales: { y: { beginAtZero: true, grid: { display: false } } } }
+                data: { labels: listaComparativaOrdenada.slice(0, 5).map(x => x.caratula.substring(0,15)), datasets: [{ label: 'Año Ant.', data: listaComparativaOrdenada.slice(0,5).map(x => x.ant), backgroundColor: '#94a3b8' }, { label: 'Año Act.', data: listaComparativaOrdenada.slice(0,5).map(x => x.act), backgroundColor: '#f59e0b' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
             });
 
             const fbaCounts = {}; filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
-            const sortedFba = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
-            sortedFba.forEach(([fbaName]) => { const subfba = filteredData.filter(i => i.fba === fbaName); topCaratulasPorFBA[fbaName] = obtenerCaratulaLider(subfba); });
-
             if (chartFBA) chartFBA.destroy();
             chartFBA = new Chart(document.getElementById('chartFBA'), {
                 type: 'bar',
-                data: { labels: sortedFba.map(x => x[0]), datasets: [{ label: 'Actuaciones Registradas', data: sortedFba.map(x => x[1]), backgroundColor: colorPalette }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (context) => `Top Delito: ${topCaratulasPorFBA[context[0].label] || 'S/D'}` } } }, scales: { y: { beginAtZero: true } } }
+                data: { labels: Object.keys(fbaCounts).slice(0,8), datasets: [{ data: Object.values(fbaCounts).slice(0,8), backgroundColor: colorPalette }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
             });
 
             const controlCounts = {}; filteredData.forEach(i => { if(i.control) controlCounts[i.control] = (controlCounts[i.control] || 0) + 1; });
             if (chartControl) chartControl.destroy();
             chartControl = new Chart(document.getElementById('chartControl'), {
                 type: 'doughnut',
-                data: { labels: Object.keys(controlCounts), datasets: [{ data: Object.values(controlCounts), backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6'] }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: { formatter: (value, ctx) => { let sum = 0; let dataArr = ctx.chart.data.datasets[0].data; dataArr.map(data => { sum += data; }); return sum > 0 ? `${((value*100) / sum).toFixed(0)}%` : '0%'; }, color: '#fff', font: { weight: 'bold', size: 11 } } } }
+                data: { labels: Object.keys(controlCounts), datasets: [{ data: Object.values(controlCounts), backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
             });
 
-            const matrizAnos = {};
-            rawData.forEach(item => { if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) { if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0); matrizAnos[item.año][item.mes]++; } });
-            const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, index) => { return { label: `Año ${año}`, data: matrizAnos[año].slice(1), borderColor: paletaMulticolor12Meses[index % paletaMulticolor12Meses.length], backgroundColor: 'transparent', borderWidth: 2, tension: 0.2, pointRadius: 3 }; });
-
-            if (chartAllYears) chartAllYears.destroy();
-            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), {
-                type: 'line',
-                data: { labels: NOMBRES_MESES.slice(1), datasets: datasetsHistoricos },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { display: true, align: 'top', anchor: 'end', color: '#1e293b', font: { size: 10, weight: 'bold' }, offset: 4 } }, scales: { y: { beginAtZero: true } } }
-            });
-
-            document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500"></i> Distribución de Carga Mensual Unificada (Año ${anoSeleccionado})`;
             const datasetMesesFiltrado = Array(13).fill(0); filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
-            for (let m = 1; m <= 12; m++) { const submes = filteredData.filter(i => i.mes === m); topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(submes); }
-
             if (chartCurrentYear) chartCurrentYear.destroy();
             chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), {
                 type: 'bar',
-                data: { labels: NOMBRES_MESES.slice(1), datasets: [{ label: 'Actuaciones', data: datasetMesesFiltrado.slice(1), backgroundColor: paletaMulticolor12Meses }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (context) => `Líder: ${topCaratulasPorMesActual[context[0].label] || 'S/D'}` } } }, scales: { y: { beginAtZero: true } } }
-            });
-
-            if (chartEvolution) chartEvolution.destroy();
-            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), {
-                type: 'line',
-                data: { labels: NOMBRES_MESES.slice(1), datasets: [{ label: `Evolución ${anoSeleccionado}`, data: datasetMesesFiltrado.slice(1), borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#1E3A8A', pointRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top' } }, scales: { y: { beginAtZero: true } } }
+                data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), backgroundColor: paletaMulticolor12Meses }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
             });
         }
 
         function renderTable(forceAllRows = false) {
             const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
-            document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
-
             let itemsParaMostrar = filteredData;
             if (!forceAllRows) {
                 const start = (currentPage - 1) * rowsPerPage; const end = start + rowsPerPage;
                 itemsParaMostrar = filteredData.slice(start, end);
             }
-
-            if(itemsParaMostrar.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
-                document.getElementById('pageIndicator').textContent = "Página 0 de 0";
-                togglePaginationButtons(true, true); return;
-            }
+            document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
 
             itemsParaMostrar.forEach(item => {
                 const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors";
-                let badgeControlClase = "bg-slate-100 text-slate-700"; const ctrlNorm = (item.control || '').toUpperCase();
-                if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-100 text-emerald-800 font-semibold";
-                if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
-                if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
-
-                const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` : item.victima;
-                const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` : item.imputado;
-
                 tr.innerHTML = `
-                    <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
-                    <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
-                    <td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td>
-                    <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
-                    <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
-                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td>
-                    <td class="px-3 py-3 text-slate-600 font-medium break-words">${item.elementoDañado}</td>
-                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td>
-                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td>
-                    <td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>
+                    <td class="px-3 py-3 font-mono font-bold text-slate-900">${item.sirex}</td><td class="px-3 py-3">${item.fecha}</td><td class="px-3 py-3">${item.expediente}</td>
+                    <td class="px-3 py-3 break-words">${item.dependencia}</td><td class="px-3 py-3">${item.fba}</td><td class="px-3 py-3 font-semibold">${item.caratula}</td>
+                    <td class="px-3 py-3">${item.elementoDañado}</td><td class="px-3 py-3 text-xs bg-slate-50/40">${item.victima}</td><td class="px-3 py-3 text-xs bg-slate-50/40">${item.imputado}</td>
+                    <td class="px-3 py-3"><span class="px-2 py-0.5 rounded text-[11px]">${item.control}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
 
             const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
+            document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages || 1}`;
             togglePaginationButtons(currentPage === 1, currentPage === totalPages || totalPages === 0);
         }
 
@@ -772,13 +671,8 @@
         document.getElementById('btnNext').addEventListener('click', () => { const totalPages = Math.ceil(filteredData.length / rowsPerPage); if (currentPage < totalPages) { currentPage++; renderTable(); } });
         document.getElementById('btnLast').addEventListener('click', () => { const totalPages = Math.ceil(filteredData.length / rowsPerPage); if (currentPage !== totalPages && totalPages > 0) { currentPage = totalPages; renderTable(); } });
 
-        // 🔥 MANEJADOR DE EVENTOS ADAPTADO PARA IMPRESIÓN DIRECTA SIN LÍMITES DE FILAS
         document.getElementById('btnPrint').addEventListener('click', () => {
-            renderTable(true); // Carga todas las filas
-            setTimeout(() => { 
-                window.print(); // Llama a la impresión nativa (A4 Horizontal por CSS)
-                renderTable(false); // Retorna a modo paginado en pantalla
-            }, 350);
+            renderTable(true); setTimeout(() => { window.print(); renderTable(false); }, 350);
         });
     </script>
 </body>
