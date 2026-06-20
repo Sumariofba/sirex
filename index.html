@@ -46,8 +46,10 @@
             select,
             #searchFilter,
             .fa-magnifying-glass,
+            #btnFirst,
             #btnPrev,
             #btnNext,
+            #btnLast,
             #pageIndicator,
             .p-4.flex.items-center.justify-between.border-t { 
                 display: none !important; 
@@ -59,7 +61,7 @@
             }
             table {
                 width: 100% !important;
-                table-layout: auto !important; /* Permite que las columnas se encojan de forma fluida */
+                table-layout: auto !important; 
                 min-width: 100% !important;
             }
             
@@ -99,14 +101,16 @@
         </div>
     </nav>
 
-    <nav class="bg-slate-900 text-white shadow-xs px-6 py-2 flex justify-between items-center border-t border-slate-800 gap-2 print:hidden">
-        <div class="flex items-center gap-4">
-            <span class="text-xs font-mono text-slate-400">Panel de Control Operativo</span>
+    <nav class="bg-slate-900 text-white shadow-xs px-6 py-2 flex flex-col sm:flex-row justify-between items-center border-t border-slate-800 gap-3 print:hidden">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+            <h4 class="text-xs font-mono text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-database text-blue-500"></i> Registros de Eventos Unificados
+            </h4>
+            <span class="text-[11px] bg-slate-800 text-slate-300 font-mono font-bold px-2 py-0.5 rounded-full border border-slate-700" id="tableCounter">0 registros</span>
         </div>
-        <div>
-            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer transition-colors shadow-sm">
-                <i class="fa-solid fa-print"></i> Imprimir Reporte
-            </button>
+        <div class="w-full sm:w-80 relative">
+            <input type="text" id="searchFilter" placeholder="Buscar en toda la base de datos..." class="w-full bg-slate-850 border border-slate-700 text-white placeholder-slate-400 text-xs rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden shadow-xs">
+            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-[10px]"></i>
         </div>
     </nav>
 
@@ -236,7 +240,7 @@
             </div>
             <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
                 <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-emerald-600 print:hidden"></i> Evolución Mensual Compartada con Año Anterior
+                    <i class="fa-solid fa-chart-line text-emerald-600 print:hidden"></i> Evolución Mensual Comparada con Año Anterior
                 </h4>
                 <div class="overflow-y-auto max-h-72">
                     <table class="w-full text-xs text-left text-slate-600">
@@ -296,20 +300,6 @@
         </div>
 
         <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6">
-            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-slate-50 gap-4">
-                <div class="flex items-center gap-3 w-full sm:w-auto">
-                    <h4 class="text-sm font-bold text-slate-700 uppercase flex items-center gap-2">
-                        <i class="fa-solid fa-database text-blue-600 print:hidden"></i> Registros de Eventos Unificados
-                    </h4>
-                    <span class="text-xs bg-slate-200 text-slate-800 font-bold px-2.5 py-0.5 rounded-full" id="tableCounter">0 registros</span>
-                </div>
-                
-                <div class="w-full sm:w-72 relative print:hidden">
-                    <input type="text" id="searchFilter" placeholder="Buscar en toda la base de datos..." class="w-full bg-white border border-slate-200 text-slate-900 text-xs rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden shadow-xs">
-                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-[10px]"></i>
-                </div>
-            </div>
-            
             <div class="overflow-x-auto">
                 <table class="w-full text-xs text-left text-slate-500 min-w-[1550px] table-fixed">
                     <thead class="text-xs text-slate-700 uppercase bg-gray-100">
@@ -329,10 +319,19 @@
                     <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
                 </table>
             </div>
+            
             <div class="p-4 flex items-center justify-between border-t border-slate-200 bg-slate-50 text-xs print:hidden">
-                <button id="btnPrev" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-medium disabled:opacity-50 hover:bg-gray-100">Anterior</button>
-                <span id="pageIndicator" class="font-semibold text-gray-600">Página 1 de 1</span>
-                <button id="btnNext" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-medium disabled:opacity-50 hover:bg-gray-100">Siguiente</button>
+                <div class="flex items-center gap-1.5">
+                    <button id="btnFirst" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-angles-left text-[10px]"></i> Primera</button>
+                    <button id="btnPrev" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-angle-left text-[10px]"></i> Anterior</button>
+                </div>
+                
+                <span id="pageIndicator" class="font-semibold text-gray-600 font-mono">Página 1 de 1</span>
+                
+                <div class="flex items-center gap-1.5">
+                    <button id="btnNext" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1">Siguiente <i class="fa-solid fa-angle-right text-[10px]"></i></button>
+                    <button id="btnLast" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1">Última <i class="fa-solid fa-angles-right text-[10px]"></i></button>
+                </div>
             </div>
         </div>
     </main>
@@ -960,11 +959,15 @@
 
             document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
 
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
             if(paginatedItems.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
                 document.getElementById('pageIndicator').textContent = "Página 0 de 0";
+                document.getElementById('btnFirst').disabled = true;
                 document.getElementById('btnPrev').disabled = true;
                 document.getElementById('btnNext').disabled = true;
+                document.getElementById('btnLast').disabled = true;
                 return;
             }
 
@@ -1001,11 +1004,19 @@
                 tbody.appendChild(tr);
             });
 
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
             document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
+            
+            // Gestión dinámica de los estados de activación de los nuevos botones
+            document.getElementById('btnFirst').disabled = (currentPage === 1);
             document.getElementById('btnPrev').disabled = (currentPage === 1);
             document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
+            document.getElementById('btnLast').disabled = (currentPage === totalPages || totalPages === 0);
         }
+
+        // Eventos lógicos para navegación por saltos absolutos e incrementales
+        document.getElementById('btnFirst').addEventListener('click', () => {
+            if (currentPage > 1) { currentPage = 1; renderTable(); }
+        });
 
         document.getElementById('btnPrev').addEventListener('click', () => {
             if (currentPage > 1) { currentPage--; renderTable(); }
@@ -1014,6 +1025,11 @@
         document.getElementById('btnNext').addEventListener('click', () => {
             const totalPages = Math.ceil(filteredData.length / rowsPerPage);
             if (currentPage < totalPages) { currentPage++; renderTable(); }
+        });
+
+        document.getElementById('btnLast').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < totalPages) { currentPage = totalPages; renderTable(); }
         });
     </script>
 </body>
