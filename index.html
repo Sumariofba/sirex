@@ -17,7 +17,7 @@
                 margin: 0.5cm;
             }
 
-            /* Resetea fondos y asegura que los colores de Tailwind se impriman */
+            /* Resetea fondos y asegura que los colores se impriman */
             body {
                 background: white !important;
                 color: black !important;
@@ -33,26 +33,32 @@
                 margin: 0 !important;
             }
 
-            /* Forzar a que los grids de gráficos se expandan bien en horizontal */
-            .grid {
-                display: grid !important;
-                width: 100% !important;
-            }
-
-            /* Ocultar elementos interactivos que no tienen sentido impresos */
-            .print\:hidden,
+            /* SI SE IMPRIME LA TABLA: Ocultar todo el resto del Dashboard */
+            nav, 
             #welcomeScreen,
+            h3,
+            .grid,
+            .flex-col.gap-6,
+            .mb-6,
             label,
             select,
             #searchFilter,
             .fa-magnifying-glass,
             #btnFirst,
             #btnPrev,
+            #pageIndicator,
             #btnNext,
             #btnLast,
-            #pageIndicator,
-            .p-4.flex.items-center.justify-between.border-t { 
+            .print\:hidden { 
                 display: none !important; 
+            }
+
+            /* Hacer visible únicamente el contenedor de la tabla durante la impresión */
+            .print-table-container {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             /* Ajustar la tabla de registros unificados para que no rompa el ancho */
@@ -67,17 +73,18 @@
             
             /* Ajustar tamaños de fuente para maximizar espacio en papel */
             th, td {
-                font-size: 9px !important;
+                font-size: 8px !important;
                 padding: 4px !important;
                 word-break: break-word !important;
             }
             
-            /* Evitar que los paneles/gráficos se corten a la mitad entre páginas */
             .bg-white {
+                page-break-inside: auto;
+                border: 1px solid #e2e8f0 !important;
+            }
+            tr {
                 page-break-inside: avoid;
                 break-inside: avoid;
-                border: 1px solid #e2e8f0 !important;
-                margin-bottom: 1rem !important;
             }
         }
     </style>
@@ -88,8 +95,9 @@
         <div class="flex items-center gap-3">
             <i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i>
             <div>
-                <h1 class="text-xl font-bold tracking-wide">Dir. Fuerza Barrial de Aprox. (F.B.A.) Analitica de Actuaciones Sumariales Administrativas (A.S.A.)</h1>
-                <p class="text-xs text-slate-400">Control de Gestión, Siniestralidad y Comparativas Interanuales Globales</p>
+                <h1 class="text-lg font-bold tracking-wide leading-tight">Dir. Fuerza Barrial de Aprox. (F.B.A.)</h1>
+                <h2 class="text-base font-semibold text-slate-200 tracking-wide">Analitica de Actuaciones Sumariales Administrativas (A.S.A.)</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Control de Gestión, Siniestralidad y Comparativas Interanuales Globales</p>
             </div>
         </div>
         <div id="statusBadge" class="flex items-center gap-2 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 w-full sm:w-auto print:hidden">
@@ -116,6 +124,71 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
+        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 print:hidden">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
+                <select id="anoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">FBA Interviniente</label>
+                <select id="fbaFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Dep. Instructora</label>
+                <select id="depFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Carátula / Delito</label>
+                <select id="delitoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Control</label>
+                <select id="controlFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6 print-table-container">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 print:hidden">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tabla Operativa Activa</span>
+                <button onclick="window.print()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs">
+                    <i class="fa-solid fa-print"></i> Imprimir Tabla
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left text-slate-500 min-w-[1550px] table-fixed">
+                    <thead class="text-xs text-slate-700 uppercase bg-gray-100">
+                        <tr>
+                            <th class="px-3 py-3 w-[100px]">SIREX N°</th>
+                            <th class="px-3 py-3 w-[110px]">FECHA INICIO</th>
+                            <th class="px-3 py-3 w-[120px]">EXPEDIENTE N°</th>
+                            <th class="px-3 py-3 w-[200px]">DEP. INSTRUCTORA</th>
+                            <th class="px-3 py-3 w-[120px]">FBA INTERV.</th>
+                            <th class="px-3 py-3 w-[250px]">CARATULA</th>
+                            <th class="px-3 py-3 w-[150px]">ELEMENTO DAÑADO</th> 
+                            <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
+                            <th class="px-3 py-3 w-[290px]">IMPUTADO / DESTINO DEL IMPUTADO</th>
+                            <th class="px-3 py-3 w-[120px]">CONTROL</th> 
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
+                </table>
+            </div>
+            
+            <div class="p-4 flex items-center justify-between border-t border-slate-200 bg-slate-50 text-xs print:hidden">
+                <div class="flex items-center gap-1.5">
+                    <button id="btnFirst" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-angles-left text-[10px]"></i> Primera</button>
+                    <button id="btnPrev" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-angle-left text-[10px]"></i> Anterior</button>
+                </div>
+                
+                <span id="pageIndicator" class="font-semibold text-gray-600 font-mono">Página 1 de 1</span>
+                
+                <div class="flex items-center gap-1.5">
+                    <button id="btnNext" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1">Siguiente <i class="fa-solid fa-angle-right text-[10px]"></i></button>
+                    <button id="btnLast" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1">Última <i class="fa-solid fa-angles-right text-[10px]"></i></button>
+                </div>
+            </div>
+        </div>
+
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
@@ -209,25 +282,6 @@
             </div>
         </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end border border-slate-100 print:hidden">
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
-                <select id="anoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">FBA Interviniente</label>
-                <select id="fbaFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Carátula / Delito</label>
-                <select id="delitoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Control</label>
-                <select id="controlFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
-            </div>
-        </div>
-
         <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
                 <div class="flex justify-between items-center mb-3">
@@ -296,42 +350,6 @@
                     <i class="fa-solid fa-line-chart text-blue-500 print:hidden"></i> Línea de Evolución Mensual del Año Seleccionado
                 </h4>
                 <div class="h-80"><canvas id="chartEvolutionLine"></canvas></div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6">
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-slate-500 min-w-[1550px] table-fixed">
-                    <thead class="text-xs text-slate-700 uppercase bg-gray-100">
-                        <tr>
-                            <th class="px-3 py-3 w-[100px]">SIREX N°</th>
-                            <th class="px-3 py-3 w-[110px]">FECHA INICIO</th>
-                            <th class="px-3 py-3 w-[120px]">EXPEDIENTE N°</th>
-                            <th class="px-3 py-3 w-[200px]">DEP. INSTRUCTORA</th>
-                            <th class="px-3 py-3 w-[120px]">FBA INTERV.</th>
-                            <th class="px-3 py-3 w-[250px]">CARATULA</th>
-                            <th class="px-3 py-3 w-[150px]">ELEMENTO DAÑADO</th> 
-                            <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
-                            <th class="px-3 py-3 w-[290px]">IMPUTADO / DESTINO DEL IMPUTADO</th>
-                            <th class="px-3 py-3 w-[120px]">CONTROL</th> 
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
-                </table>
-            </div>
-            
-            <div class="p-4 flex items-center justify-between border-t border-slate-200 bg-slate-50 text-xs print:hidden">
-                <div class="flex items-center gap-1.5">
-                    <button id="btnFirst" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-angles-left text-[10px]"></i> Primera</button>
-                    <button id="btnPrev" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-angle-left text-[10px]"></i> Anterior</button>
-                </div>
-                
-                <span id="pageIndicator" class="font-semibold text-gray-600 font-mono">Página 1 de 1</span>
-                
-                <div class="flex items-center gap-1.5">
-                    <button id="btnNext" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1">Siguiente <i class="fa-solid fa-angle-right text-[10px]"></i></button>
-                    <button id="btnLast" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1">Última <i class="fa-solid fa-angles-right text-[10px]"></i></button>
-                </div>
             </div>
         </div>
     </main>
@@ -476,16 +494,18 @@
         }
 
         function populateInitialFilters() {
-            const anos = new Set(), fbas = new Set(['TODOS']), delitos = new Set(['TODOS']), controles = new Set(['TODOS']);
+            const anos = new Set(), fbas = new Set(['TODOS']), deps = new Set(['TODOS']), delitos = new Set(['TODOS']), controles = new Set(['TODOS']);
 
             rawData.forEach(item => {
                 if(!isNaN(item.año)) anos.add(item.año);
                 if(item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') fbas.add(item.fba);
+                if(item.dependencia && item.dependencia !== 'S/D') deps.add(item.dependencia);
                 if(item.caratula && item.caratula !== 'S/D') delitos.add(item.caratula);
                 if(item.control && item.control !== 'NINGUNO') controles.add(item.control);
             });
 
             buildSelectOptions('fbaFilter', fbas, true);
+            buildSelectOptions('depFilter', deps, true);
             buildSelectOptions('delitoFilter', delitos, true);
             buildSelectOptions('controlFilter', controles, true);
 
@@ -498,6 +518,7 @@
 
             document.getElementById('anoFilter').addEventListener('change', applyFilters);
             document.getElementById('fbaFilter').addEventListener('change', applyFilters);
+            document.getElementById('depFilter').addEventListener('change', applyFilters);
             document.getElementById('delitoFilter').addEventListener('change', applyFilters);
             document.getElementById('controlFilter').addEventListener('change', applyFilters);
             document.getElementById('searchFilter').addEventListener('input', applyFilters);
@@ -522,6 +543,7 @@
         function applyFilters() {
             const anoVal = parseInt(document.getElementById('anoFilter').value);
             const fbaVal = document.getElementById('fbaFilter').value;
+            const depVal = document.getElementById('depFilter').value;
             const delitoVal = document.getElementById('delitoFilter').value;
             const controlVal = document.getElementById('controlFilter').value;
             const searchVal = normalizarTexto(document.getElementById('searchFilter').value);
@@ -529,6 +551,7 @@
             filteredData = rawData.filter(item => {
                 const matchAno = (searchVal !== "") || isNaN(anoVal) || item.año === anoVal;
                 const matchFba = fbaVal === 'TODOS' || item.fba === fbaVal;
+                const matchDep = depVal === 'TODOS' || item.dependencia === depVal;
                 const matchDelito = delitoVal === 'TODOS' || item.caratula.includes(delitoVal);
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
@@ -537,7 +560,7 @@
                 );
                 const matchSearch = !searchVal || todoElRegistroConcat.includes(searchVal);
 
-                return matchAno && matchFba && matchDelito && matchControl && matchSearch;
+                return matchAno && matchFba && matchDep && matchDelito && matchControl && matchSearch;
             });
 
             currentPage = 1;
@@ -568,21 +591,18 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            // 1. Lesiones por Accidente
             const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => 
                 (i.caratula || '').toLowerCase().includes("lesiones por accidente. art 331")
             );
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            // 2. Presunta Infracción Ley 12569
             const ley = findTopFbaFijo(dataAnoActualGlobal, i => 
                 (i.caratula || '').toLowerCase().includes("presunta infraccion ley 12569")
             );
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            // 3. Abandono de Servicio
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const caratulaNorm = (i.caratula || '').toLowerCase();
                 return caratulaNorm.includes("abandono de servicio") || 
@@ -591,7 +611,6 @@
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            // 4. Lógica de Móviles Dañados
             let acumuladorSiniestrosMovil = 0;
             const conteoPorFbaMovil = {};
             
@@ -616,7 +635,6 @@
             document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
 
-            // 5. Dependencia Instructora Líder
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
@@ -672,7 +690,6 @@
             document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
 
-            // Mes Máxima Actividad
             const conteoPorMes = Array(13).fill(0);
             dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
             let mesMaximo = 1, valorMaximo = 0;
@@ -685,7 +702,6 @@
             document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].toUpperCase() : 'S/D';
             document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
 
-            // Representación de Filtros
             const totalDelAñoSeleccionado = dataAnoActualGlobal.length;
             const porcFiltrado = totalDelAñoSeleccionado > 0 ? ((totalAñoActualFiltrado / totalDelAñoSeleccionado) * 100) : 0;
             document.getElementById('kpiPorcentajeFiltrado').textContent = `${porcFiltrado.toFixed(1)}%`;
@@ -1006,14 +1022,12 @@
 
             document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
             
-            // Gestión dinámica de los estados de activación de los nuevos botones
             document.getElementById('btnFirst').disabled = (currentPage === 1);
             document.getElementById('btnPrev').disabled = (currentPage === 1);
             document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
             document.getElementById('btnLast').disabled = (currentPage === totalPages || totalPages === 0);
         }
 
-        // Eventos lógicos para navegación por saltos absolutos e incrementales
         document.getElementById('btnFirst').addEventListener('click', () => {
             if (currentPage > 1) { currentPage = 1; renderTable(); }
         });
