@@ -15,13 +15,11 @@
             body * { visibility: hidden; }
             #printableTableSection, #printableTableSection * { visibility: visible; }
             #printableTableSection { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: none; }
-            /* Esconder elementos de navegación e inputs en el PDF */
             #searchFilter, #btnPDF, #paginationControls, .no-print { display: none !important; }
-            /* Forzar a la tabla a expandirse completamente sin scrolls */
             .overflow-x-auto { overflow: visible !important; max-height: none !important; }
             table { width: 100% !important; table-layout: auto !important; page-break-inside: auto; }
             tr { page-break-inside: avoid; page-break-after: auto; }
-            thead { display: table-header-group; } /* Repetir encabezados en cada hoja del PDF */
+            thead { display: table-header-group; }
             td, th { word-wrap: break-word !important; white-space: normal !important; overflow: visible !important; }
         }
     </style>
@@ -53,7 +51,7 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
-        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100">
+        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 no-print">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
                 <select id="anoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
@@ -266,12 +264,38 @@
                 <div class="h-64 flex justify-center"><canvas id="chartControl"></canvas></div>
             </div>
         </div>
+
+        <div class="flex items-center justify-between mb-3 no-print">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Análisis Temporal y de Evolución del Flujo Operativo</h3>
+            <span class="text-[11px] text-blue-600 font-semibold bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100" id="lblMesEnCursoLimit"></span>
+        </div>
+        
+        <div class="flex flex-col gap-6 mb-6 no-print">
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
+                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-area text-indigo-500"></i> Métricas Mensuales Históricas Comparadas (Todos los Años de la Base)
+                </h4>
+                <div class="h-80"><canvas id="chartAllYearsMonthly"></canvas></div>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
+                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5" id="titleCurrentYearInterventions">
+                    <i class="fa-solid fa-chart-bar text-emerald-500"></i> Intervenciones por Mes (Año Actual)
+                </h4>
+                <div class="h-80"><canvas id="chartCurrentYearMonthly"></canvas></div>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
+                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5">
+                    <i class="fa-solid fa-line-chart text-blue-500"></i> Línea de Evolución Mensual del Año Seleccionado
+                </h4>
+                <div class="h-80"><canvas id="chartEvolutionLine"></canvas></div>
+            </div>
+        </div>
     </main>
 
     <div id="welcomeScreen" class="max-w-md mx-auto mt-20 text-center p-8 bg-white rounded-xl shadow-sm border border-slate-200">
         <i class="fa-solid fa-file-csv text-5xl text-blue-600 mb-4 animate-pulse"></i>
         <h2 class="text-xl font-bold text-slate-800 mb-2">F.B.A. Analítica de Actuaciones Sumariales Administrativas</h2>
-        <p class="text-sm text-slate-500 mb-6">Por favor, cargue su archivo CSV de la base SIREX en el botón de la barra superior para activar los módulos estadísticos locales.</p>
+        <p class="text-sm text-slate-500 mb-6">Conectando de manera segura con los servidores remotos de Google Sheets corporativos...</p>
     </div>
 
     <script>
@@ -302,6 +326,7 @@
 
         const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+        // URL Segura de Google Sheets Publicada como CSV
         const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRao7X5J7L90OCDD-3YQxv7VN8uDfDOrxfo4ubRfaBnzMzLkx6Cyrx7NjmtIJp4uM-wNlyMWVqtIqqU/pub?gid=1060128342&single=true&output=csv';
 
         function setStatus(icon, color, text, sub) {
@@ -319,13 +344,15 @@
                 processCSV(text);
                 setStatus('fa-circle-check', 'text-green-400', 'Conectado — BASE SIREX', 'Datos cargados automáticamente');
             } catch (err) {
-                setStatus('fa-triangle-exclamation', 'text-red-400', 'Error al conectar', 'Verifique que la hoja esté publicada');
+                setStatus('fa-triangle-exclamation', 'text-red-400', 'Error al conectar', 'Reintente o verifique que la hoja esté publicada');
                 console.error('Error cargando Google Sheets:', err);
+                document.getElementById('welcomeScreen').innerHTML = `<p class="text-sm text-red-500 font-bold">Error de Conexión. Verifique que la URL de Google Sheets esté bien configurada y accesible.</p>`;
             }
         }
 
         document.addEventListener('DOMContentLoaded', cargarDesdeSheets);
 
+        // Lector robusto contra saltos de línea internos en las celdas
         function parseCSV(text) {
             const firstLine = text.split('\n')[0];
             const separator = (firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length ? ';' : ',';
@@ -359,10 +386,8 @@
             const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA") || h.includes("DEP."));
             const idxFba = headers.findIndex(h => h.includes("FBA") || h.includes("INTERVINIENTE"));
             const idxCara = headers.findIndex(h => h.includes("CARATULA"));
-            
             const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO DAÑADO") || (h.includes("DAÑADO") && !h.includes("INCAUTADO")));
             const idxCont = headers.findIndex(h => h.trim() === "CONTROL" || h.includes("CONTROL"));
-            
             const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
             const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA") || h.includes("DESTINO VICTIMA"));
             const idxImputado = headers.findIndex(h => h.trim() === "IMPUTADO");
@@ -388,8 +413,6 @@
                     }
                 }
 
-                let caratulaCelda = r[idxCara]?.trim() || 'S/D';
-
                 rawData.push({
                     sirex: r[idxSirex].trim(), 
                     fecha: fechaOriginal, 
@@ -398,7 +421,7 @@
                     expediente: r[idxExp]?.trim() || 'S/D', 
                     dependencia: r[idxDep]?.trim() || 'S/D',
                     fba: r[idxFba]?.trim() || 'NINGUNO', 
-                    caratula: caratulaCelda,
+                    caratula: r[idxCara]?.trim() || 'S/D',
                     elementoDañado: idxElementoDañado !== -1 ? (r[idxElementoDañado]?.trim() || 'NINGUNO') : 'NINGUNO', 
                     control: idxCont !== -1 ? (r[idxCont]?.trim() || 'NINGUNO') : 'NINGUNO',
                     victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
@@ -514,14 +537,10 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            // 1. Lesiones por Accidente
-            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => 
-                (i.caratula || '').toLowerCase().includes("lesiones por accidente")
-            );
+            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("lesiones por accidente"));
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            // 2. Presunta Infracción Ley 12569
             const ley = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const target = (i.caratula || '').toLowerCase();
                 return target.includes("pta inf ley 12569") || target.includes("presunta infraccion ley 12569") || target.includes("12569");
@@ -529,7 +548,6 @@
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            // 3. Abandono de Servicio
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const caratulaNorm = (i.caratula || '').toLowerCase();
                 return caratulaNorm.includes("abandono de servicio") || caratulaNorm.includes("abandono de servicio mas de 72 horas");
@@ -537,10 +555,8 @@
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            // 4. Móviles Dañados
             let acumuladorSiniestrosMovil = 0;
             const conteoPorFbaMovil = {};
-            
             rawData.forEach(item => {
                 if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("movil")) {
                     acumuladorSiniestrosMovil++;
@@ -549,20 +565,12 @@
                     }
                 }
             });
-
             const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
-            let fbaMasAfectado = 'Ninguna';
-            let conteoFbaEspecifico = 0;
-
-            if (fbaSiniestradoOrdenado.length > 0) {
-                fbaMasAfectado = fbaSiniestradoOrdenado[0][0];      
-                conteoFbaEspecifico = fbaSiniestradoOrdenado[0][1]; 
-            }
-
+            let fbaMasAfectado = 'Ninguna'; let conteoFbaEspecifico = 0;
+            if (fbaSiniestradoOrdenado.length > 0) { fbaMasAfectado = fbaSiniestradoOrdenado[0][0]; conteoFbaEspecifico = fbaSiniestradoOrdenado[0][1]; }
             document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
 
-            // 5. Dependencia Instructora Líder
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
@@ -573,7 +581,6 @@
                 }
             });
             const sortedDeps = Object.entries(depCounts).sort((a, b) => b[1] - a[1]);
-            
             if (sortedDeps.length > 0) {
                 document.getElementById('topCountDependencia').textContent = `${sortedDeps[0][1]} actuaciones`;
                 document.getElementById('topNombreDependencia').textContent = sortedDeps[0][0];
@@ -581,16 +588,13 @@
             } else {
                 document.getElementById('topCountDependencia').textContent = `0 actuaciones`;
                 document.getElementById('topNombreDependencia').textContent = `Ninguna`;
-                document.getElementById('topNombreDependencia').setAttribute('title', `Ninguna`);
             }
 
             const hoy = new Date();
             const esAñoActualCorriente = (anoSeleccionado === hoy.getFullYear());
             const mesLimiteEnCurso = esAñoActualCorriente ? (hoy.getMonth() + 1) : 12;
 
-            document.getElementById('lblMesEnCursoLimit').textContent = esAñoActualCorriente 
-                ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` 
-                : `Rango Activo: Periodo Anual Consolidado (Enero - Diciembre)`;
+            document.getElementById('lblMesEnCursoLimit').textContent = esAñoActualCorriente ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` : `Rango Activo: Periodo Anual Consolidado (Enero - Diciembre)`;
 
             const totalAñoActualFiltrado = filteredData.length;
             const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
@@ -598,42 +602,24 @@
             
             document.getElementById('lblKpiAnual').textContent = `Intervenciones Año ${anoSeleccionado}`;
             document.getElementById('kpiTotalAnual').textContent = totalAñoActualFiltrado.toLocaleString('es-AR');
-
             document.getElementById('lblKpiComparativaAnual').textContent = `Vs. Año Anterior (${anoSeleccionado - 1})`;
             document.getElementById('kpiTotalAnoAnterior').textContent = totalAñoAnteriorGlobal.toLocaleString('es-AR');
 
-            let variacionPorcentual = 0;
-            if (totalAñoAnteriorGlobal > 0) {
-                variacionPorcentual = ((totalAñoActualFiltrado - totalAñoAnteriorGlobal) / totalAñoAnteriorGlobal) * 100;
-            }
-            const signoVar = variacionPorcentual >= 0 ? '+' : '';
-            const elKpiVariacion = document.getElementById('kpiVariacionAnual');
+            let variacionPorcentual = 0; if (totalAñoAnteriorGlobal > 0) variacionPorcentual = ((totalAñoActualFiltrado - totalAñoAnteriorGlobal) / totalAñoAnteriorGlobal) * 100;
+            const signoVar = variacionPorcentual >= 0 ? '+' : ''; const elKpiVariacion = document.getElementById('kpiVariacionAnual');
             elKpiVariacion.textContent = `${signoVar}${variacionPorcentual.toFixed(1)}% var.`;
-            if (variacionPorcentual > 0) {
-                elKpiVariacion.className = "text-[11px] text-red-600 font-bold pt-1 border-t border-slate-100";
-            } else {
-                elKpiVariacion.className = "text-[11px] text-emerald-600 font-bold pt-1 border-t border-slate-100";
-            }
+            elKpiVariacion.className = variacionPorcentual > 0 ? "text-[11px] text-red-600 font-bold pt-1 border-t border-slate-100" : "text-[11px] text-emerald-600 font-bold pt-1 border-t border-slate-100";
 
             document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
 
-            // Mes Máxima Actividad
-            const conteoPorMes = Array(13).fill(0);
-            dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
+            const conteoPorMes = Array(13).fill(0); dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
             let mesMaximo = 1, valorMaximo = 0;
-            for(let m = 1; m <= 12; m++) {
-                if(conteoPorMes[m] > valorMaximo) {
-                    valorMaximo = conteoPorMes[m];
-                    mesMaximo = m;
-                }
-            }
+            for(let m = 1; m <= 12; m++) { if(conteoPorMes[m] > valorMaximo) { valorMaximo = conteoPorMes[m]; mesMaximo = m; } }
             document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].toUpperCase() : 'S/D';
             document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
 
-            // Representación de Filtros
-            const totalDelAñoSeleccionado = dataAnoActualGlobal.length;
-            const porcFiltrado = totalDelAñoSeleccionado > 0 ? ((totalAñoActualFiltrado / totalDelAñoSeleccionado) * 100) : 0;
+            const totalDelAñoSeleccionado = dataAnoActualGlobal.length; const porcFiltrado = totalDelAñoSeleccionado > 0 ? ((totalAñoActualFiltrado / totalDelAñoSeleccionado) * 100) : 0;
             document.getElementById('kpiPorcentajeFiltrado').textContent = `${porcFiltrado.toFixed(1)}%`;
             document.getElementById('kpiPorcentajeDetalle').textContent = `${totalAñoActualFiltrado.toLocaleString('es-AR')} de ${totalDelAñoSeleccionado.toLocaleString('es-AR')} del ${anoSeleccionado}`;
 
@@ -643,52 +629,25 @@
 
             const dataMesAñoActualGlobal = rawData.filter(i => i.año === anoSeleccionado && i.mes === mesLimiteEnCurso);
             const dataMesAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1) && i.mes === mesLimiteEnCurso);
-
             const conteoDelitosActual = {}, conteoDelitosAnterior = {};
             
-            dataMesAñoActualGlobal.forEach(i => { 
-                if(i.caratula) {
-                    const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula;
-                    conteoDelitosActual[clave] = (conteoDelitosActual[clave] || 0) + 1; 
-                }
-            });
-            dataMesAñoAnteriorGlobal.forEach(i => { 
-                if(i.caratula) {
-                    const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula;
-                    conteoDelitosAnterior[clave] = (conteoDelitosAnterior[clave] || 0) + 1; 
-                }
-            });
+            dataMesAñoActualGlobal.forEach(i => { if(i.caratula) { const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula; conteoDelitosActual[clave] = (conteoDelitosActual[clave] || 0) + 1; } });
+            dataMesAñoAnteriorGlobal.forEach(i => { if(i.caratula) { const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula; conteoDelitosAnterior[clave] = (conteoDelitosAnterior[clave] || 0) + 1; } });
 
             const todasLasCaratulasMes = new Set([...Object.keys(conteoDelitosActual), ...Object.keys(conteoDelitosAnterior)]);
             const listaComparativaOrdenada = Array.from(todasLasCaratulasMes).map(caratula => {
-                const act = conteoDelitosActual[caratula] || 0;
-                const ant = conteoDelitosAnterior[caratula] || 0;
-                let difPorc = 0;
-                if (ant > 0) difPorc = ((act - ant) / ant) * 100;
-                else if (act > 0) difPorc = 100; 
+                const act = conteoDelitosActual[caratula] || 0; const ant = conteoDelitosAnterior[caratula] || 0;
+                let difPorc = 0; if (ant > 0) difPorc = ((act - ant) / ant) * 100; else if (act > 0) difPorc = 100;
                 return { caratula, act, ant, difPorc };
             }).sort((a, b) => b.act - a.act);
 
-            const tbodyComparativo = document.getElementById('comparativeTableBody');
-            tbodyComparativo.innerHTML = '';
-            
+            const tbodyComparativo = document.getElementById('comparativeTableBody'); tbodyComparativo.innerHTML = '';
             const top5Comparativa = listaComparativaOrdenada.slice(0, 5);
 
             listaComparativaOrdenada.forEach(fila => {
-                const tr = document.createElement('tr');
-                let badgeClase = 'bg-gray-100 text-gray-700';
-                let stringPorc = `${fila.difPorc >= 0 ? '+' : ''}${fila.difPorc.toFixed(0)}%`;
-                
-                if (fila.ant === 0 && fila.act > 0) stringPorc = 'Nuevo';
-                if (fila.difPorc > 0) badgeClase = 'bg-red-50 text-red-600 font-bold';
-                if (fila.difPorc < 0) badgeClase = 'bg-emerald-50 text-emerald-600 font-bold';
-
-                tr.innerHTML = `
-                    <td class="p-2 font-medium truncate max-w-xs text-slate-800">${fila.caratula}</td>
-                    <td class="p-2 text-center font-semibold">${fila.ant}</td>
-                    <td class="p-2 text-center font-bold bg-amber-50/60">${fila.act}</td>
-                    <td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${stringPorc}</span></td>
-                `;
+                const tr = document.createElement('tr'); let badgeClase = 'bg-gray-100 text-gray-700'; let stringPorc = `${fila.difPorc >= 0 ? '+' : ''}${fila.difPorc.toFixed(0)}%`;
+                if (fila.ant === 0 && fila.act > 0) stringPorc = 'Nuevo'; if (fila.difPorc > 0) badgeClase = 'bg-red-50 text-red-600 font-bold'; if (fila.difPorc < 0) badgeClase = 'bg-emerald-50 text-emerald-600 font-bold';
+                tr.innerHTML = `<td class="p-2 font-medium truncate max-w-xs text-slate-800">${fila.caratula}</td><td class="p-2 text-center font-semibold">${fila.ant}</td><td class="p-2 text-center font-bold bg-amber-50/60">${fila.act}</td><td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${stringPorc}</span></td>`;
                 tbodyComparativo.appendChild(tr);
             });
 
@@ -697,243 +656,85 @@
                 type: 'bar',
                 data: {
                     labels: top5Comparativa.map(x => x.caratula.substring(0, 25) + (x.caratula.length > 25 ? '...' : '')),
-                    datasets: [
-                        {
-                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`,
-                            data: top5Comparativa.map(x => x.ant),
-                            backgroundColor: 'rgba(148, 163, 184, 0.65)'
-                        },
-                        {
-                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`,
-                            data: top5Comparativa.map(x => x.act),
-                            backgroundColor: 'rgba(245, 158, 11, 0.85)'
-                        }
-                    ]
+                    datasets: [{ label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`, data: top5Comparativa.map(x => x.ant), backgroundColor: 'rgba(148, 163, 184, 0.65)' }, { label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`, data: top5Comparativa.map(x => x.act), backgroundColor: 'rgba(245, 158, 11, 0.85)' }]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
-                        datalabels: { anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' } }
-                    },
-                    scales: { y: { beginAtZero: true, grid: { display: false } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' } } }, scales: { y: { beginAtZero: true, grid: { display: false } } } }
             });
 
-            const fbaCounts = {};
-            filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
+            const fbaCounts = {}; filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
             const sortedFba = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
-
-            sortedFba.forEach(([fbaName]) => {
-                const subfba = filteredData.filter(i => i.fba === fbaName);
-                topCaratulasPorFBA[fbaName] = obtenerCaratulaLider(subfba);
-            });
+            sortedFba.forEach(([fbaName]) => { const subfba = filteredData.filter(i => i.fba === fbaName); topCaratulasPorFBA[fbaName] = obtenerCaratulaLider(subfba); });
 
             if (chartFBA) chartFBA.destroy();
             chartFBA = new Chart(document.getElementById('chartFBA'), {
                 type: 'bar',
-                data: {
-                    labels: sortedFba.map(x => x[0]),
-                    datasets: [{
-                        label: 'Actuaciones Registradas',
-                        data: sortedFba.map(x => x[1]),
-                        backgroundColor: colorPalette
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
-                        tooltip: {
-                            callbacks: {
-                                afterBody: (context) => {
-                                    const fbaKey = context[0].label;
-                                    return `Top Delito: ${topCaratulasPorFBA[fbaKey] || 'S/D'}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: { y: { beginAtZero: true } }
-                }
+                data: { labels: sortedFba.map(x => x[0]), datasets: [{ label: 'Actuaciones Registradas', data: sortedFba.map(x => x[1]), backgroundColor: colorPalette }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (context) => `Top Delito: ${topCaratulasPorFBA[context[0].label] || 'S/D'}` } } }, scales: { y: { beginAtZero: true } } }
             });
 
-            const controlCounts = {};
-            filteredData.forEach(i => { if(i.control) controlCounts[i.control] = (controlCounts[i.control] || 0) + 1; });
-            
+            const controlCounts = {}; filteredData.forEach(i => { if(i.control) controlCounts[i.control] = (controlCounts[i.control] || 0) + 1; });
             if (chartControl) chartControl.destroy();
             chartControl = new Chart(document.getElementById('chartControl'), {
                 type: 'doughnut',
-                data: {
-                    labels: Object.keys(controlCounts),
-                    datasets: [{
-                        data: Object.values(controlCounts),
-                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6']
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-                        datalabels: {
-                            formatter: (value, ctx) => {
-                                let sum = 0;
-                                let dataArr = ctx.chart.data.datasets[0].data;
-                                dataArr.map(data => { sum += data; });
-                                return sum > 0 ? `${((value*100) / sum).toFixed(0)}%` : '0%';
-                            },
-                            color: '#fff', font: { weight: 'bold', size: 11 }
-                        }
-                    }
-                }
+                data: { labels: Object.keys(controlCounts), datasets: [{ data: Object.values(controlCounts), backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: { formatter: (value, ctx) => { let sum = 0; let dataArr = ctx.chart.data.datasets[0].data; dataArr.map(data => { sum += data; }); return sum > 0 ? `${((value*100) / sum).toFixed(0)}%` : '0%'; }, color: '#fff', font: { weight: 'bold', size: 11 } } } }
             });
 
             const matrizAnos = {};
-            rawData.forEach(item => {
-                if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) {
-                    if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0);
-                    matrizAnos[item.año][item.mes]++;
-                }
-            });
-
-            const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, index) => {
-                return {
-                    label: `Año ${año}`,
-                    data: matrizAnos[año].slice(1),
-                    borderColor: paletaMulticolor12Meses[index % paletaMulticolor12Meses.length],
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    tension: 0.2,
-                    pointRadius: 3
-                };
-            });
+            rawData.forEach(item => { if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) { if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0); matrizAnos[item.año][item.mes]++; } });
+            const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, index) => { return { label: `Año ${año}`, data: matrizAnos[año].slice(1), borderColor: paletaMulticolor12Meses[index % paletaMulticolor12Meses.length], backgroundColor: 'transparent', borderWidth: 2, tension: 0.2, pointRadius: 3 }; });
 
             if (chartAllYears) chartAllYears.destroy();
             chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), {
                 type: 'line',
-                data: {
-                    labels: NOMBRES_MESES.slice(1),
-                    datasets: datasetsHistoricos
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
-                        datalabels: { 
-                            display: true, 
-                            align: 'top', 
-                            anchor: 'end',
-                            color: '#1e293b',
-                            font: { size: 10, weight: 'bold' },
-                            offset: 4
-                        }
-                    },
-                    scales: { y: { beginAtZero: true } }
-                }
+                data: { labels: NOMBRES_MESES.slice(1), datasets: datasetsHistoricos },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { display: true, align: 'top', anchor: 'end', color: '#1e293b', font: { size: 10, weight: 'bold' }, offset: 4 } }, scales: { y: { beginAtZero: true } } }
             });
 
             document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500"></i> Distribución de Carga Mensual Unificada (Año ${anoSeleccionado})`;
-            const datasetMesesFiltrado = Array(13).fill(0);
-            filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
-
-            for (let m = 1; m <= 12; m++) {
-                const submes = filteredData.filter(i => i.mes === m);
-                topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(submes);
-            }
+            const datasetMesesFiltrado = Array(13).fill(0); filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
+            for (let m = 1; m <= 12; m++) { const submes = filteredData.filter(i => i.mes === m); topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(submes); }
 
             if (chartCurrentYear) chartCurrentYear.destroy();
             chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), {
                 type: 'bar',
-                data: {
-                    labels: NOMBRES_MESES.slice(1),
-                    datasets: [{
-                        label: 'Actuaciones',
-                        data: datasetMesesFiltrado.slice(1),
-                        backgroundColor: paletaMulticolor12Meses
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
-                        tooltip: {
-                            callbacks: {
-                                afterBody: (context) => {
-                                    const mesKey = context[0].label;
-                                    return `Líder: ${topCaratulasPorMesActual[mesKey] || 'S/D'}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: { y: { beginAtZero: true } }
-                }
+                data: { labels: NOMBRES_MESES.slice(1), datasets: [{ label: 'Actuaciones', data: datasetMesesFiltrado.slice(1), backgroundColor: paletaMulticolor12Meses }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (context) => `Líder: ${topCaratulasPorMesActual[context[0].label] || 'S/D'}` } } }, scales: { y: { beginAtZero: true } } }
             });
 
             if (chartEvolution) chartEvolution.destroy();
             chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), {
                 type: 'line',
-                data: {
-                    labels: NOMBRES_MESES.slice(1),
-                    datasets: [{
-                        label: `Evolución ${anoSeleccionado}`,
-                        data: datasetMesesFiltrado.slice(1),
-                        borderColor: '#3B82F6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                        fill: true,
-                        tension: 0.3,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#1E3A8A',
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top' } },
-                    scales: { y: { beginAtZero: true } }
-                }
+                data: { labels: NOMBRES_MESES.slice(1), datasets: [{ label: `Evolución ${anoSeleccionado}`, data: datasetMesesFiltrado.slice(1), borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#1E3A8A', pointRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top' } }, scales: { y: { beginAtZero: true } } }
             });
         }
 
-        // 📝 FUNCIÓN DE RENDERIZADO CON SOPORTE DE EXPORTACIÓN COMPLETA PARA EL PDF
         function renderTable(forceAllRows = false) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
             document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
 
-            // Si forceAllRows es true (activado al presionar PDF), renderiza todo sin paginar
             let itemsParaMostrar = filteredData;
             if (!forceAllRows) {
-                const start = (currentPage - 1) * rowsPerPage;
-                const end = start + rowsPerPage;
+                const start = (currentPage - 1) * rowsPerPage; const end = start + rowsPerPage;
                 itemsParaMostrar = filteredData.slice(start, end);
             }
 
             if(itemsParaMostrar.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
                 document.getElementById('pageIndicator').textContent = "Página 0 de 0";
-                togglePaginationButtons(true, true);
-                return;
+                togglePaginationButtons(true, true); return;
             }
 
             itemsParaMostrar.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors";
-                
-                let badgeControlClase = "bg-slate-100 text-slate-700";
-                const ctrlNorm = (item.control || '').toUpperCase();
+                const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors";
+                let badgeControlClase = "bg-slate-100 text-slate-700"; const ctrlNorm = (item.control || '').toUpperCase();
                 if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-100 text-emerald-800 font-semibold";
                 if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
                 if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
 
-                const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' 
-                    ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` 
-                    : item.victima;
-
-                const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' 
-                    ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
-                    : item.imputado;
+                const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` : item.victima;
+                const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` : item.imputado;
 
                 tr.innerHTML = `
                     <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
@@ -956,42 +757,18 @@
         }
 
         function togglePaginationButtons(isFirst, isLast) {
-            document.getElementById('btnFirst').disabled = isFirst;
-            document.getElementById('btnPrev').disabled = isFirst;
-            document.getElementById('btnNext').disabled = isLast;
-            document.getElementById('btnLast').disabled = isLast;
+            document.getElementById('btnFirst').disabled = isFirst; document.getElementById('btnPrev').disabled = isFirst;
+            document.getElementById('btnNext').disabled = isLast; document.getElementById('btnLast').disabled = isLast;
         }
 
-        // ⚡ ASIGNACIÓN DE BOTONES COMPORTAMIENTO RÁPIDO (PRIMERA, ANTERIOR, SIGUIENTE, ÚLTIMA PÁGINA)
-        document.getElementById('btnFirst').addEventListener('click', () => {
-            if (currentPage !== 1) { currentPage = 1; renderTable(); }
-        });
+        document.getElementById('btnFirst').addEventListener('click', () => { if (currentPage !== 1) { currentPage = 1; renderTable(); } });
+        document.getElementById('btnPrev').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
+        document.getElementById('btnNext').addEventListener('click', () => { const totalPages = Math.ceil(filteredData.length / rowsPerPage); if (currentPage < totalPages) { currentPage++; renderTable(); } });
+        document.getElementById('btnLast').addEventListener('click', () => { const totalPages = Math.ceil(filteredData.length / rowsPerPage); if (currentPage !== totalPages && totalPages > 0) { currentPage = totalPages; renderTable(); } });
 
-        document.getElementById('btnPrev').addEventListener('click', () => {
-            if (currentPage > 1) { currentPage--; renderTable(); }
-        });
-
-        document.getElementById('btnNext').addEventListener('click', () => {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            if (currentPage < totalPages) { currentPage++; renderTable(); }
-        });
-
-        document.getElementById('btnLast').addEventListener('click', () => {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            if (currentPage !== totalPages && totalPages > 0) { currentPage = totalPages; renderTable(); }
-        });
-
-        // 📑 EVENTO COMPARTIDO ASÍNCRONO PARA LA CONVERSIÓN COMPLETA A PDF SIN CORTES
         document.getElementById('btnPDF').addEventListener('click', () => {
-            // 1. Desactivar paginación y renderizar la base de datos filtrada completa en la tabla
             renderTable(true);
-            
-            // 2. Dar una pequeña fracción de tiempo para el flujo del DOM y llamar a la ventana nativa de impresión/PDF
-            setTimeout(() => {
-                window.print();
-                // 3. Al cerrar el cuadro de diálogo del PDF, restablecer de inmediato la vista paginada estándar
-                renderTable(false);
-            }, 350);
+            setTimeout(() => { window.print(); renderTable(false); }, 350);
         });
     </script>
 </body>
