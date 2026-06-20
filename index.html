@@ -235,7 +235,7 @@
             </div>
             
             <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-slate-500 min-w-[1400px] table-fixed">
+                <table class="w-full text-xs text-left text-slate-500 min-w-[1550px] table-fixed">
                     <thead class="text-xs text-slate-700 uppercase bg-gray-100">
                         <tr>
                             <th class="px-3 py-3 w-[100px]">SIREX N°</th>
@@ -244,10 +244,9 @@
                             <th class="px-3 py-3 w-[200px]">DEP. INSTRUCTORA</th>
                             <th class="px-3 py-3 w-[120px]">FBA INTERV.</th>
                             <th class="px-3 py-3 w-[250px]">CARATULA</th>
-                            <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
+                            <th class="px-3 py-3 w-[150px]">ELEMENTO DAÑADO</th> <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
                             <th class="px-3 py-3 w-[290px]">IMPUTADO / DESTINO DEL IMPUTADO</th>
-                            <th class="px-3 py-3 w-[120px]">CONTROL</th>
-                        </tr>
+                            <th class="px-3 py-3 w-[120px]">CONTROL</th> </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
                 </table>
@@ -351,9 +350,8 @@
             const idxFba = headers.findIndex(h => h.includes("FBA") || h.includes("INTERVINIENTE"));
             const idxCara = headers.findIndex(h => h.includes("CARATULA"));
             
-            // ACTUALIZACION CRITICA: Mapeo exacto excluyendo la columna 'ELEMENTO INCAUTADO'
+            // ACTUALIZACIÓN DE COLUMNAS ESTRICTAS (L = ELEMENTO DAÑADO, M = CONTROL DISCIPLINARIO)
             const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO DAÑADO") || (h.includes("DAÑADO") && !h.includes("INCAUTADO")));
-            
             const idxCont = headers.findIndex(h => h.includes("CONTROL"));
             
             const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
@@ -458,8 +456,9 @@
                 const matchDelito = delitoVal === 'TODOS' || item.caratula.includes(delitoVal);
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
+                // ACTUALIZACIÓN DE FILTRO DE EVENTOS: Ahora observa e incluye la columna ELEMENTO DAÑADO
                 let todoElRegistroConcat = normalizarTexto(
-                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.victima} ${item.destinoVictima} ${item.imputado} ${item.destinoImputado} ${item.control}`
+                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.elementoDañado} ${item.victima} ${item.destinoVictima} ${item.imputado} ${item.destinoImputado} ${item.control}`
                 );
                 const matchSearch = !searchVal || todoElRegistroConcat.includes(searchVal);
 
@@ -517,22 +516,19 @@
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            // 4. LÓGICA DE FÓRMULA QUERY CON ARREGLO DE COLUMNA CORREGIDA
+            // 4. LÓGICA DE FÓRMULA QUERY (L = ELEMENTO DAÑADO)
             let acumuladorSiniestrosMovil = 0;
             const conteoPorFbaMovil = {};
             
             rawData.forEach(item => {
-                // CONDICIONES QUERY: YEAR(B) = AñoSeleccionado AND LOWER(ELEMENTO_DAÑADO) LIKE '%movil%'
                 if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("movil")) {
                     acumuladorSiniestrosMovil++;
-                    
                     if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D' && item.fba.trim() !== '') {
                         conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1;
                     }
                 }
             });
 
-            // ORDER BY COUNT(E) DESC LIMIT 1
             const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
             let fbaMasAfectado = 'Ninguna';
             let conteoFbaEspecifico = 0;
@@ -544,7 +540,6 @@
 
             document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
-
 
             // 5. Dependencia Instructora Líder
             const depCounts = {};
@@ -890,7 +885,7 @@
             document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
 
             if(paginatedItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
                 document.getElementById('pageIndicator').textContent = "Página 0 de 0";
                 document.getElementById('btnPrev').disabled = true;
                 document.getElementById('btnNext').disabled = true;
@@ -915,6 +910,7 @@
                     ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
                     : item.imputado;
 
+                // RENDERIZADO CON NUEVA COLUMNA L DE ELEMENTO DAÑADO VISIBLE EN LA TABLA
                 tr.innerHTML = `
                     <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
                     <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
@@ -922,6 +918,7 @@
                     <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
                     <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
                     <td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td>
+                    <td class="px-3 py-3 text-slate-600 font-medium break-words">${item.elementoDañado}</td>
                     <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td>
                     <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td>
                     <td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>
