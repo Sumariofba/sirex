@@ -650,4 +650,301 @@
                 const ant = conteoDelitosAnterior[caratula] || 0;
                 let difPorc = 0;
                 if (ant > 0) difPorc = ((act - ant) / ant) * 100;
-                else if (
+                else if (act > 0) difPorc = 100; 
+                return { caratula, act, ant, difPorc };
+            }).sort((a, b) => b.act - a.act);
+
+            const tbodyComparativo = document.getElementById('comparativeTableBody');
+            tbodyComparativo.innerHTML = '';
+            
+            const top5Comparativa = listaComparativaOrdenada.slice(0, 5);
+
+            listaComparativaOrdenada.forEach(fila => {
+                const tr = document.createElement('tr');
+                let badgeClase = 'bg-gray-100 text-gray-700';
+                let stringPorc = `${fila.difPorc >= 0 ? '+' : ''}${fila.difPorc.toFixed(0)}%`;
+                
+                if (fila.ant === 0 && fila.act > 0) stringPorc = 'Nuevo';
+                if (fila.difPorc > 0) badgeClase = 'bg-red-50 text-red-600 font-bold';
+                if (fila.difPorc < 0) badgeClase = 'bg-emerald-50 text-emerald-600 font-bold';
+
+                tr.innerHTML = `
+                    <td class="p-2 font-medium truncate max-w-xs text-slate-800">${fila.caratula}</td>
+                    <td class="p-2 text-center font-semibold">${fila.ant}</td>
+                    <td class="p-2 text-center font-bold bg-amber-50/60">${fila.act}</td>
+                    <td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${stringPorc}</span></td>
+                `;
+                tbodyComparativo.appendChild(tr);
+            });
+
+            if (chartMonthComp) chartMonthComp.destroy();
+            chartMonthComp = new Chart(document.getElementById('chartMonthComparison'), {
+                type: 'bar',
+                data: {
+                    labels: top5Comparativa.map(x => x.caratula.substring(0, 25) + (x.caratula.length > 25 ? '...' : '')),
+                    datasets: [
+                        {
+                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`,
+                            data: top5Comparativa.map(x => x.ant),
+                            backgroundColor: 'rgba(148, 163, 184, 0.65)'
+                        },
+                        {
+                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`,
+                            data: top5Comparativa.map(x => x.act),
+                            backgroundColor: 'rgba(245, 158, 11, 0.85)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+                        datalabels: { anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' } }
+                    },
+                    scales: { y: { beginAtZero: true, grid: { display: false } } }
+                }
+            });
+
+            const fbaCounts = {};
+            filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
+            const sortedFba = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
+
+            sortedFba.forEach(([fbaName]) => {
+                const subfba = filteredData.filter(i => i.fba === fbaName);
+                topCaratulasPorFBA[fbaName] = obtenerCaratulaLider(subfba);
+            });
+
+            if (chartFBA) chartFBA.destroy();
+            chartFBA = new Chart(document.getElementById('chartFBA'), {
+                type: 'bar',
+                data: {
+                    labels: sortedFba.map(x => x[0]),
+                    datasets: [{
+                        label: 'Actuaciones Registradas',
+                        data: sortedFba.map(x => x[1]),
+                        backgroundColor: colorPalette
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
+                        tooltip: {
+                            callbacks: {
+                                afterBody: (context) => {
+                                    const fbaKey = context[0].label;
+                                    return `Top Delito: ${topCaratulasPorFBA[fbaKey] || 'S/D'}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            const controlCounts = {};
+            filteredData.forEach(i => { if(i.control) controlCounts[i.control] = (controlCounts[i.control] || 0) + 1; });
+            
+            if (chartControl) chartControl.destroy();
+            chartControl = new Chart(document.getElementById('chartControl'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(controlCounts),
+                    datasets: [{
+                        data: Object.values(controlCounts),
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6']
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                let sum = 0;
+                                let dataArr = ctx.chart.data.datasets[0].data;
+                                dataArr.map(data => { sum += data; });
+                                return `${((value*100) / sum).toFixed(0)}%`;
+                            },
+                            color: '#fff', font: { weight: 'bold', size: 11 }
+                        }
+                    }
+                }
+            });
+
+            const matrizAnos = {};
+            rawData.forEach(item => {
+                if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) {
+                    if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0);
+                    matrizAnos[item.año][item.mes]++;
+                }
+            });
+
+            const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, index) => {
+                return {
+                    label: `Año ${año}`,
+                    data: matrizAnos[año].slice(1),
+                    borderColor: paletaMulticolor12Meses[index % paletaMulticolor12Meses.length],
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    pointRadius: 3
+                };
+            });
+
+            if (chartAllYears) chartAllYears.destroy();
+            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), {
+                type: 'line',
+                data: {
+                    labels: NOMBRES_MESES.slice(1),
+                    datasets: datasetsHistoricos
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+                        datalabels: { 
+                            display: true, 
+                            align: 'top', 
+                            anchor: 'end',
+                            color: '#1e293b',
+                            font: { size: 10, weight: 'bold' },
+                            offset: 4
+                        }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500"></i> Distribución de Carga Mensual Unificada (Año ${anoSeleccionado})`;
+            const datasetMesesFiltrado = Array(13).fill(0);
+            filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
+
+            for (let m = 1; m <= 12; m++) {
+                const submes = filteredData.filter(i => i.mes === m);
+                topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(submes);
+            }
+
+            if (chartCurrentYear) chartCurrentYear.destroy();
+            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), {
+                type: 'bar',
+                data: {
+                    labels: NOMBRES_MESES.slice(1),
+                    datasets: [{
+                        label: 'Actuaciones',
+                        data: datasetMesesFiltrado.slice(1),
+                        backgroundColor: paletaMulticolor12Meses
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
+                        tooltip: {
+                            callbacks: {
+                                afterBody: (context) => {
+                                    const mesKey = context[0].label;
+                                    return `Líder: ${topCaratulasPorMesActual[mesKey] || 'S/D'}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            if (chartEvolution) chartEvolution.destroy();
+            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), {
+                type: 'line',
+                data: {
+                    labels: NOMBRES_MESES.slice(1),
+                    datasets: [{
+                        label: `Evolución ${anoSeleccionado}`,
+                        data: datasetMesesFiltrado.slice(1),
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#1E3A8A',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function renderTable() {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedItems = filteredData.slice(start, end);
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
+
+            if(paginatedItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
+                document.getElementById('pageIndicator').textContent = "Página 0 de 0";
+                document.getElementById('btnPrev').disabled = true;
+                document.getElementById('btnNext').disabled = true;
+                return;
+            }
+
+            paginatedItems.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                
+                let badgeControlClase = "bg-slate-100 text-slate-700";
+                const ctrlNorm = (item.control || '').toUpperCase();
+                if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-100 text-emerald-800 font-semibold";
+                if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
+                if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
+
+                const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' 
+                    ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` 
+                    : item.victima;
+
+                const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' 
+                    ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
+                    : item.imputado;
+
+                tr.innerHTML = `
+                    <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
+                    <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
+                    <td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td>
+                    <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
+                    <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
+                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td>
+                    <td class="px-3 py-3 text-slate-600 font-medium break-words">${item.elementoDañado}</td>
+                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td>
+                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td>
+                    <td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
+            document.getElementById('btnPrev').disabled = (currentPage === 1);
+            document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
+        }
+
+        document.getElementById('btnPrev').addEventListener('click', () => {
+            if (currentPage > 1) { currentPage--; renderTable(); }
+        });
+
+        document.getElementById('btnNext').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < totalPages) { currentPage++; renderTable(); }
+        });
+    </script>
+</body>
+</html>
