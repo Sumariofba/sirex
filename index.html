@@ -129,10 +129,15 @@
             </div>
         </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end border border-slate-100">
+        <!-- SECCIÓN DE FILTROS ACTUALIZADA: Grid de 5 columnas para alojar el nuevo filtro de Dependencia -->
+        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
                 <select id="anoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Dep. Instructora</label>
+                <select id="depFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">FBA Interviniente</label>
@@ -344,10 +349,8 @@
             const rows = parseCSV(text);
             if (rows.length < 2) return;
 
-            // Normalización robusta de encabezados eliminando espacios extras
             const headers = rows[0].map(h => h.trim().toUpperCase().replace(/\s+/g, ' '));
             
-            // Adaptado para detectar la columna "SIREX " con espacios al final
             const idxSirex = headers.findIndex(h => h.includes("SIREX"));
             const idxFecha = headers.findIndex(h => h.includes("FECHA") || h.includes("INICIO"));
             const idxExp = headers.findIndex(h => h.includes("EXPEDIENTE"));
@@ -411,15 +414,18 @@
         }
 
         function populateInitialFilters() {
-            const anos = new Set(), fbas = new Set(['TODOS']), delitos = new Set(['TODOS']), controles = new Set(['TODOS']);
+            // AGREGADO: Set de dependencias instructoras para el filtro select
+            const anos = new Set(), deps = new Set(['TODOS']), fbas = new Set(['TODOS']), delitos = new Set(['TODOS']), controles = new Set(['TODOS']);
 
             rawData.forEach(item => {
                 if(!isNaN(item.año)) anos.add(item.año);
+                if(item.dependencia && item.dependencia !== 'S/D') deps.add(item.dependencia);
                 if(item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') fbas.add(item.fba);
                 if(item.caratula && item.caratula !== 'S/D') delitos.add(item.caratula);
                 if(item.control && item.control !== 'NINGUNO') controles.add(item.control);
             });
 
+            buildSelectOptions('depFilter', deps, true);
             buildSelectOptions('fbaFilter', fbas, true);
             buildSelectOptions('delitoFilter', delitos, true);
             buildSelectOptions('controlFilter', controles, true);
@@ -432,6 +438,7 @@
             });
 
             document.getElementById('anoFilter').addEventListener('change', applyFilters);
+            document.getElementById('depFilter').addEventListener('change', applyFilters);
             document.getElementById('fbaFilter').addEventListener('change', applyFilters);
             document.getElementById('delitoFilter').addEventListener('change', applyFilters);
             document.getElementById('controlFilter').addEventListener('change', applyFilters);
@@ -457,6 +464,7 @@
         function applyFilters() {
             const anoFilterElem = document.getElementById('anoFilter');
             const anoVal = anoFilterElem && anoFilterElem.value ? parseInt(anoFilterElem.value) : NaN;
+            const depVal = document.getElementById('depFilter').value;
             const fbaVal = document.getElementById('fbaFilter').value;
             const delitoVal = document.getElementById('delitoFilter').value;
             const controlVal = document.getElementById('controlFilter').value;
@@ -464,6 +472,7 @@
 
             filteredData = rawData.filter(item => {
                 const matchAno = (searchVal !== "") || isNaN(anoVal) || item.año === anoVal;
+                const matchDep = depVal === 'TODOS' || item.dependencia === depVal; // AGREGADO: Validación de filtro de dependencia
                 const matchFba = fbaVal === 'TODOS' || item.fba === fbaVal;
                 const matchDelito = delitoVal === 'TODOS' || item.caratula.includes(delitoVal);
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
@@ -473,7 +482,7 @@
                 );
                 const matchSearch = !searchVal || todoElRegistroConcat.includes(searchVal);
 
-                return matchAno && matchFba && matchDelito && matchControl && matchSearch;
+                return matchAno && matchDep && matchFba && matchDelito && matchControl && matchSearch;
             });
 
             currentPage = 1;
@@ -511,7 +520,7 @@
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            // 2. Presunta Infracción Ley 12569 (Búsqueda híbrida flexible)
+            // 2. Presunta Infracción Ley 12569
             const ley = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const target = (i.caratula || '').toLowerCase();
                 return target.includes("pta inf ley 12569") || target.includes("presunta infraccion ley 12569") || target.includes("12569");
@@ -519,7 +528,7 @@
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            // 3. Abandono de Servicio (Búsqueda híbrida flexible)
+            // 3. Abandono de Servicio
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const caratulaNorm = (i.caratula || '').toLowerCase();
                 return caratulaNorm.includes("abandono de servicio") || caratulaNorm.includes("abandono de servicio mas de 72 horas");
@@ -552,7 +561,7 @@
             document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
 
-            // 5. Dependencia Instructora Líder (Filtro Inteligente aislando Comisarías)
+            // 5. Dependencia Instructora Líder
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
