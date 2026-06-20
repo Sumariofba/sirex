@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 🖨️ CONFIGURACIÓN DE IMPRESIÓN PROFESIONAL PARA AJUSTAR A A4 HORIZONTAL */
+        /* 🖨️ PRECONFIGURACIÓN ESTRICTA DE IMPRESIÓN INTERNA (A4 - HORIZONTAL) */
         @media print {
             @page { 
                 size: A4 landscape; 
@@ -31,20 +31,19 @@
                 box-shadow: none !important; 
                 border: none !important; 
             }
-            /* Ocultar elementos innecesarios */
-            #searchFilter, #btnPDF, #paginationControls, .no-print, th:last-child, td:last-child { display: none !important; }
+            /* Ocultar elementos de interfaz interactivos que no deben ir en el papel */
+            #searchFilter, #btnPrint, #paginationControls, .no-print, th:last-child, td:last-child { display: none !important; }
             
-            /* Ajustar contenedores para evitar desbordes */
+            /* Forzar visualización expandida y ajuste estricto al ancho de la página */
             .overflow-x-auto { overflow: visible !important; max-height: none !important; }
             table { 
                 width: 100% !important; 
-                table-layout: fixed !important; /* Fuerza el respeto estricto de los anchos asignados */
+                table-layout: fixed !important; 
                 page-break-inside: auto; 
             }
             tr { page-break-inside: avoid; page-break-after: auto; }
             thead { display: table-header-group; }
             
-            /* Forzar reducción de tamaño drástica en celdas para que quepa en A4 */
             th, td { 
                 padding: 3px 2px !important; 
                 font-size: 7.5px !important; 
@@ -53,7 +52,7 @@
                 overflow: visible !important;
             }
 
-            /* 📐 Redistribución matemática exacta de anchos de columnas para hoja A4 (Total ~100%) */
+            /* Distribución proporcional exacta para que entre todo en el ancho de la hoja A4 */
             th:nth-child(1), td:nth-child(1) { width: 6% !important; }  /* SIREX */
             th:nth-child(2), td:nth-child(2) { width: 7% !important; }  /* FECHA */
             th:nth-child(3), td:nth-child(3) { width: 8% !important; }  /* EXPEDIENTE */
@@ -68,7 +67,6 @@
 </head>
 <body class="bg-slate-50 text-gray-800 font-sans antialiased">
 
-    <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
     <nav class="bg-slate-950 text-white shadow-md px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3">
             <i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i>
@@ -94,7 +92,6 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
-        <!-- BARRA DE SELECTORES PRINCIPALES -->
         <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 no-print">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
@@ -118,7 +115,6 @@
             </div>
         </div>
 
-        <!-- REGISTRO DE EVENTOS UNIFICADOS (POSICIÓN SUPERIOR) -->
         <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6" id="printableTableSection">
             <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-slate-50 gap-4">
                 <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -133,8 +129,8 @@
                         <input type="text" id="searchFilter" placeholder="Buscar en toda la base de datos..." class="w-full bg-white border border-slate-200 text-slate-900 text-xs rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden shadow-xs">
                         <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-[10px]"></i>
                     </div>
-                    <button id="btnPDF" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer">
-                        <i class="fa-solid fa-file-pdf text-sm"></i> Exportar PDF Completo
+                    <button id="btnPrint" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer">
+                        <i class="fa-solid fa-print text-sm"></i> Imprimir Registro
                     </button>
                 </div>
             </div>
@@ -159,7 +155,6 @@
                 </table>
             </div>
             
-            <!-- CONTROLES DE PAGINACIÓN COMPLETA (INICIO Y FIN) -->
             <div id="paginationControls" class="p-4 flex items-center justify-between border-t border-slate-200 bg-slate-50 text-xs">
                 <div class="flex items-center gap-1">
                     <button id="btnFirst" title="Primera Página" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-bold hover:bg-gray-100 disabled:opacity-40 cursor-pointer"><i class="fa-solid fa-angles-left"></i></button>
@@ -173,7 +168,6 @@
             </div>
         </div>
 
-        <!-- TARJETAS INTELIGENTES KPIs -->
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 no-print">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 no-print">
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
@@ -267,7 +261,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN DE GRÁFICOS COMPARATIVOS -->
         <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6 no-print">
             <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
                 <div class="flex justify-between items-center mb-3">
@@ -779,9 +772,13 @@
         document.getElementById('btnNext').addEventListener('click', () => { const totalPages = Math.ceil(filteredData.length / rowsPerPage); if (currentPage < totalPages) { currentPage++; renderTable(); } });
         document.getElementById('btnLast').addEventListener('click', () => { const totalPages = Math.ceil(filteredData.length / rowsPerPage); if (currentPage !== totalPages && totalPages > 0) { currentPage = totalPages; renderTable(); } });
 
-        document.getElementById('btnPDF').addEventListener('click', () => {
-            renderTable(true);
-            setTimeout(() => { window.print(); renderTable(false); }, 350);
+        // 🔥 MANEJADOR DE EVENTOS ADAPTADO PARA IMPRESIÓN DIRECTA SIN LÍMITES DE FILAS
+        document.getElementById('btnPrint').addEventListener('click', () => {
+            renderTable(true); // Carga todas las filas
+            setTimeout(() => { 
+                window.print(); // Llama a la impresión nativa (A4 Horizontal por CSS)
+                renderTable(false); // Retorna a modo paginado en pantalla
+            }, 350);
         });
     </script>
 </body>
