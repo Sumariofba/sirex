@@ -49,7 +49,7 @@
             </div>
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-purple-500 flex flex-col justify-between">
                 <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Pta Inf Ley 12569</span>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Presunta Infracción Ley 12569</span>
                     <h3 class="text-2xl font-black text-purple-600 tracking-tight" id="topCountLey">0 actuacion/es</h3>
                 </div>
                 <div class="mt-3 pt-2 border-t border-slate-100">
@@ -244,9 +244,11 @@
                             <th class="px-3 py-3 w-[200px]">DEP. INSTRUCTORA</th>
                             <th class="px-3 py-3 w-[120px]">FBA INTERV.</th>
                             <th class="px-3 py-3 w-[250px]">CARATULA</th>
-                            <th class="px-3 py-3 w-[150px]">ELEMENTO DAÑADO</th> <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
+                            <th class="px-3 py-3 w-[150px]">ELEMENTO DAÑADO</th>
+                            <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
                             <th class="px-3 py-3 w-[290px]">IMPUTADO / DESTINO DEL IMPUTADO</th>
-                            <th class="px-3 py-3 w-[120px]">CONTROL</th> </tr>
+                            <th class="px-3 py-3 w-[120px]">CONTROL</th>
+                        </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
                 </table>
@@ -344,14 +346,14 @@
 
             const headers = rows[0].map(h => h.trim().toUpperCase().replace(/\s+/g, ' '));
             const idxSirex = headers.findIndex(h => h.includes("SIREX"));
-            const idxFecha = headers.findIndex(h => h.includes("FECHA") || h.includes("F INICIO"));
+            const idxFecha = headers.findIndex(h => h.includes("FECHA") || h.includes("F INICIO") || h.includes("INICIO"));
             const idxExp = headers.findIndex(h => h.includes("EXPEDIENTE"));
             const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA"));
             const idxFba = headers.findIndex(h => h.includes("FBA") || h.includes("INTERVINIENTE"));
             const idxCara = headers.findIndex(h => h.includes("CARATULA"));
             
             const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO DAÑADO") || (h.includes("DAÑADO") && !h.includes("INCAUTADO")));
-            const idxCont = headers.findIndex(h => h.includes("CONTROL"));
+            const idxCont = headers.findIndex(h => h.trim() === "CONTROL" || h.includes("CONTROL"));
             
             const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
             const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA") || h.includes("DESTINO VICTIMA"));
@@ -367,14 +369,12 @@
                 let fechaOriginal = r[idxFecha]?.trim() || '';
                 let año = NaN, mes = NaN;
 
-                // CORRECCIÓN CLAVE: Permitir parsear tanto guiones (-) como barras (/)
                 if (fechaOriginal) {
                     let partes = fechaOriginal.includes('-') ? fechaOriginal.split('-') : fechaOriginal.split('/');
                     if(partes.length === 3) {
-                        // Si empieza por el año (ISO: AAAA-MM-DD)
                         if (partes[0].length === 4) {
                             año = parseInt(partes[0]); mes = parseInt(partes[1]);
-                        } else { // Formato tradicional DD/MM/AAAA
+                        } else {
                             año = parseInt(partes[2]); mes = parseInt(partes[1]);
                         }
                     }
@@ -391,8 +391,8 @@
                     dependencia: r[idxDep]?.trim() || 'S/D',
                     fba: r[idxFba]?.trim() || 'NINGUNO', 
                     caratula: caratulaCelda,
-                    elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', 
-                    control: r[idxCont]?.trim() || 'NINGUNO',
+                    elementoDañado: idxElementoDañado !== -1 ? (r[idxElementoDañado]?.trim() || 'NINGUNO') : 'NINGUNO', 
+                    control: idxCont !== -1 ? (r[idxCont]?.trim() || 'NINGUNO') : 'NINGUNO',
                     victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
                     destinoVictima: idxDestinoVictima !== -1 ? (r[idxDestinoVictima]?.trim() || 'S/D') : 'S/D',
                     imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D',
@@ -452,7 +452,8 @@
         }
 
         function applyFilters() {
-            const anoVal = parseInt(document.getElementById('anoFilter').value);
+            const anoFilterElem = document.getElementById('anoFilter');
+            const anoVal = anoFilterElem && anoFilterElem.value ? parseInt(anoFilterElem.value) : NaN;
             const fbaVal = document.getElementById('fbaFilter').value;
             const delitoVal = document.getElementById('delitoFilter').value;
             const controlVal = document.getElementById('controlFilter').value;
@@ -507,22 +508,23 @@
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            // 2. Presunta Infracción Ley 12569
-            const ley = findTopFbaFijo(dataAnoActualGlobal, i => 
-                (i.caratula || '').toLowerCase().includes("ley 12569") || (i.caratula || '').toLowerCase().includes("12569")
-            );
+            // 2. Presunta Infracción Ley 12569 (Filtro flexible inteligente)
+            const ley = findTopFbaFijo(dataAnoActualGlobal, i => {
+                const target = (i.caratula || '').toLowerCase();
+                return target.includes("pta inf ley 12569") || target.includes("presunta infraccion ley 12569") || target.includes("12569");
+            });
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
             // 3. Abandono de Servicio
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const caratulaNorm = (i.caratula || '').toLowerCase();
-                return caratulaNorm.includes("abandono de servicio");
+                return caratulaNorm.includes("abandono de servicio") || caratulaNorm.includes("abandono de servicio mas de 72 horas");
             });
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            // 4. Elementos Dañados (Móvil)
+            // 4. Móviles Dañados
             let acumuladorSiniestrosMovil = 0;
             const conteoPorFbaMovil = {};
             
@@ -547,12 +549,12 @@
             document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
 
-            // 5. Dependencia Instructora Líder
+            // 5. Dependencia Instructora Líder (Extrayendo Comisarías / Cria)
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
                 if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '') {
-                    if (!dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && dep.includes("CRIA")) {
+                    if (!dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && (dep.includes("CRIA") || dep.includes("COMISARIA"))) {
                         depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1;
                     }
                 }
@@ -765,7 +767,7 @@
                                 let sum = 0;
                                 let dataArr = ctx.chart.data.datasets[0].data;
                                 dataArr.map(data => { sum += data; });
-                                return `${((value*100) / sum).toFixed(0)}%`;
+                                return sum > 0 ? `${((value*100) / sum).toFixed(0)}%` : '0%';
                             },
                             color: '#fff', font: { weight: 'bold', size: 11 }
                         }
