@@ -344,11 +344,14 @@
             const rows = parseCSV(text);
             if (rows.length < 2) return;
 
+            // Normalización robusta de encabezados eliminando espacios extras
             const headers = rows[0].map(h => h.trim().toUpperCase().replace(/\s+/g, ' '));
+            
+            // Adaptado para detectar la columna "SIREX " con espacios al final
             const idxSirex = headers.findIndex(h => h.includes("SIREX"));
-            const idxFecha = headers.findIndex(h => h.includes("FECHA") || h.includes("F INICIO") || h.includes("INICIO"));
+            const idxFecha = headers.findIndex(h => h.includes("FECHA") || h.includes("INICIO"));
             const idxExp = headers.findIndex(h => h.includes("EXPEDIENTE"));
-            const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA"));
+            const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA") || h.includes("DEP."));
             const idxFba = headers.findIndex(h => h.includes("FBA") || h.includes("INTERVINIENTE"));
             const idxCara = headers.findIndex(h => h.includes("CARATULA"));
             
@@ -508,7 +511,7 @@
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            // 2. Presunta Infracción Ley 12569 (Filtro flexible inteligente)
+            // 2. Presunta Infracción Ley 12569 (Búsqueda híbrida flexible)
             const ley = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const target = (i.caratula || '').toLowerCase();
                 return target.includes("pta inf ley 12569") || target.includes("presunta infraccion ley 12569") || target.includes("12569");
@@ -516,7 +519,7 @@
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
-            // 3. Abandono de Servicio
+            // 3. Abandono de Servicio (Búsqueda híbrida flexible)
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const caratulaNorm = (i.caratula || '').toLowerCase();
                 return caratulaNorm.includes("abandono de servicio") || caratulaNorm.includes("abandono de servicio mas de 72 horas");
@@ -549,7 +552,7 @@
             document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
 
-            // 5. Dependencia Instructora Líder (Extrayendo Comisarías / Cria)
+            // 5. Dependencia Instructora Líder (Filtro Inteligente aislando Comisarías)
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
