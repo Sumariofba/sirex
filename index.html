@@ -33,7 +33,7 @@
                 margin: 0 !important;
             }
 
-            /* SI SE IMPRIME LA TABLA: Ocultar todo el resto del Dashboard */
+            /* Ocultar todo el resto del Dashboard */
             nav, 
             #welcomeScreen,
             h3,
@@ -44,11 +44,6 @@
             select,
             #searchFilter,
             .fa-magnifying-glass,
-            #btnFirst,
-            #btnPrev,
-            #pageIndicator,
-            #btnNext,
-            #btnLast,
             .print\:hidden { 
                 display: none !important; 
             }
@@ -61,10 +56,12 @@
                 padding: 0 !important;
             }
 
-            /* Ajustar la tabla de registros unificados para que no rompa el ancho */
+            /* Forzar que la tabla ignore contenedores con scroll */
             .overflow-x-auto {
                 overflow: visible !important;
+                max-height: none !important;
             }
+            
             table {
                 width: 100% !important;
                 table-layout: auto !important; 
@@ -109,6 +106,7 @@
         </div>
     </nav>
 
+    <!-- BARRA SUPERIOR OPERATIVA CON BUSCADOR Y TOTAL DE EVENTOS -->
     <nav class="bg-slate-900 text-white shadow-xs px-6 py-2 flex flex-col sm:flex-row justify-between items-center border-t border-slate-800 gap-3 print:hidden">
         <div class="flex items-center gap-3 w-full sm:w-auto">
             <h4 class="text-xs font-mono text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -124,6 +122,7 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
+        <!-- BARRA DE FILTROS -->
         <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 print:hidden">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
@@ -147,11 +146,12 @@
             </div>
         </div>
 
+        <!-- TABLA EN LA PARTE SUPERIOR DEL CONTENIDO -->
         <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6 print-table-container">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 print:hidden">
                 <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tabla Operativa Activa</span>
-                <button onclick="window.print()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs">
-                    <i class="fa-solid fa-print"></i> Imprimir Tabla
+                <button onclick="imprimirListadoCompleto()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs">
+                    <i class="fa-solid fa-print"></i> Imprimir Listado Completo
                 </button>
             </div>
             <div class="overflow-x-auto">
@@ -965,6 +965,7 @@
             });
         }
 
+        // RENDERIZADO INTERACTIVO BASE (PAGINADO)
         function renderTable() {
             const start = (currentPage - 1) * rowsPerPage;
             const end = start + rowsPerPage;
@@ -988,36 +989,7 @@
             }
 
             paginatedItems.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors";
-                
-                let badgeControlClase = "bg-slate-100 text-slate-700";
-                const ctrlNorm = (item.control || '').toUpperCase();
-                if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-100 text-emerald-800 font-semibold";
-                if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
-                if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
-
-                const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' 
-                    ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` 
-                    : item.victima;
-
-                const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' 
-                    ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
-                    : item.imputado;
-
-                tr.innerHTML = `
-                    <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
-                    <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
-                    <td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td>
-                    <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
-                    <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
-                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td>
-                    <td class="px-3 py-3 text-slate-600 font-medium break-words">${item.elementoDañado}</td>
-                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td>
-                    <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td>
-                    <td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>
-                `;
-                tbody.appendChild(tr);
+                tbody.appendChild(generarFilaHTML(item));
             });
 
             document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
@@ -1026,6 +998,57 @@
             document.getElementById('btnPrev').disabled = (currentPage === 1);
             document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
             document.getElementById('btnLast').disabled = (currentPage === totalPages || totalPages === 0);
+        }
+
+        // FUNCIÓN AUXILIAR ESTRICTA PARA CONSTRUIR CELDAS
+        function generarFilaHTML(item) {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition-colors";
+            
+            let badgeControlClase = "bg-slate-100 text-slate-700";
+            const ctrlNorm = (item.control || '').toUpperCase();
+            if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-100 text-emerald-800 font-semibold";
+            if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
+            if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
+
+            const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' 
+                ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` 
+                : item.victima;
+
+            const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' 
+                ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
+                : item.imputado;
+
+            tr.innerHTML = `
+                <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
+                <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
+                <td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td>
+                <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
+                <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
+                <td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td>
+                <td class="px-3 py-3 text-slate-600 font-medium break-words">${item.elementoDañado}</td>
+                <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td>
+                <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td>
+                <td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>
+            `;
+            return tr;
+        }
+
+        // LÓGICA DE DETONACIÓN DE IMPRESIÓN COMPLETA (ROMPE LA PAGINACIÓN TEMPORALMENTE)
+        function imprimirListadoCompleto() {
+            const tbody = document.getElementById('tableBody');
+            
+            // 1. Renderizar absolutamente TODOS los elementos actualmente filtrados en la tabla
+            tbody.innerHTML = '';
+            filteredData.forEach(item => {
+                tbody.appendChild(generarFilaHTML(item));
+            });
+
+            // 2. Disparar el flujo nativo de impresión de manera síncrona
+            window.print();
+
+            // 3. Restaurar la vista paginada estándar de 10 elementos en la pantalla interactiva inmediatamente
+            renderTable();
         }
 
         document.getElementById('btnFirst').addEventListener('click', () => {
