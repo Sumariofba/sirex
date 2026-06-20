@@ -9,23 +9,66 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Reglas CSS específicas para lograr un PDF con datos 100% visibles y completos */
+        /* 🖨️ CONFIGURACIÓN DE IMPRESIÓN PROFESIONAL PARA AJUSTAR A A4 HORIZONTAL */
         @media print {
-            body { background: white; color: black; font-size: 10px; }
+            @page { 
+                size: A4 landscape; 
+                margin: 0.3cm; 
+            }
+            body { 
+                background: white; 
+                color: black; 
+                font-size: 8px !important; 
+                line-height: 1.1 !important;
+            }
             body * { visibility: hidden; }
             #printableTableSection, #printableTableSection * { visibility: visible; }
-            #printableTableSection { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: none; }
-            #searchFilter, #btnPDF, #paginationControls, .no-print { display: none !important; }
+            #printableTableSection { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100% !important; 
+                box-shadow: none !important; 
+                border: none !important; 
+            }
+            /* Ocultar elementos innecesarios */
+            #searchFilter, #btnPDF, #paginationControls, .no-print, th:last-child, td:last-child { display: none !important; }
+            
+            /* Ajustar contenedores para evitar desbordes */
             .overflow-x-auto { overflow: visible !important; max-height: none !important; }
-            table { width: 100% !important; table-layout: auto !important; page-break-inside: auto; }
+            table { 
+                width: 100% !important; 
+                table-layout: fixed !important; /* Fuerza el respeto estricto de los anchos asignados */
+                page-break-inside: auto; 
+            }
             tr { page-break-inside: avoid; page-break-after: auto; }
             thead { display: table-header-group; }
-            td, th { word-wrap: break-word !important; white-space: normal !important; overflow: visible !important; }
+            
+            /* Forzar reducción de tamaño drástica en celdas para que quepa en A4 */
+            th, td { 
+                padding: 3px 2px !important; 
+                font-size: 7.5px !important; 
+                word-wrap: break-word !important; 
+                white-space: normal !important; 
+                overflow: visible !important;
+            }
+
+            /* 📐 Redistribución matemática exacta de anchos de columnas para hoja A4 (Total ~100%) */
+            th:nth-child(1), td:nth-child(1) { width: 6% !important; }  /* SIREX */
+            th:nth-child(2), td:nth-child(2) { width: 7% !important; }  /* FECHA */
+            th:nth-child(3), td:nth-child(3) { width: 8% !important; }  /* EXPEDIENTE */
+            th:nth-child(4), td:nth-child(4) { width: 14% !important; } /* DEP. INSTRUCTORA */
+            th:nth-child(5), td:nth-child(5) { width: 8% !important; }  /* FBA */
+            th:nth-child(6), td:nth-child(6) { width: 15% !important; } /* CARATULA */
+            th:nth-child(7), td:nth-child(7) { width: 10% !important; } /* E. DAÑADO */
+            th:nth-child(8), td:nth-child(8) { width: 16% !important; } /* VICTIMA */
+            th:nth-child(9), td:nth-child(9) { width: 16% !important; } /* IMPUTADO */
         }
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800 font-sans antialiased">
 
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
     <nav class="bg-slate-950 text-white shadow-md px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3">
             <i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i>
@@ -51,6 +94,7 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
+        <!-- BARRA DE SELECTORES PRINCIPALES -->
         <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 no-print">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
@@ -74,6 +118,7 @@
             </div>
         </div>
 
+        <!-- REGISTRO DE EVENTOS UNIFICADOS (POSICIÓN SUPERIOR) -->
         <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6" id="printableTableSection">
             <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-slate-50 gap-4">
                 <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -95,7 +140,7 @@
             </div>
             
             <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-slate-500 min-w-[1550px] table-fixed">
+                <table class="w-full text-xs text-left text-slate-500 min-w-[1550px] table-fixed" style="width: 100%;">
                     <thead class="text-xs text-slate-700 uppercase bg-gray-100">
                         <tr>
                             <th class="px-3 py-3 w-[100px]">SIREX N°</th>
@@ -114,6 +159,7 @@
                 </table>
             </div>
             
+            <!-- CONTROLES DE PAGINACIÓN COMPLETA (INICIO Y FIN) -->
             <div id="paginationControls" class="p-4 flex items-center justify-between border-t border-slate-200 bg-slate-50 text-xs">
                 <div class="flex items-center gap-1">
                     <button id="btnFirst" title="Primera Página" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-bold hover:bg-gray-100 disabled:opacity-40 cursor-pointer"><i class="fa-solid fa-angles-left"></i></button>
@@ -127,6 +173,7 @@
             </div>
         </div>
 
+        <!-- TARJETAS INTELIGENTES KPIs -->
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 no-print">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 no-print">
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
@@ -220,6 +267,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN DE GRÁFICOS COMPARATIVOS -->
         <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6 no-print">
             <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
                 <div class="flex justify-between items-center mb-3">
@@ -264,32 +312,6 @@
                 <div class="h-64 flex justify-center"><canvas id="chartControl"></canvas></div>
             </div>
         </div>
-
-        <div class="flex items-center justify-between mb-3 no-print">
-            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Análisis Temporal y de Evolución del Flujo Operativo</h3>
-            <span class="text-[11px] text-blue-600 font-semibold bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100" id="lblMesEnCursoLimit"></span>
-        </div>
-        
-        <div class="flex flex-col gap-6 mb-6 no-print">
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
-                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5">
-                    <i class="fa-solid fa-chart-area text-indigo-500"></i> Métricas Mensuales Históricas Comparadas (Todos los Años de la Base)
-                </h4>
-                <div class="h-80"><canvas id="chartAllYearsMonthly"></canvas></div>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
-                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5" id="titleCurrentYearInterventions">
-                    <i class="fa-solid fa-chart-bar text-emerald-500"></i> Intervenciones por Mes (Año Actual)
-                </h4>
-                <div class="h-80"><canvas id="chartCurrentYearMonthly"></canvas></div>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
-                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5">
-                    <i class="fa-solid fa-line-chart text-blue-500"></i> Línea de Evolución Mensual del Año Seleccionado
-                </h4>
-                <div class="h-80"><canvas id="chartEvolutionLine"></canvas></div>
-            </div>
-        </div>
     </main>
 
     <div id="welcomeScreen" class="max-w-md mx-auto mt-20 text-center p-8 bg-white rounded-xl shadow-sm border border-slate-200">
@@ -326,7 +348,6 @@
 
         const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-        // URL Segura de Google Sheets Publicada como CSV
         const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRao7X5J7L90OCDD-3YQxv7VN8uDfDOrxfo4ubRfaBnzMzLkx6Cyrx7NjmtIJp4uM-wNlyMWVqtIqqU/pub?gid=1060128342&single=true&output=csv';
 
         function setStatus(icon, color, text, sub) {
@@ -346,13 +367,11 @@
             } catch (err) {
                 setStatus('fa-triangle-exclamation', 'text-red-400', 'Error al conectar', 'Reintente o verifique que la hoja esté publicada');
                 console.error('Error cargando Google Sheets:', err);
-                document.getElementById('welcomeScreen').innerHTML = `<p class="text-sm text-red-500 font-bold">Error de Conexión. Verifique que la URL de Google Sheets esté bien configurada y accesible.</p>`;
             }
         }
 
         document.addEventListener('DOMContentLoaded', cargarDesdeSheets);
 
-        // Lector robusto contra saltos de línea internos en las celdas
         function parseCSV(text) {
             const firstLine = text.split('\n')[0];
             const separator = (firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length ? ';' : ',';
@@ -555,14 +574,11 @@
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            let acumuladorSiniestrosMovil = 0;
-            const conteoPorFbaMovil = {};
+            let acumuladorSiniestrosMovil = 0; const conteoPorFbaMovil = {};
             rawData.forEach(item => {
                 if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("movil")) {
                     acumuladorSiniestrosMovil++;
-                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D' && item.fba.trim() !== '') {
-                        conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1;
-                    }
+                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D' && item.fba.trim() !== '') { conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1; }
                 }
             });
             const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
@@ -575,9 +591,7 @@
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
                 if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '') {
-                    if (!dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && (dep.includes("CRIA") || dep.includes("COMISARIA"))) {
-                        depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1;
-                    }
+                    if (!dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && (dep.includes("CRIA") || dep.includes("COMISARIA"))) { depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1; }
                 }
             });
             const sortedDeps = Object.entries(depCounts).sort((a, b) => b[1] - a[1]);
@@ -596,8 +610,7 @@
 
             document.getElementById('lblMesEnCursoLimit').textContent = esAñoActualCorriente ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` : `Rango Activo: Periodo Anual Consolidado (Enero - Diciembre)`;
 
-            const totalAñoActualFiltrado = filteredData.length;
-            const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
+            const totalAñoActualFiltrado = filteredData.length; const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
             const datosMesActualFiltrados = filteredData.filter(i => i.mes === mesLimiteEnCurso);
             
             document.getElementById('lblKpiAnual').textContent = `Intervenciones Año ${anoSeleccionado}`;
