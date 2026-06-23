@@ -11,29 +11,22 @@
     
     <style>
         @media print {
-            /* Configura la página en orientación horizontal y márgenes mínimos */
             @page {
                 size: landscape;
                 margin: 0.5cm;
             }
-
-            /* Resetea fondos y asegura que los colores se impriman */
             body {
                 background: white !important;
                 color: black !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-
-            /* Fuerza al contenedor principal a ocupar el 100% del ancho sin cortes */
             main {
                 max-width: 100% !important;
                 width: 100% !important;
                 padding: 0 !important;
                 margin: 0 !important;
             }
-
-            /* Ocultar todo el resto del Dashboard */
             nav, 
             #welcomeScreen,
             h3,
@@ -47,34 +40,26 @@
             .print\:hidden { 
                 display: none !important; 
             }
-
-            /* Hacer visible únicamente el contenedor de la tabla durante la impresión */
             .print-table-container {
                 display: block !important;
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
-
-            /* Forzar que la tabla ignore contenedores con scroll */
             .overflow-x-auto {
                 overflow: visible !important;
                 max-height: none !important;
             }
-            
             table {
                 width: 100% !important;
                 table-layout: auto !important; 
                 min-width: 100% !important;
             }
-            
-            /* Ajustar tamaños de fuente para maximizar espacio en papel */
             th, td {
                 font-size: 8px !important;
                 padding: 4px !important;
                 word-break: break-word !important;
             }
-            
             .bg-white {
                 page-break-inside: auto;
                 border: 1px solid #e2e8f0 !important;
@@ -106,7 +91,6 @@
         </div>
     </nav>
 
-    <!-- BARRA SUPERIOR OPERATIVA CON BUSCADOR Y TOTAL DE EVENTOS -->
     <nav class="bg-slate-900 text-white shadow-xs px-6 py-2 flex flex-col sm:flex-row justify-between items-center border-t border-slate-800 gap-3 print:hidden">
         <div class="flex items-center gap-3 w-full sm:w-auto">
             <h4 class="text-xs font-mono text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -122,7 +106,6 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
-        <!-- BARRA DE FILTROS -->
         <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 print:hidden">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
@@ -146,7 +129,6 @@
             </div>
         </div>
 
-        <!-- TABLA EN LA PARTE SUPERIOR DEL CONTENIDO -->
         <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6 print-table-container">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 print:hidden">
                 <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tabla Operativa Activa</span>
@@ -656,17 +638,20 @@
                 document.getElementById('topNombreDependencia').setAttribute('title', `Ninguna`);
             }
 
+            // --- LÓGICA CORREGIDA PARA EL MES ACTUAL EN TIEMPO REAL ---
             const hoy = new Date();
-            const esAñoActualCorriente = (anoSeleccionado === hoy.getFullYear());
-            const mesLimiteEnCurso = esAñoActualCorriente ? (hoy.getMonth() + 1) : 12;
+            const mesLimiteEnCurso = hoy.getMonth() + 1; 
+            const añoActualReal = hoy.getFullYear();
 
-            document.getElementById('lblMesEnCursoLimit').textContent = esAñoActualCorriente 
+            document.getElementById('lblMesEnCursoLimit').textContent = (anoSeleccionado === añoActualReal)
                 ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` 
                 : `Rango Activo: Periodo Anual Consolidado (Enero - Diciembre)`;
 
             const totalAñoActualFiltrado = filteredData.length;
             const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
-            const datosMesActualFiltrados = filteredData.filter(i => i.mes === mesLimiteEnCurso);
+            
+            // El KPI ahora cruza los filtros activos con el mes actual y el año correspondiente seleccionados
+            const datosMesActualFiltrados = filteredData.filter(i => i.mes === mesLimiteEnCurso && i.año === anoSeleccionado);
             
             document.getElementById('lblKpiAnual').textContent = `Intervenciones Año ${anoSeleccionado}`;
             document.getElementById('kpiTotalAnual').textContent = totalAñoActualFiltrado.toLocaleString('es-AR');
@@ -965,7 +950,6 @@
             });
         }
 
-        // RENDERIZADO INTERACTIVO BASE (PAGINADO)
         function renderTable() {
             const start = (currentPage - 1) * rowsPerPage;
             const end = start + rowsPerPage;
@@ -1000,7 +984,6 @@
             document.getElementById('btnLast').disabled = (currentPage === totalPages || totalPages === 0);
         }
 
-        // FUNCIÓN AUXILIAR ESTRICTA PARA CONSTRUIR CELDAS
         function generarFilaHTML(item) {
             const tr = document.createElement('tr');
             tr.className = "hover:bg-slate-50 transition-colors";
@@ -1034,20 +1017,13 @@
             return tr;
         }
 
-        // LÓGICA DE DETONACIÓN DE IMPRESIÓN COMPLETA (ROMPE LA PAGINACIÓN TEMPORALMENTE)
         function imprimirListadoCompleto() {
             const tbody = document.getElementById('tableBody');
-            
-            // 1. Renderizar absolutamente TODOS los elementos actualmente filtrados en la tabla
             tbody.innerHTML = '';
             filteredData.forEach(item => {
                 tbody.appendChild(generarFilaHTML(item));
             });
-
-            // 2. Disparar el flujo nativo de impresión de manera síncrona
             window.print();
-
-            // 3. Restaurar la vista paginada estándar de 10 elementos en la pantalla interactiva inmediatamente
             renderTable();
         }
 
