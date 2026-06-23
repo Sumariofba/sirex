@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F.B.A. - Analítica de Actuaciones Sumariales Administrativas</title>
+    <title>F.B.A. - Centro de Analítica Sumarial Avanzada</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,292 +11,306 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* Estilizaciones de scrollbars modernas para ambiente oscuro */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
         @media print {
             @page { size: landscape; margin: 0.5cm; }
             body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             main { max-width: 100% !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
-            nav, #welcomeScreen, h3, .grid, .flex-col.gap-6, .mb-6, label, select, #searchFilter, .fa-magnifying-glass, .print\:hidden { display: none !important; }
+            nav, #welcomeScreen, h3, .grid, .mb-6, label, select, #searchFilter, .print\:hidden { display: none !important; }
             .print-table-container { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
             .overflow-x-auto { overflow: visible !important; max-height: none !important; }
             table { width: 100% !important; table-layout: auto !important; min-width: 100% !important; }
-            th, td { font-size: 8px !important; padding: 4px !important; word-break: break-word !important; }
-            .bg-white { page-break-inside: auto; border: 1px solid #e2e8f0 !important; }
-            tr { page-break-inside: avoid; break-inside: avoid; }
+            th, td { font-size: 8px !important; padding: 4px !important; word-break: break-word !important; color: black !important; }
+            .bg-slate-900, .bg-slate-950, .bg-slate-900\/50 { background: transparent !important; }
+            tr { page-break-inside: avoid; break-inside: avoid; border-bottom: 1px solid #cbd5e1 !important; }
         }
     </style>
 </head>
-<body class="bg-slate-50 text-gray-800 font-sans antialiased">
+<body class="bg-[#090d16] text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-slate-950">
 
-    <nav class="bg-slate-950 text-white shadow-md px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-3">
-            <i class="fa-solid fa-shield-halved text-2xl text-amber-500"></i>
+    <nav class="bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <div class="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg shadow-orange-500/10">
+                <i class="fa-solid fa-shield-halved text-2xl text-slate-950"></i>
+            </div>
             <div>
-                <h1 class="text-lg font-bold tracking-wide leading-tight">Dir. Fuerza Barrial de Aprox. (F.B.A.)</h1>
-                <h2 class="text-base font-semibold text-slate-200 tracking-wide">Analitica de Actuaciones Sumariales Administrativas (A.S.A.)</h2>
-                <p class="text-xs text-slate-400 mt-0.5">Control de Gestión, Siniestralidad y Comparativas Interanuales Globales</p>
+                <h1 class="text-xl font-black tracking-wide text-white uppercase bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Dir. Fuerza Barrial de Aproximación</h1>
+                <h2 class="text-sm font-semibold text-amber-400/90 tracking-wider uppercase mt-0.5">Analítica de Actuaciones Sumariales Administrativas (A.S.A.)</h2>
             </div>
         </div>
-        <div id="statusBadge" class="flex items-center gap-2 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 w-full sm:w-auto print:hidden">
-            <i id="statusIcon" class="fa-solid fa-spinner fa-spin text-amber-400 text-lg"></i>
+        <div id="statusBadge" class="flex items-center gap-3 bg-slate-900/90 px-4 py-2.5 rounded-xl border border-slate-800/80 shadow-inner w-full sm:w-auto print:hidden">
+            <div class="relative flex h-2.5 w-2.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+            </div>
             <div>
-                <p id="statusText" class="text-sm font-semibold text-amber-300">Conectando con Base de Datos...</p>
-                <p id="statusSub" class="text-[10px] text-slate-400">Procesando enlace en tiempo real</p>
+                <p id="statusText" class="text-xs font-bold font-mono uppercase tracking-widest text-amber-400">Conectando Terminal...</p>
+                <p id="statusSub" class="text-[10px] text-slate-500">Sincronizando registros CSV nativos</p>
             </div>
         </div>
     </nav>
 
-    <nav class="bg-slate-900 text-white shadow-xs px-6 py-2 flex flex-col sm:flex-row justify-between items-center border-t border-slate-800 gap-3 print:hidden">
+    <nav class="bg-slate-950/40 border-b border-slate-900 px-6 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 print:hidden">
         <div class="flex items-center gap-3 w-full sm:w-auto">
-            <h4 class="text-xs font-mono text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <i class="fa-solid fa-database text-blue-500"></i> Registros de Eventos Unificados
-            </h4>
-            <span class="text-[11px] bg-slate-800 text-slate-300 font-mono font-bold px-2 py-0.5 rounded-full border border-slate-700" id="tableCounter">0 registros</span>
+            <span class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-widest">
+                <i class="fa-solid fa-server text-blue-500 animate-pulse"></i> Núcleo de Eventos:
+            </span>
+            <span class="text-xs bg-blue-500/10 text-blue-400 font-mono font-black px-3 py-1 rounded-lg border border-blue-500/20 shadow-xs" id="tableCounter">0 registros</span>
         </div>
-        <div class="w-full sm:w-80 relative">
-            <input type="text" id="searchFilter" placeholder="Buscar en toda la base de datos..." class="w-full bg-slate-850 border border-slate-700 text-white placeholder-slate-400 text-xs rounded-lg p-2 pl-8 focus:ring-2 focus:ring-blue-500 focus:outline-hidden shadow-xs">
-            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-3 text-slate-400 text-[10px]"></i>
+        <div class="w-full sm:w-96 relative">
+            <input type="text" id="searchFilter" placeholder="Buscar por SIREX, Imputado, Dependencia..." class="w-full bg-slate-900/60 border border-slate-800 text-white placeholder-slate-500 text-xs rounded-xl p-2.5 pl-9 focus:ring-2 focus:ring-amber-500 focus:border-transparent focus:outline-hidden transition-all shadow-inner">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-slate-600 text-xs"></i>
         </div>
     </nav>
 
-    <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
+    <main class="p-4 sm:p-6 max-w-[1700px] mx-auto hidden transition-all duration-300" id="dashboardContent">
         
-        <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 print:hidden">
+        <div class="bg-slate-950/40 backdrop-blur-xs p-5 rounded-2xl border border-slate-900 mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end shadow-2xl print:hidden">
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
-                <select id="anoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">Año Fiscal</label>
+                <select id="anoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">FBA Interviniente</label>
-                <select id="fbaFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">FBA Interviniente</label>
+                <select id="fbaFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Dep. Instructora</label>
-                <select id="depFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">Dependencia Instructora</label>
+                <select id="depFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Carátula / Delito</label>
-                <select id="delitoFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">Tipificación de Carátula</label>
+                <select id="delitoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Control</label>
-                <select id="controlFilter" class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">Estado de Control</label>
+                <select id="controlFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6 print-table-container">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 print:hidden">
-                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tabla Operativa Activa</span>
-                <button onclick="imprimirListadoCompleto()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs">
-                    <i class="fa-solid fa-print"></i> Imprimir Listado Completo
+        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Focos de Criticidad y Alerta Siniestral
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-red-500 flex flex-col justify-between shadow-lg">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lesiones por Accidente</span>
+                    <h3 class="text-2xl font-black text-red-400 tracking-tight" id="topCountLesiones">0 casos</h3>
+                </div>
+                <div class="mt-4 pt-2 border-t border-slate-900">
+                    <p class="text-xs font-semibold text-slate-400 truncate" id="topDivisionLesiones">Buscando...</p>
+                </div>
+            </div>
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-purple-500 flex flex-col justify-between shadow-lg">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Pta. Inf. Ley 12569</span>
+                    <h3 class="text-2xl font-black text-purple-400 tracking-tight" id="topCountLey">0 casos</h3>
+                </div>
+                <div class="mt-4 pt-2 border-t border-slate-900">
+                    <p class="text-xs font-semibold text-slate-400 truncate" id="topDivisionLey">Buscando...</p>
+                </div>
+            </div>
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-amber-500 flex flex-col justify-between shadow-lg">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Abandono de Servicio</span>
+                    <h3 class="text-2xl font-black text-amber-400 tracking-tight" id="topCountAbandono">0 casos</h3>
+                </div>
+                <div class="mt-4 pt-2 border-t border-slate-900">
+                    <p class="text-xs font-semibold text-slate-400 truncate" id="topDivisionAbandono">Buscando...</p>
+                </div>
+            </div>
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-blue-500 flex flex-col justify-between shadow-lg">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Móviles Dañados</span>
+                    <h3 class="text-2xl font-black text-blue-400 tracking-tight" id="topCountMovil">0 móviles</h3>
+                </div>
+                <div class="mt-4 pt-2 border-t border-slate-900">
+                    <p class="text-xs font-semibold text-slate-400 truncate" id="topDivisionMovil">Buscando...</p>
+                </div>
+            </div>
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-emerald-500 flex flex-col justify-between shadow-lg">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Cria Instructora Líder</span>
+                    <h3 class="text-2xl font-black text-emerald-400 tracking-tight" id="topCountDependencia">0 casos</h3>
+                </div>
+                <div class="mt-4 pt-2 border-t border-slate-900">
+                    <p class="text-[11px] font-bold text-slate-300 truncate" id="topNombreDependencia" title="Buscando...">Buscando...</p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-indigo-500"></i> Métricas Clave del Flujo Operativo
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-indigo-500 flex flex-col justify-between shadow-sm">
+                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1" id="lblKpiAnual">Intervenciones Año</span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <h2 class="text-4xl font-black text-white tracking-tight leading-none" id="kpiTotalAnual">0</h2>
+                    <div class="text-indigo-400 bg-indigo-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-calendar"></i></div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60">Registros consolidados</p>
+            </div>
+            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-violet-500 flex flex-col justify-between shadow-sm">
+                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1" id="lblKpiComparativaAnual">Vs. Año Anterior</span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <h2 class="text-4xl font-black text-white tracking-tight leading-none" id="kpiTotalAnoAnterior">0</h2>
+                    <div class="text-violet-400 bg-violet-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-right-left"></i></div>
+                </div>
+                <p class="text-[11px] font-bold mt-3 pt-2 border-t border-slate-900/60" id="kpiVariacionAnual">0% var.</p>
+            </div>
+            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-emerald-500 flex flex-col justify-between shadow-sm">
+                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1" id="lblKpiMensual">Intervenciones Mes Actual</span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <h2 class="text-4xl font-black text-emerald-400 tracking-tight leading-none" id="kpiTotalMensual">0</h2>
+                    <div class="text-emerald-400 bg-emerald-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-clock"></i></div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60">Casos en periodo operativo</p>
+            </div>
+            <div class="bg-slate-950/40 rounded-2xl p-5 border item border-slate-900 border-l-4 border-l-red-500 flex flex-col justify-between shadow-sm">
+                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Mes Máxima Actividad</span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <h2 class="text-2xl font-black text-red-400 tracking-tight leading-none" id="kpiMesMaximo">S/D</h2>
+                    <div class="text-red-400 bg-red-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-fire"></i></div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60" id="kpiMesMaximoDetalle">0 actuaciones</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-slate-950 to-slate-900 rounded-2xl p-5 border border-amber-500/30 border-l-4 border-l-amber-500 flex flex-col justify-between shadow-xl">
+                <span class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt animate-pulse"></i> Última Novedad Base
+                </span>
+                <div>
+                    <h2 class="text-lg font-mono font-black text-white tracking-tight mt-1" id="kpiUltimoSirex">S/D</h2>
+                    <p class="text-[11px] text-slate-400 font-medium mt-0.5 truncate max-w-[220px]" id="kpiUltimoDetalle">Sincronizando...</p>
+                </div>
+                <p class="text-[10px] text-slate-500 font-mono pt-2 border-t border-slate-900" id="kpiUltimaFecha">Fecha: --/--/----</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-950/30 rounded-2xl border border-slate-900 overflow-hidden mb-6 shadow-2xl print-table-container">
+            <div class="p-4 border-b border-slate-900 flex justify-between items-center bg-slate-950/80 print:hidden">
+                <span class="text-xs font-black tracking-widest text-slate-400 uppercase">Tabla Operativa Sumarial Activa</span>
+                <button onclick="imprimirListadoCompleto()" class="bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2 border border-slate-800 cursor-pointer transition-colors">
+                    <i class="fa-solid fa-print text-amber-500"></i> Imprimir Todo el Historial
                 </button>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-slate-500 min-w-[1550px] table-fixed">
-                    <thead class="text-xs text-slate-700 uppercase bg-gray-100">
+                <table class="w-full text-xs text-left text-slate-400 min-w-[1550px] table-fixed">
+                    <thead class="text-xs text-slate-400 uppercase bg-slate-950/60 font-mono tracking-wider border-b border-slate-900">
                         <tr>
-                            <th class="px-3 py-3 w-[100px]">SIREX N°</th>
-                            <th class="px-3 py-3 w-[110px]">FECHA INICIO</th>
-                            <th class="px-3 py-3 w-[120px]">EXPEDIENTE N°</th>
-                            <th class="px-3 py-3 w-[200px]">DEP. INSTRUCTORA</th>
-                            <th class="px-3 py-3 w-[120px]">FBA INTERV.</th>
-                            <th class="px-3 py-3 w-[250px]">CARATULA</th>
-                            <th class="px-3 py-3 w-[150px]">ELEMENTO DAÑADO</th> 
-                            <th class="px-3 py-3 w-[290px]">VICTIMA / DESTINO DE LA VICTIMA</th>
-                            <th class="px-3 py-3 w-[290px]">IMPUTADO / DESTINO DEL IMPUTADO</th>
-                            <th class="px-3 py-3 w-[120px]">CONTROL</th> 
+                            <th class="px-4 py-3.5 w-[100px]">SIREX N°</th>
+                            <th class="px-4 py-3.5 w-[110px]">FECHA INICIO</th>
+                            <th class="px-4 py-3.5 w-[130px]">EXPEDIENTE N°</th>
+                            <th class="px-4 py-3.5 w-[220px]">DEP. INSTRUCTORA</th>
+                            <th class="px-4 py-3.5 w-[130px]">FBA INTERV.</th>
+                            <th class="px-4 py-3.5 w-[250px]">CARATULA SUMARIAL</th>
+                            <th class="px-4 py-3.5 w-[150px]">ELEMENTO DAÑADO</th> 
+                            <th class="px-4 py-3.5 w-[290px]">VICTIMA / DESTINO</th>
+                            <th class="px-4 py-3.5 w-[290px]">IMPUTADO / DESTINO</th>
+                            <th class="px-4 py-3.5 w-[120px]">CONTROL</th> 
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-200 text-slate-700"></tbody>
+                    <tbody id="tableBody" class="divide-y divide-slate-900/60 text-slate-300 bg-slate-950/10"></tbody>
                 </table>
             </div>
             
-            <div class="p-4 flex items-center justify-between border-t border-slate-200 bg-slate-50 text-xs print:hidden">
-                <div class="flex items-center gap-1.5">
-                    <button id="btnFirst" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-angles-left text-[10px]"></i> Primera</button>
-                    <button id="btnPrev" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1"><i class="fa-solid fa-angle-left text-[10px]"></i> Anterior</button>
+            <div class="p-4 flex items-center justify-between border-t border-slate-900 bg-slate-950/40 text-xs print:hidden">
+                <div class="flex items-center gap-2">
+                    <button id="btnFirst" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors"><i class="fa-solid fa-angles-left text-[10px]"></i> Primera</button>
+                    <button id="btnPrev" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors"><i class="fa-solid fa-angle-left text-[10px]"></i> Anterior</button>
                 </div>
-                
-                <span id="pageIndicator" class="font-semibold text-gray-600 font-mono">Página 1 de 1</span>
-                
-                <div class="flex items-center gap-1.5">
-                    <button id="btnNext" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1">Siguiente <i class="fa-solid fa-angle-right text-[10px]"></i></button>
-                    <button id="btnLast" class="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg font-medium shadow-xs disabled:opacity-40 hover:bg-gray-100 cursor-pointer flex items-center gap-1">Última <i class="fa-solid fa-angles-right text-[10px]"></i></button>
+                <span id="pageIndicator" class="font-bold text-slate-400 font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">Página 1 de 1</span>
+                <div class="flex items-center gap-2">
+                    <button id="btnNext" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors">Siguiente <i class="fa-solid fa-angle-right text-[10px]"></i></button>
+                    <button id="btnLast" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors">Última <i class="fa-solid fa-angles-right text-[10px]"></i></button>
                 </div>
-            </div>
-        </div>
-
-        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Lesiones por Accidente</span>
-                    <h3 class="text-2xl font-black text-red-600 tracking-tight" id="topCountLesiones">0 actuacion/es</h3>
-                </div>
-                <div class="mt-3 pt-2 border-t border-slate-100">
-                    <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLesiones">Buscando...</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-purple-500 flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Pta Inf Ley 12569</span>
-                    <h3 class="text-2xl font-black text-purple-600 tracking-tight" id="topCountLey">0 actuacion/es</h3>
-                </div>
-                <div class="mt-3 pt-2 border-t border-slate-100">
-                    <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionLey">Buscando...</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-amber-500 flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Abandono de Servicio</span>
-                    <h3 class="text-2xl font-black text-amber-600 tracking-tight" id="topCountAbandono">0 actuaciones</h3>
-                </div>
-                <div class="mt-3 pt-2 border-t border-slate-100">
-                    <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionAbandono">Buscando...</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-blue-600 flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Móviles Dañados</span>
-                    <h3 class="text-2xl font-black text-blue-600 tracking-tight" id="topCountMovil">0 moviles dañado/s</h3>
-                </div>
-                <div class="mt-3 pt-2 border-t border-slate-100">
-                    <p class="text-xs font-bold text-slate-700 truncate" id="topDivisionMovil">Buscando...</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-emerald-500 flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Cria Instructora Líder</span>
-                    <h3 class="text-2xl font-black text-emerald-600 tracking-tight" id="topCountDependencia">0 actuaciones</h3>
-                </div>
-                <div class="mt-3 pt-2 border-t border-slate-100">
-                    <p class="text-[10px] font-bold text-slate-700 leading-tight whitespace-normal break-words" id="topNombreDependencia" title="Buscando...">Buscando...</p>
-                </div>
-            </div>
-        </div>
-
-        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Métricas Clave del Flujo Operativo</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-600 flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1" id="lblKpiAnual">Intervenciones del Año</span>
-                <div class="flex items-baseline justify-between">
-                    <h2 class="text-5xl font-black text-slate-900 tracking-tight leading-none my-2" id="kpiTotalAnual">0</h2>
-                    <div class="text-indigo-500 bg-indigo-50 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-calendar"></i></div>
-                </div>
-                <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100">Registros consolidados</p>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-violet-600 flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1" id="lblKpiComparativaAnual">Vs. Año Anterior</span>
-                <div class="flex items-baseline justify-between">
-                    <h2 class="text-5xl font-black text-slate-900 tracking-tight leading-none my-2" id="kpiTotalAnoAnterior">0</h2>
-                    <div class="text-violet-500 bg-violet-50 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-right-left"></i></div>
-                </div>
-                <p class="text-[11px] text-slate-500 font-bold pt-1 border-t border-slate-100" id="kpiVariacionAnual">0% var.</p>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-emerald-500 flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1" id="lblKpiMensual">Intervenciones Mes Actual</span>
-                <div class="flex items-baseline justify-between">
-                    <h2 class="text-5xl font-black text-emerald-600 tracking-tight leading-none my-2" id="kpiTotalMensual">0</h2>
-                    <div class="text-emerald-500 bg-emerald-50 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-clock"></i></div>
-                </div>
-                <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100">Casos en el periodo operativo</p>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500 flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Mes Máxima Actividad</span>
-                <div class="flex items-baseline justify-between">
-                    <h2 class="text-3xl font-black text-red-600 tracking-tight leading-none my-2.5" id="kpiMesMaximo">S/D</h2>
-                    <div class="text-red-500 bg-red-50 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-fire"></i></div>
-                </div>
-                <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100" id="kpiMesMaximoDetalle">0 actuacion/es</p>
-            </div>
-            
-            <div class="bg-slate-900 text-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500 flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wide block mb-1">
-                    <i class="fa-solid fa-bolt text-xs animate-pulse mr-1"></i>Último Registro Cargado
-                </span>
-                <div>
-                    <h2 class="text-xl font-mono font-black text-white tracking-tight mt-1" id="kpiUltimoSirex">S/D</h2>
-                    <p class="text-[11px] text-slate-300 font-medium mt-1 truncate" id="kpiUltimoDetalle">Buscando novedad...</p>
-                </div>
-                <p class="text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-800" id="kpiUltimaFecha">Fecha: --/--/----</p>
             </div>
         </div>
 
         <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
-                <div class="flex justify-between items-center mb-3">
-                    <h4 class="text-sm font-bold text-slate-700 uppercase flex items-center gap-2">
-                        <i class="fa-solid fa-business-time text-sky-500 print:hidden"></i> Top Delitos: Mes Año Actual vs Año Anterior
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-business-time text-sky-400"></i> Distribución de Tipificaciones: Mes Actual vs Anterior
                     </h4>
-                    <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono font-bold" id="lblGraficoMes">Evolución</span>
+                    <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded font-mono font-bold uppercase tracking-wider" id="lblGraficoMes">Evolución</span>
                 </div>
                 <div class="h-72"><canvas id="chartMonthComparison"></canvas></div>
             </div>
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
-                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-emerald-600 print:hidden"></i> Evolución Mensual Comparada con Año Anterior
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-emerald-400"></i> Desglose Temporal y Porcentual de Cambios
                 </h4>
-                <div class="overflow-y-auto max-h-72">
-                    <table class="w-full text-xs text-left text-slate-600">
-                        <thead class="bg-slate-50 text-slate-700 uppercase font-bold sticky top-0">
+                <div class="overflow-y-auto max-h-72 border border-slate-900 rounded-xl">
+                    <table class="w-full text-xs text-left text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 font-mono uppercase tracking-wider sticky top-0 border-b border-slate-900">
                             <tr>
-                                <th class="p-2">Carátula / Tipificación</th>
-                                <th class="p-2 text-center" id="thAnoAnterior">Mes Año Ant.</th>
-                                <th class="p-2 text-center bg-amber-50" id="thAnoActual">Mes Año Act.</th>
-                                <th class="p-2 text-center">Evolución (%)</th>
+                                <th class="p-3">Carátula / Tipificación</th>
+                                <th class="p-3 text-center" id="thAnoAnterior">Mes Año Ant.</th>
+                                <th class="p-3 text-center bg-amber-500/5 text-amber-400" id="thAnoActual">Mes Año Act.</th>
+                                <th class="p-3 text-center">Evolución (%)</th>
                             </tr>
                         </thead>
-                        <tbody id="comparativeTableBody" class="divide-y divide-slate-100"></tbody>
+                        <tbody id="comparativeTableBody" class="divide-y divide-slate-900"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 lg:col-span-2">
-                <h4 class="text-sm font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-palette text-indigo-500 print:hidden"></i> Concentración por FBA Interviniente
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg lg:col-span-2">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-palette text-indigo-400"></i> Densidad de Casos por División FBA Interviniente
                 </h4>
                 <div class="h-64"><canvas id="chartFBA"></canvas></div>
             </div>
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
-                <h4 class="text-sm font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-filter-list text-purple-500 print:hidden"></i> Estado de Control Resolutivo
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-filter text-purple-400"></i> Porcentaje de Resolución Operativa (Control)
                 </h4>
                 <div class="h-64 flex justify-center"><canvas id="chartControl"></canvas></div>
             </div>
         </div>
 
         <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Análisis Temporal y de Evolución del Flujo Operativo</h3>
-            <span class="text-[11px] text-blue-600 font-semibold bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100" id="lblMesEnCursoLimit"></span>
+            <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Histograma Histórico y Líneas de Carga Global
+            </h3>
+            <span class="text-[11px] text-blue-400 font-mono font-bold bg-blue-500/10 px-3 py-1 rounded-md border border-blue-500/20" id="lblMesEnCursoLimit"></span>
         </div>
         
         <div class="flex flex-col gap-6 mb-6">
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
-                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5">
-                    <i class="fa-solid fa-chart-area text-indigo-500 print:hidden"></i> Métricas Mensuales Históricas Comparadas (Todos los Años de la Base)
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg w-full">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-area text-indigo-400"></i> Serie de Tiempo Comparativa Unificada (Años Detectados en Base)
                 </h4>
                 <div class="h-80"><canvas id="chartAllYearsMonthly"></canvas></div>
             </div>
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
-                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5" id="titleCurrentYearInterventions">
-                    <i class="fa-solid fa-chart-bar text-emerald-500 print:hidden"></i> Intervenciones por Mes (Año Actual)
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg w-full">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2" id="titleCurrentYearInterventions">
+                    <i class="fa-solid fa-chart-bar text-emerald-400"></i> Distribución Estacional de Carga
                 </h4>
                 <div class="h-80"><canvas id="chartCurrentYearMonthly"></canvas></div>
             </div>
-            <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100 w-full">
-                <h4 class="text-sm font-bold text-slate-700 uppercase mb-3 flex items-center gap-1.5">
-                    <i class="fa-solid fa-line-chart text-blue-500 print:hidden"></i> Línea de Evolución Mensual del Año Seleccionado
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg w-full">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-wave-square text-blue-400"></i> Vector de Tendencia del Período Seleccionado
                 </h4>
                 <div class="h-80"><canvas id="chartEvolutionLine"></canvas></div>
             </div>
         </div>
     </main>
 
-    <div id="welcomeScreen" class="max-w-md mx-auto mt-20 text-center p-8 bg-white rounded-xl shadow-sm border border-slate-200">
-        <i class="fa-solid fa-circle-nodes text-5xl text-blue-600 mb-4 animate-spin"></i>
-        <h2 class="text-xl font-bold text-slate-800 mb-2">Estableciendo Sincronización</h2>
-        <p class="text-sm text-slate-500 mb-6">Conectando de forma directa y procesando la estructura de datos...</p>
+    <div id="welcomeScreen" class="max-w-md mx-auto mt-32 text-center p-8 bg-slate-950 rounded-2xl border border-slate-900 shadow-2xl transition-all duration-300">
+        <i class="fa-solid fa-shield-halved text-5xl text-amber-500 mb-4 animate-pulse"></i>
+        <h2 class="text-lg font-black text-white tracking-wider uppercase mb-2">Iniciando Terminal de Analítica</h2>
+        <p class="text-xs text-slate-400 mb-6 font-mono">Bypasseando caché y mapeando variables estructurales...</p>
     </div>
 
     <script>
@@ -313,25 +327,26 @@
         let topCaratulasPorFBA = {};
         let topCaratulasPorMesActual = {};
 
+        // Paletas de diseño oscuras de alto contraste
         const colorPalette = [
             'rgba(59, 130, 246, 0.85)', 'rgba(245, 158, 11, 0.85)', 'rgba(16, 185, 129, 0.85)',
             'rgba(139, 92, 246, 0.85)', 'rgba(239, 68, 68, 0.85)', 'rgba(236, 72, 153, 0.85)'
         ];
 
         const paletaMulticolor12Meses = [
-            'rgba(59, 130, 246, 0.85)', 'rgba(16, 185, 129, 0.85)', 'rgba(245, 158, 11, 0.85)', 
-            'rgba(139, 92, 246, 0.85)', 'rgba(239, 68, 68, 0.85)', 'rgba(6, 182, 212, 0.85)', 
-            'rgba(236, 72, 153, 0.85)', 'rgba(100, 116, 139, 0.85)', 'rgba(168, 85, 247, 0.85)', 
-            'rgba(20, 184, 166, 0.85)', 'rgba(234, 179, 8, 0.85)', 'rgba(249, 115, 22, 0.85)'
+            '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', 
+            '#ec4899', '#64748b', '#a855f7', '#14b8a6', '#eab308', '#f97316'
         ];
 
         const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         const ENLACE_BASE_INPUT = 'https://docs.google.com/spreadsheets/d/1jIAiLNjiwSnGrdBeiJ_ie5TRcDh8ocIuSTTvIYP9_5A/edit?usp=sharing';
 
-        // PARSER DE FECHAS DE ALTA FIABILIDAD CONTRA CELDAS COMPUESTAS O DOBLES
+        // MOTOR EXTRACTOR DE FECHAS SOBERANO: PARSEA FORMATOS LATINOS Y FORMATOS NATIVOS DE EXPORTACIÓN GOOGLE (AAAA-MM-DD)
         function extraerMesYAño(fechaStr) {
             if (!fechaStr) return { mes: NaN, año: NaN };
+            
+            // Forzar solo la primera línea por si la celda trae saltos de línea con historial
             let stringLimpio = fechaStr.toString().split(/[\r\n]+/)[0].trim();
             stringLimpio = stringLimpio.replace(/[-.]/g, '/');
             if (stringLimpio.includes(" ")) { stringLimpio = stringLimpio.split(" ")[0]; }
@@ -343,11 +358,14 @@
             let p1 = parseInt(partes[1], 10);
             let p2 = parseInt(partes[2], 10);
             
-            if (partes[0].length === 4) return { mes: p1, año: p0 }; // Formato AAAA/MM/DD
-            return { mes: p1, año: p2 }; // Formato DD/MM/AAAA
+            // Si el bloque 0 tiene 4 dígitos significa que vino en formato ISO AAAA/MM/DD nativo de Sheets export
+            if (partes[0].length === 4) {
+                return { mes: p1, año: p0 };
+            }
+            // Formato normal DD/MM/AAAA
+            return { mes: p1, año: p2 };
         }
 
-        // CONEXIÓN DIRECTA CON BYPASS DE CACHÉ
         async function cargarDesdeSheets() {
             try {
                 let targetUrl = ENLACE_BASE_INPUT;
@@ -361,9 +379,9 @@
                 const textData = await res.text();
                 
                 processCSV(textData);
-                setStatus('fa-circle-check', 'text-green-400', 'Conectado — BASE SIREX', 'Datos procesados correctamente');
+                setStatus('fa-circle-check', 'text-green-400', 'CONEXIÓN ESTABLE', 'Estructura lógica sumarial validada');
             } catch (err) {
-                setStatus('fa-triangle-exclamation', 'text-red-400', 'Error de enlace', 'Verifique los accesos compartidos');
+                setStatus('fa-triangle-exclamation', 'text-red-400', 'FALLO DE ENLACE', 'Verifique permisos del enlace');
                 console.error(err);
             }
         }
@@ -391,23 +409,27 @@
             return lines;
         }
 
+        // EMERGEN LAS RESOLUCIONES LÓGICAS DE MAPEO DIRECTO DE CABECERAS ORIGINALES DEL CSV ADJUNTADO
         function processCSV(text) {
             const rows = parseCSV(text);
             if (rows.length < 2) return;
 
-            const headers = rows[0].map(h => h.trim().toUpperCase().replace(/\s+/g, ' '));
-            const idxSirex = headers.findIndex(h => h.includes("SIREX"));
-            const idxFecha = headers.findIndex(h => h.includes("FECHA") || h.includes("F INICIO"));
+            // Sanitizar cabeceras removiendo espacios invisibles que rompen el indexado
+            const headers = rows[0].map(h => h.toString().trim().toUpperCase().replace(/\s+/g, ' '));
+            
+            const idxSirex = headers.findIndex(h => h.startsWith("SIREX"));
+            const idxFecha = headers.findIndex(h => h.includes("FECHA"));
             const idxExp = headers.findIndex(h => h.includes("EXPEDIENTE"));
-            const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA"));
-            const idxFba = headers.findIndex(h => h.includes("FBA") || h.includes("INTERVINIENTE"));
+            const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA INSTRUCTORA"));
+            const idxFba = headers.findIndex(h => h.includes("FBA INTERVINIENTE"));
             const idxCara = headers.findIndex(h => h.includes("CARATULA"));
-            const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO DAÑADO") || (h.includes("DAÑADO") && !h.includes("INCAUTADO")));
-            const idxCont = headers.findIndex(h => h.includes("CONTROL"));
+            const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO DAÑADO"));
+            const idxCont = headers.findIndex(h => h.trim() === "CONTROL");
+            
             const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
-            const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA") || h.includes("DESTINO VICTIMA"));
+            const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA"));
             const idxImputado = headers.findIndex(h => h.trim() === "IMPUTADO");
-            const idxDestinoImputado = headers.findIndex(h => h.includes("DESTINO DEL IMPUTADO") || h.includes("DESTINO IMPUTADO"));
+            const idxDestinoImputado = headers.findIndex(h => h.includes("DESTINO DEL IMPUTADO"));
 
             rawData = [];
 
@@ -428,7 +450,7 @@
                     fba: r[idxFba]?.trim() || 'NINGUNO', 
                     caratula: r[idxCara]?.trim() || 'S/D',
                     elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', 
-                    control: r[idxCont]?.trim() || 'NINGUNO',
+                    control: idxCont !== -1 ? (r[idxCont]?.trim() || 'NINGUNO') : 'NINGUNO',
                     victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
                     destinoVictima: idxDestinoVictima !== -1 ? (r[idxDestinoVictima]?.trim() || 'S/D') : 'S/D',
                     imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D',
@@ -436,16 +458,15 @@
                 });
             }
 
-            // CARGA DE TARJETA INTELIGENTE: EXTRAER ÚLTIMO REGISTRO DE LA BASE DE DATOS DIRECTAMENTE
+            // TARJETA INTELIGENTE: EXTRAER EN TIEMPO REAL EL ÚLTIMO REGISTRO REAL VÁLIDO DE LA PLANILLA
             if(rawData.length > 0) {
                 const ultimoRegistro = rawData[rawData.length - 1];
-                document.getElementById('kpiUltimoSirex').textContent = `SIREX: ${ultimoRegistro.sirex}`;
+                document.getElementById('kpiUltimoSirex').textContent = `${ultimoRegistro.sirex}`;
                 document.getElementById('kpiUltimoDetalle').textContent = `${ultimoRegistro.caratula}`;
                 document.getElementById('kpiUltimoDetalle').setAttribute('title', ultimoRegistro.caratula);
                 
-                // Limpiar la fecha de novedades para mostrar solo la fecha limpia en el pie de la tarjeta
                 const fechaLimpiaUltimo = ultimoRegistro.fecha.toString().split(/[\r\n]+/)[0].trim();
-                document.getElementById('kpiUltimaFecha').textContent = `Inicio: ${fechaLimpiaUltimo}`;
+                document.getElementById('kpiUltimaFecha').textContent = `F. Inicio: ${fechaLimpiaUltimo}`;
             }
 
             inicializarDashboard();
@@ -474,8 +495,8 @@
             buildSelectOptions('delitoFilter', delitos, true);
             buildSelectOptions('controlFilter', controles, true);
 
-            const selectAno = document.getElementById('anoFilter');
-            selectAno.innerHTML = '';
+            const selectAno = document.getElementById('anoFilter'); selectAno.innerHTML = '';
+            // Forzar que el año más nuevo (2026) quede arriba por defecto
             Array.from(anos).sort((a,b)=>b-a).forEach(val => {
                 const opt = document.createElement('option'); opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
             });
@@ -553,18 +574,15 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("lesiones por accidente. art 331"));
-            document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
+            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("lesiones"));
+            document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuaciones`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            const ley = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("presunta infraccion ley 12569"));
-            document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
-            document.getElementById('topDivisionLey').textContent = ley.division;
+            const ley = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("12569"));
+            document.getElementById('topCountLey').textContent = `${ley.total} actuaciones`;
+            document.getElementById('topDivisionLey').textContent = lesiones.total > 0 ? ley.division : "Sin registros";
 
-            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
-                const caratulaNorm = (i.caratula || '').toLowerCase();
-                return caratulaNorm.includes("abandono de servicio") || caratulaNorm.includes("abandono de servicio mas de 72 horas. art 198 inc a");
-            });
+            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("abandono"));
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
@@ -578,28 +596,28 @@
             const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
             let fbaMasAfectado = 'Ninguna', conteoFbaEspecifico = 0;
             if (fbaSiniestradoOrdenado.length > 0) { fbaMasAfectado = fbaSiniestradoOrdenado[0][0]; conteoFbaEspecifico = fbaSiniestradoOrdenado[0][1]; }
-            document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
+            document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} dañados`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
 
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
-                if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '' && !dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && dep.includes("CRIA")) {
+                if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '' && dep.includes("CRIA")) {
                     depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1;
                 }
             });
             const sortedDeps = Object.entries(depCounts).sort((a, b) => b[1] - a[1]);
             if (sortedDeps.length > 0) {
-                document.getElementById('topCountDependencia').textContent = `${sortedDeps[0][1]} actuaciones`;
+                document.getElementById('topCountDependencia').textContent = `${sortedDeps[0][1]} casos`;
                 document.getElementById('topNombreDependencia').textContent = sortedDeps[0][0];
             } else {
-                document.getElementById('topCountDependencia').textContent = `0 actuaciones`;
+                document.getElementById('topCountDependencia').textContent = `0 casos`;
                 document.getElementById('topNombreDependencia').textContent = `Ninguna`;
             }
 
-            // --- COMPUTACIÓN BASADA EN FECHA DE SISTEMA REAL EN CURSO ---
+            // --- SINCRONIZACIÓN TEMPORAL EXACTA AUTOMÁTICA ---
             const hoy = new Date();
-            const mesLimiteEnCurso = hoy.getMonth() + 1;
+            const mesLimiteEnCurso = hoy.getMonth() + 1; 
             const añoActualReal = hoy.getFullYear();
 
             document.getElementById('lblMesEnCursoLimit').textContent = (anoSeleccionado === añoActualReal)
@@ -618,7 +636,7 @@
             let variacionPorcentual = 0; if (totalAñoAnteriorGlobal > 0) variacionPorcentual = ((totalAñoActualFiltrado - totalAñoAnteriorGlobal) / totalAñoAnteriorGlobal) * 100;
             const elKpiVariacion = document.getElementById('kpiVariacionAnual');
             elKpiVariacion.textContent = `${variacionPorcentual >= 0 ? '+' : ''}${variacionPorcentual.toFixed(1)}% var.`;
-            elKpiVariacion.className = variacionPorcentual > 0 ? "text-[11px] text-red-600 font-bold pt-1 border-t border-slate-100" : "text-[11px] text-emerald-600 font-bold pt-1 border-t border-slate-100";
+            elKpiVariacion.className = variacionPorcentual > 0 ? "text-[11px] text-red-400 font-bold pt-1 border-t border-slate-900" : "text-[11px] text-emerald-400 font-bold pt-1 border-t border-slate-900";
 
             document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
@@ -627,9 +645,8 @@
             let mesMaximo = 1, valorMaximo = 0;
             for(let m = 1; m <= 12; m++) { if(conteoPorMes[m] > valorMaximo) { valorMaximo = conteoPorMes[m]; mesMaximo = m; } }
             document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].toUpperCase() : 'S/D';
-            document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
+            document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuaciones` : '0 actuaciones';
 
-            // RENDER DE GRÁFICOS COMPARATIVOS
             renderizarGraficosYTablas(anoSeleccionado, mesLimiteEnCurso, dataAnoActualGlobal);
         }
 
@@ -642,8 +659,8 @@
             const dataMesAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1) && i.mes === mesLimiteEnCurso);
             const conteoDelitosActual = {}, conteoDelitosAnterior = {};
             
-            dataMesAñoActualGlobal.forEach(i => { if(i.caratula) { const c = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula; conteoDelitosActual[c] = (conteoDelitosActual[c] || 0) + 1; } });
-            dataMesAñoAnteriorGlobal.forEach(i => { if(i.caratula) { const c = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula; conteoDelitosAnterior[c] = (conteoDelitosAnterior[c] || 0) + 1; } });
+            dataMesAñoActualGlobal.forEach(i => { if(i.caratula) { const c = i.caratula; conteoDelitosActual[c] = (conteoDelitosActual[c] || 0) + 1; } });
+            dataMesAñoAnteriorGlobal.forEach(i => { if(i.caratula) { const c = i.caratula; conteoDelitosAnterior[c] = (conteoDelitosAnterior[c] || 0) + 1; } });
 
             const todasLasCaratulasMes = new Set([...Object.keys(conteoDelitosActual), ...Object.keys(conteoDelitosAnterior)]);
             const listaComparativaOrdenada = Array.from(todasLasCaratulasMes).map(caratula => {
@@ -656,20 +673,20 @@
 
             listaComparativaOrdenada.forEach(fila => {
                 const tr = document.createElement('tr');
-                let badgeClase = fila.difPorc > 0 ? 'bg-red-50 text-red-600 font-bold' : (fila.difPorc < 0 ? 'bg-emerald-50 text-emerald-600 font-bold' : 'bg-gray-100 text-gray-700');
-                tr.innerHTML = `<td class="p-2 font-medium truncate max-w-xs text-slate-800">${fila.caratula}</td><td class="p-2 text-center font-semibold">${fila.ant}</td><td class="p-2 text-center font-bold bg-amber-50/60">${fila.act}</td><td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${fila.ant===0?'Nuevo':(fila.difPorc>=0?'+':'')+fila.difPorc.toFixed(0)+'%'}</span></td>`;
+                let badgeClase = fila.difPorc > 0 ? 'bg-red-500/10 text-red-400 font-bold border border-red-500/20' : (fila.difPorc < 0 ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20' : 'bg-slate-900 text-slate-400');
+                tr.innerHTML = `<td class="p-3 font-medium truncate max-w-xs text-white">${fila.caratula}</td><td class="p-3 text-center font-semibold text-slate-400">${fila.ant}</td><td class="p-3 text-center font-bold bg-amber-500/5 text-amber-400">${fila.act}</td><td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${fila.ant===0?'Nuevo':(fila.difPorc>=0?'+':'')+fila.difPorc.toFixed(0)+'%'}</span></td>`;
                 tbodyComparativo.appendChild(tr);
             });
 
-            // Re-instanciar ChartMonth Comparison
+            // Re-instanciar Grafico Comparativo de Barra
             if (chartMonthComp) chartMonthComp.destroy();
             chartMonthComp = new Chart(document.getElementById('chartMonthComparison'), {
                 type: 'bar',
                 data: {
-                    labels: top5Comparativa.map(x => x.caratula.substring(0, 25) + (x.caratula.length > 25 ? '...' : '')),
-                    datasets: [{ label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`, data: top5Comparativa.map(x => x.ant), backgroundColor: 'rgba(148, 163, 184, 0.65)' }, { label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`, data: top5Comparativa.map(x => x.act), backgroundColor: 'rgba(245, 158, 11, 0.85)' }]
+                    labels: top5Comparativa.map(x => x.caratula.substring(0, 22) + (x.caratula.length > 22 ? '...' : '')),
+                    datasets: [{ label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`, data: top5Comparativa.map(x => x.ant), backgroundColor: '#475569' }, { label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`, data: top5Comparativa.map(x => x.act), backgroundColor: '#f59e0b' }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' } } }, scales: { y: { beginAtZero: true, grid: { display: false } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#94a3b8', boxWidth: 12, font: { size: 10 } } }, datalabels: { anchor: 'end', align: 'top', color: '#f8fafc', font: { size: 9, weight: 'bold' } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#64748b' } } } }
             });
 
             // Concentración FBA
@@ -680,8 +697,8 @@
             if (chartFBA) chartFBA.destroy();
             chartFBA = new Chart(document.getElementById('chartFBA'), {
                 type: 'bar',
-                data: { labels: sortedFba.map(x => x[0]), datasets: [{ data: sortedFba.map(x => x[1]), backgroundColor: colorPalette }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Top Delito: ${topCaratulasPorFBA[ctx[0].label] || 'S/D'}` } } } }
+                data: { labels: sortedFba.map(x => x[0]), datasets: [{ data: sortedFba.map(x => x[1]), backgroundColor: '#3b82f6' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Top Delito: ${topCaratulasPorFBA[ctx[0].label] || 'S/D'}` } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } }
             });
 
             // Control resolutivo doughnut
@@ -689,26 +706,26 @@
             if (chartControl) chartControl.destroy();
             chartControl = new Chart(document.getElementById('chartControl'), {
                 type: 'doughnut',
-                data: { labels: Object.keys(controlCounts), datasets: [{ data: Object.values(controlCounts), backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6'] }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: { formatter: (val, ctx) => { let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d); return `${((val*100) / sum).toFixed(0)}%`; }, color: '#fff', font: { weight: 'bold', size: 11 } } } }
+                data: { labels: Object.keys(controlCounts), datasets: [{ data: Object.values(controlCounts), backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } }, datalabels: { formatter: (val, ctx) => { let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d); return `${((val*100) / sum).toFixed(0)}%`; }, color: '#fff', font: { weight: 'bold', size: 11 } } } }
             });
 
             // Históricos
             const matrizAnos = {}; rawData.forEach(item => { if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) { if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0); matrizAnos[item.año][item.mes]++; } });
             const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, idx) => ({ label: `Año ${año}`, data: matrizAnos[año].slice(1), borderColor: paletaMulticolor12Meses[idx % paletaMulticolor12Meses.length], backgroundColor: 'transparent', borderWidth: 2, tension: 0.2, pointRadius: 3 }));
             if (chartAllYears) chartAllYears.destroy();
-            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: datasetsHistoricos }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { display: true, align: 'top', anchor: 'end', color: '#1e293b', font: { size: 10, weight: 'bold' } } } } });
+            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: datasetsHistoricos }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#94a3b8', boxWidth: 12, font: { size: 10 } } }, datalabels: { display: true, align: 'top', anchor: 'end', color: '#94a3b8', font: { size: 9 } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } } });
 
             // Distribución mensual año actual
-            document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500 print:hidden"></i> Distribución de Carga Mensual Unificada (Año ${anoSeleccionado})`;
+            document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-400"></i> Distribución Estacional de Carga Unificada (Año ${anoSeleccionado})`;
             const datasetMesesFiltrado = Array(13).fill(0); filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
             for (let m = 1; m <= 12; m++) { topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(filteredData.filter(i => i.mes === m)); }
             if (chartCurrentYear) chartCurrentYear.destroy();
-            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), { type: 'bar', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), backgroundColor: paletaMulticolor12Meses }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Líder: ${topCaratulasPorMesActual[ctx[0].label] || 'S/D'}` } } } } });
+            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), { type: 'bar', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), backgroundColor: '#10b981' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Líder: ${topCaratulasPorMesActual[ctx[0].label] || 'S/D'}` } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } } });
 
             // Línea de evolución
             if (chartEvolution) chartEvolution.destroy();
-            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#1E3A8A', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top' } } } });
+            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#1e3a8a', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top', color: '#3b82f6' } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } } });
         }
 
         function renderTable() {
@@ -719,7 +736,7 @@
             const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
             if(paginatedItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-600 font-medium font-mono">NINGÚN REGISTRO DETECTADO CON LOS PARÁMETROS FILTRADOS</td></tr>`;
                 document.getElementById('pageIndicator').textContent = "Página 0 de 0";
                 document.getElementById('btnFirst').disabled = true; document.getElementById('btnPrev').disabled = true;
                 document.getElementById('btnNext').disabled = true; document.getElementById('btnLast').disabled = true;
@@ -735,17 +752,17 @@
         }
 
         function generarFilaHTML(item) {
-            const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors";
-            let badgeControlClase = "bg-slate-100 text-slate-700"; const ctrlNorm = (item.control || '').toUpperCase();
-            if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-100 text-emerald-800 font-semibold";
-            if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
-            if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
+            const tr = document.createElement('tr'); tr.className = "hover:bg-slate-900/40 border-b border-slate-900 transition-colors";
+            let badgeControlClase = "bg-slate-800 text-slate-400"; const ctrlNorm = (item.control || '').toUpperCase();
+            if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20";
+            if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20";
+            if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-500/10 text-blue-400 font-semibold border border-blue-500/20";
 
-            const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` : item.victima;
-            const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` : item.imputado;
-            const fechaFormateadaTabla = item.fecha.toString().replace(/[\r\n]+/g, '<br><span class="text-[10px] text-amber-600 font-bold">Novedad:</span> ');
+            const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' ? `${item.victima} — <span class="text-slate-500">Destino: ${item.destinoVictima}</span>` : item.victima;
+            const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' ? `${item.imputado} — <span class="text-slate-500">Destino: ${item.destinoImputado}</span>` : item.imputado;
+            const fechaFormateadaTabla = item.fecha.toString().replace(/[\r\n]+/g, '<br><span class="text-[10px] text-amber-500 font-bold">Novedad:</span> ');
 
-            tr.innerHTML = `<td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td><td class="px-3 py-3 text-slate-700 leading-tight">${fechaFormateadaTabla}</td><td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td><td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td><td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td><td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td><td class="px-3 py-3 text-slate-600 font-medium break-words">${item.elementoDañado}</td><td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td><td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td><td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>`;
+            tr.innerHTML = `<td class="px-4 py-3 font-mono font-bold text-amber-400 overflow-hidden break-all bg-slate-950/20">${item.sirex}</td><td class="px-4 py-3 text-slate-300 leading-tight">${fechaFormateadaTabla}</td><td class="px-4 py-3 font-mono text-slate-400 break-all">${item.expediente}</td><td class="px-4 py-3 text-xs text-slate-300 break-words font-medium" title="${item.dependencia}">${item.dependencia}</td><td class="px-4 py-3"><span class="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-md text-[10px] font-mono block text-center truncate">${item.fba}</span></td><td class="px-4 py-3 font-bold text-white whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td><td class="px-4 py-3 text-slate-400 break-words font-medium">${item.elementoDañado}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10">${textoVictimaCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10">${textoImputadoCompleto}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] block text-center ${badgeControlClase}">${item.control}</span></td>`;
             return tr;
         }
 
@@ -755,7 +772,6 @@
             window.print(); renderTable();
         }
 
-        // Listeners de Paginación
         document.getElementById('btnFirst').addEventListener('click', () => { if (currentPage > 1) { currentPage = 1; renderTable(); } });
         document.getElementById('btnPrev').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
         document.getElementById('btnNext').addEventListener('click', () => { const tp = Math.ceil(filteredData.length / rowsPerPage); if (currentPage < tp) { currentPage++; renderTable(); } });
