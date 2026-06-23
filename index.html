@@ -59,6 +59,7 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
+        <!-- BARRA DE FILTROS -->
         <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 print:hidden">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
@@ -82,6 +83,7 @@
             </div>
         </div>
 
+        <!-- TABLA OPERATIVA -->
         <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6 print-table-container">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 print:hidden">
                 <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tabla Operativa Activa</span>
@@ -124,6 +126,7 @@
             </div>
         </div>
 
+        <!-- KPIs CARD GRID -->
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
@@ -217,6 +220,7 @@
             </div>
         </div>
 
+        <!-- SECCIÓN GRÁFICOS Y COMPARATIVAS -->
         <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
                 <div class="flex justify-between items-center mb-3">
@@ -332,31 +336,34 @@
             document.getElementById('statusSub').textContent = sub;
         }
 
-        // PARSER INDUSTRIAL DE FECHAS - ELIMINA ERRORES DE DETECCIÓN Y FORMATOS MIXTOS (CORS / EXPORT NATIVO)
+        // PARSER INTELIGENTE MULTI-FECHA (SEPARA LA FECHA DE INICIO DE LA DE ÚLTIMA NOVEDAD EN CELDAS COMPUESTAS)
         function extraerMesYAño(fechaStr) {
             if (!fechaStr) return { mes: NaN, año: NaN };
             
-            // Sanitizar la celda de cualquier residuo o salto de línea
-            let limpia = fechaStr.toString().trim().replace(/[\r\n]/g, '').replace(/[-.]/g, '/');
+            // Si la celda contiene saltos de línea (formato celda compuesta), nos quedamos rigurosamente con la primera línea
+            let stringLimpio = fechaStr.toString().split(/[\r\n]+/)[0].trim();
             
-            // Si viene con formato extendido de Google, aislar solo el componente de fecha corta
-            if (limpia.includes(" ")) {
-                limpia = limpia.split(" ")[0];
+            // Si contiene guiones o puntos, los unificamos a barras inclinadas
+            stringLimpio = stringLimpio.replace(/[-.]/g, '/');
+            
+            // Si la celda contiene texto extra o espacios, extraemos el primer bloque que parezca una fecha
+            if (stringLimpio.includes(" ")) {
+                stringLimpio = stringLimpio.split(" ")[0];
             }
 
-            let partes = limpia.split('/');
+            let partes = stringLimpio.split('/');
             if (partes.length !== 3) return { mes: NaN, año: NaN };
             
             let p0 = parseInt(partes[0], 10);
             let p1 = parseInt(partes[1], 10);
             let p2 = parseInt(partes[2], 10);
             
-            // Caso Estructura ISO: AAAA/MM/DD
+            // Detección e inversión de formato nativo ISO (AAAA/MM/DD)
             if (partes[0].length === 4) {
                 return { mes: p1, año: p0 };
             }
             
-            // Caso Estructura Latina Estándar: DD/MM/AAAA
+            // Formato estándar Latinoamericano (DD/MM/AAAA)
             return { mes: p1, año: p2 };
         }
 
@@ -525,7 +532,6 @@
             const selectAno = document.getElementById('anoFilter');
             selectAno.innerHTML = '';
             
-            // Ordenar los años de forma descendente para que 2026 aparezca primero automáticamente
             Array.from(anos).sort((a,b)=>b-a).forEach(val => {
                 const opt = document.createElement('option');
                 opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
@@ -671,7 +677,7 @@
                 document.getElementById('topNombreDependencia').setAttribute('title', `Ninguna`);
             }
 
-            // --- SINCRONIZACIÓN TEMPORAL EXACTA PARA JUNIO 2026 ---
+            // --- COMPUTACIÓN BASADA EN FECHA DE SISTEMA REAL (JUNIO 2026) ---
             const hoy = new Date();
             const mesLimiteEnCurso = hoy.getMonth() + 1; // 6 para Junio
             const añoActualReal = hoy.getFullYear();    // 2026
@@ -683,7 +689,6 @@
             const totalAñoActualFiltrado = filteredData.length;
             const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
             
-            // Cálculo estricto en base al mes y año seleccionados de forma síncrona
             const datosMesActualFiltrados = filteredData.filter(i => i.mes === mesLimiteEnCurso && i.año === anoSeleccionado);
             
             document.getElementById('lblKpiAnual').textContent = `Intervenciones Año ${anoSeleccionado}`;
@@ -1035,9 +1040,12 @@
                 ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
                 : item.imputado;
 
+            // Reemplazo visual estético: en la tabla operativa renderizamos saltos de línea legibles si es compuesta
+            const fechaFormateadaTabla = item.fecha.toString().replace(/[\r\n]+/g, '<br><span class="text-[10px] text-amber-600 font-bold">Novedad:</span> ');
+
             tr.innerHTML = `
                 <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
-                <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
+                <td class="px-3 py-3 text-slate-700 leading-tight">${fechaFormateadaTabla}</td>
                 <td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td>
                 <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
                 <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
