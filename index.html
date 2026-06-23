@@ -11,63 +11,16 @@
     
     <style>
         @media print {
-            @page {
-                size: landscape;
-                margin: 0.5cm;
-            }
-            body {
-                background: white !important;
-                color: black !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            main {
-                max-width: 100% !important;
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            nav, 
-            #welcomeScreen,
-            h3,
-            .grid,
-            .flex-col.gap-6,
-            .mb-6,
-            label,
-            select,
-            #searchFilter,
-            .fa-magnifying-glass,
-            .print\:hidden { 
-                display: none !important; 
-            }
-            .print-table-container {
-                display: block !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            .overflow-x-auto {
-                overflow: visible !important;
-                max-height: none !important;
-            }
-            table {
-                width: 100% !important;
-                table-layout: auto !important; 
-                min-width: 100% !important;
-            }
-            th, td {
-                font-size: 8px !important;
-                padding: 4px !important;
-                word-break: break-word !important;
-            }
-            .bg-white {
-                page-break-inside: auto;
-                border: 1px solid #e2e8f0 !important;
-            }
-            tr {
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
+            @page { size: landscape; margin: 0.5cm; }
+            body { background: white !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            main { max-width: 100% !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            nav, #welcomeScreen, h3, .grid, .flex-col.gap-6, .mb-6, label, select, #searchFilter, .fa-magnifying-glass, .print\:hidden { display: none !important; }
+            .print-table-container { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .overflow-x-auto { overflow: visible !important; max-height: none !important; }
+            table { width: 100% !important; table-layout: auto !important; min-width: 100% !important; }
+            th, td { font-size: 8px !important; padding: 4px !important; word-break: break-word !important; }
+            .bg-white { page-break-inside: auto; border: 1px solid #e2e8f0 !important; }
+            tr { page-break-inside: avoid; break-inside: avoid; }
         }
     </style>
 </head>
@@ -106,7 +59,6 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
-        <!-- BARRA DE FILTROS -->
         <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 print:hidden">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
@@ -130,7 +82,6 @@
             </div>
         </div>
 
-        <!-- TABLA OPERATIVA -->
         <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6 print-table-container">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 print:hidden">
                 <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tabla Operativa Activa</span>
@@ -173,7 +124,6 @@
             </div>
         </div>
 
-        <!-- KPIs CARD GRID -->
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
@@ -267,7 +217,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN GRÁFICOS Y COMPARATIVAS -->
         <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
                 <div class="flex justify-between items-center mb-3">
@@ -383,23 +332,32 @@
             document.getElementById('statusSub').textContent = sub;
         }
 
-        // MOTOR EXTRACTOR DE FECHAS DE ALTA PRECISIÓN (NORMALIZA / , - , AAAA Y DD)
+        // PARSER INDUSTRIAL DE FECHAS - ELIMINA ERRORES DE DETECCIÓN Y FORMATOS MIXTOS (CORS / EXPORT NATIVO)
         function extraerMesYAño(fechaStr) {
             if (!fechaStr) return { mes: NaN, año: NaN };
-            let limpia = fechaStr.toString().trim().replace(/[-.]/g, '/');
+            
+            // Sanitizar la celda de cualquier residuo o salto de línea
+            let limpia = fechaStr.toString().trim().replace(/[\r\n]/g, '').replace(/[-.]/g, '/');
+            
+            // Si viene con formato extendido de Google, aislar solo el componente de fecha corta
+            if (limpia.includes(" ")) {
+                limpia = limpia.split(" ")[0];
+            }
+
             let partes = limpia.split('/');
             if (partes.length !== 3) return { mes: NaN, año: NaN };
             
-            let dia = parseInt(partes[0]);
-            let mes = parseInt(partes[1]);
-            let año = parseInt(partes[2]);
+            let p0 = parseInt(partes[0], 10);
+            let p1 = parseInt(partes[1], 10);
+            let p2 = parseInt(partes[2], 10);
             
-            // Si el primer bloque tiene 4 dígitos, la fecha viene formateada como AAAA/MM/DD
+            // Caso Estructura ISO: AAAA/MM/DD
             if (partes[0].length === 4) {
-                año = parseInt(partes[0]);
-                mes = parseInt(partes[1]);
+                return { mes: p1, año: p0 };
             }
-            return { mes: mes, año: año };
+            
+            // Caso Estructura Latina Estándar: DD/MM/AAAA
+            return { mes: p1, año: p2 };
         }
 
         async function cargarDesdeSheets() {
@@ -566,6 +524,8 @@
 
             const selectAno = document.getElementById('anoFilter');
             selectAno.innerHTML = '';
+            
+            // Ordenar los años de forma descendente para que 2026 aparezca primero automáticamente
             Array.from(anos).sort((a,b)=>b-a).forEach(val => {
                 const opt = document.createElement('option');
                 opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
@@ -596,7 +556,7 @@
         }
 
         function applyFilters() {
-            const anoVal = parseInt(document.getElementById('anoFilter').value);
+            const anoVal = parseInt(document.getElementById('anoFilter').value, 10);
             const fbaVal = document.getElementById('fbaFilter').value;
             const depVal = document.getElementById('depFilter').value;
             const delitoVal = document.getElementById('delitoFilter').value;
@@ -711,10 +671,10 @@
                 document.getElementById('topNombreDependencia').setAttribute('title', `Ninguna`);
             }
 
-            // --- SINCRONIZACIÓN TEMPORAL PERFECTA DEL MES EN CURSO (JUNIO 2026) ---
+            // --- SINCRONIZACIÓN TEMPORAL EXACTA PARA JUNIO 2026 ---
             const hoy = new Date();
-            const mesLimiteEnCurso = hoy.getMonth() + 1; 
-            const añoActualReal = hoy.getFullYear();
+            const mesLimiteEnCurso = hoy.getMonth() + 1; // 6 para Junio
+            const añoActualReal = hoy.getFullYear();    // 2026
 
             document.getElementById('lblMesEnCursoLimit').textContent = (anoSeleccionado === añoActualReal)
                 ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` 
@@ -723,7 +683,7 @@
             const totalAñoActualFiltrado = filteredData.length;
             const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
             
-            // Filtro estricto que calcula solo las filas del mes actual cruzadas con el año seleccionado
+            // Cálculo estricto en base al mes y año seleccionados de forma síncrona
             const datosMesActualFiltrados = filteredData.filter(i => i.mes === mesLimiteEnCurso && i.año === anoSeleccionado);
             
             document.getElementById('lblKpiAnual').textContent = `Intervenciones Año ${anoSeleccionado}`;
