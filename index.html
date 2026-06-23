@@ -86,7 +86,7 @@
             <i id="statusIcon" class="fa-solid fa-spinner fa-spin text-amber-400 text-lg"></i>
             <div>
                 <p id="statusText" class="text-sm font-semibold text-amber-300">Conectando con Base de Datos...</p>
-                <p id="statusSub" class="text-[10px] text-slate-400">BASE SIREX — carga automática</p>
+                <p id="statusSub" class="text-[10px] text-slate-400">Consultando Web App en tiempo real</p>
             </div>
         </div>
     </nav>
@@ -337,9 +337,9 @@
     </main>
 
     <div id="welcomeScreen" class="max-w-md mx-auto mt-20 text-center p-8 bg-white rounded-xl shadow-sm border border-slate-200">
-        <i class="fa-solid fa-file-csv text-5xl text-blue-600 mb-4 animate-pulse"></i>
-        <h2 class="text-xl font-bold text-slate-800 mb-2">F.B.A. Analítica de Actuaciones Sumariales Administrativas</h2>
-        <p class="text-sm text-slate-500 mb-6">Por favor, cargue su archivo CSV de la base SIREX en el botón de la barra superior para activar los módulos estadísticos locales.</p>
+        <i class="fa-solid fa-circle-nodes text-5xl text-blue-600 mb-4 animate-spin"></i>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">Sincronizando Módulos Locales</h2>
+        <p class="text-sm text-slate-500 mb-6">Estableciendo comunicación bidireccional con el servidor de Google Apps Script...</p>
     </div>
 
     <script>
@@ -370,7 +370,8 @@
 
         const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-        const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRao7X5J7L90OCDD-3YQxv7VN8uDfDOrxfo4ubRfaBnzMzLkx6Cyrx7NjmtIJp4uM-wNlyMWVqtIqqU/pub?gid=1060128342&single=true&output=csv';
+        // URL DE TU WEB APP GOOGLE APPS SCRIPT
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8trnSzjUfykmk9o8xlHR7aDdqmgUyzetuCpgMYGkVmg7Z5KzfDTC0fBENrKSdKc4s3A/exec';
 
         function setStatus(icon, color, text, sub) {
             document.getElementById('statusIcon').className = `fa-solid ${icon} ${color}`;
@@ -381,14 +382,31 @@
 
         async function cargarDesdeSheets() {
             try {
-                const res = await fetch(SHEETS_CSV_URL);
+                const res = await fetch(APPS_SCRIPT_URL);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const text = await res.text();
-                processCSV(text);
-                setStatus('fa-circle-check', 'text-green-400', 'Conectado — BASE SIREX', 'Datos cargados automáticamente');
+                
+                const contentType = res.headers.get("content-type");
+                
+                // Inteligencia de parseo: si tu Apps Script devuelve JSON directo, lo toma, sino parsea el texto estructurado como CSV
+                if (contentType && contentType.includes("application/json")) {
+                    const json = await res.json();
+                    processJSON(json);
+                } else {
+                    const text = await res.text();
+                    processCSV(text);
+                }
+
+                setStatus('fa-circle-check', 'text-green-400', 'Conectado — BASE SIREX', 'Datos actualizados en vivo');
             } catch (err) {
-                setStatus('fa-triangle-exclamation', 'text-red-400', 'Error al conectar', 'Verifique que la hoja esté publicada');
-                console.error('Error cargando Google Sheets:', err);
+                setStatus('fa-triangle-exclamation', 'text-red-400', 'Error de enlace', 'Revise los permisos o CORS de su Web App');
+                console.error('Error cargando Web App:', err);
+                
+                // Fallback amigable por si falla el despliegue inicial de macros
+                document.getElementById('welcomeScreen').innerHTML = `
+                    <i class="fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-4"></i>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">Error de Sincronización</h2>
+                    <p class="text-sm text-slate-500 mb-4">La Web App requiere configurarse ejecutando como: <strong>"Cualquier persona" (Anyone)</strong> en el panel de Google Apps Script.</p>
+                `;
             }
         }
 
@@ -426,10 +444,8 @@
             const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA"));
             const idxFba = headers.findIndex(h => h.includes("FBA") || h.includes("INTERVINIENTE"));
             const idxCara = headers.findIndex(h => h.includes("CARATULA"));
-            
             const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO DAÑADO") || (h.includes("DAÑADO") && !h.includes("INCAUTADO")));
             const idxCont = headers.findIndex(h => h.includes("CONTROL"));
-            
             const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
             const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA") || h.includes("DESTINO VICTIMA"));
             const idxImputado = headers.findIndex(h => h.trim() === "IMPUTADO");
@@ -448,8 +464,6 @@
                     año = parseInt(partes[2]); mes = parseInt(partes[1]);
                 }
 
-                let caratulaCelda = r[idxCara]?.trim() || 'S/D';
-
                 rawData.push({
                     sirex: r[idxSirex].trim(), 
                     fecha: fechaOriginal, 
@@ -458,7 +472,7 @@
                     expediente: r[idxExp]?.trim() || 'S/D', 
                     dependencia: r[idxDep]?.trim() || 'S/D',
                     fba: r[idxFba]?.trim() || 'NINGUNO', 
-                    caratula: caratulaCelda,
+                    caratula: r[idxCara]?.trim() || 'S/D',
                     elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', 
                     control: r[idxCont]?.trim() || 'NINGUNO',
                     victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
@@ -468,6 +482,40 @@
                 });
             }
 
+            inicializarDashboard();
+        }
+
+        function processJSON(jsonArray) {
+            rawData = jsonArray.map(item => {
+                let fechaOriginal = item.fecha || item.FECHA || item.f_inicio || item['FECHA INICIO'] || '';
+                let partes = fechaOriginal.toString().split('/');
+                let año = NaN, mes = NaN;
+                if(partes.length === 3) {
+                    año = parseInt(partes[2]); mes = parseInt(partes[1]);
+                }
+
+                return {
+                    sirex: (item.sirex || item.SIREX || '').toString(),
+                    fecha: fechaOriginal,
+                    mes: mes,
+                    año: año,
+                    expediente: item.expediente || item.EXPEDIENTE || 'S/D',
+                    dependencia: item.dependencia || item.DEPENDENCIA || 'S/D',
+                    fba: item.fba || item.FBA || item.fba_interviniente || 'NINGUNO',
+                    caratula: item.caratula || item.CARATULA || 'S/D',
+                    elementoDañado: item.elemento_dañado || item['ELEMENTO DAÑADO'] || 'NINGUNO',
+                    control: item.control || item.CONTROL || 'NINGUNO',
+                    victima: item.victima || item.VICTIMA || 'S/D',
+                    destinoVictima: item.destino_victima || item['DESTINO VICTIMA'] || item['DESTINO DE LA VICTIMA'] || 'S/D',
+                    imputado: item.imputado || item.IMPUTADO || 'S/D',
+                    destinoImputado: item.destino_imputado || item['DESTINO IMPUTADO'] || item['DESTINO DEL IMPUTADO'] || 'S/D'
+                };
+            });
+
+            inicializarDashboard();
+        }
+
+        function inicializarDashboard() {
             document.getElementById('welcomeScreen').classList.add('hidden');
             document.getElementById('dashboardContent').classList.remove('hidden');
 
@@ -638,7 +686,7 @@
                 document.getElementById('topNombreDependencia').setAttribute('title', `Ninguna`);
             }
 
-            // --- LÓGICA CORREGIDA PARA EL MES ACTUAL EN TIEMPO REAL ---
+            // --- LÓGICA DE CONTROL TEMPORAL EXACTA ---
             const hoy = new Date();
             const mesLimiteEnCurso = hoy.getMonth() + 1; 
             const añoActualReal = hoy.getFullYear();
@@ -650,7 +698,6 @@
             const totalAñoActualFiltrado = filteredData.length;
             const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
             
-            // El KPI ahora cruza los filtros activos con el mes actual y el año correspondiente seleccionados
             const datosMesActualFiltrados = filteredData.filter(i => i.mes === mesLimiteEnCurso && i.año === anoSeleccionado);
             
             document.getElementById('lblKpiAnual').textContent = `Intervenciones Año ${anoSeleccionado}`;
