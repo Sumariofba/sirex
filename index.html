@@ -86,7 +86,7 @@
             <i id="statusIcon" class="fa-solid fa-spinner fa-spin text-amber-400 text-lg"></i>
             <div>
                 <p id="statusText" class="text-sm font-semibold text-amber-300">Conectando con Base de Datos...</p>
-                <p id="statusSub" class="text-[10px] text-slate-400">Sincronizando Web App en tiempo real</p>
+                <p id="statusSub" class="text-[10px] text-slate-400">Procesando enlace en tiempo real</p>
             </div>
         </div>
     </nav>
@@ -338,8 +338,8 @@
 
     <div id="welcomeScreen" class="max-w-md mx-auto mt-20 text-center p-8 bg-white rounded-xl shadow-sm border border-slate-200">
         <i class="fa-solid fa-circle-nodes text-5xl text-blue-600 mb-4 animate-spin"></i>
-        <h2 class="text-xl font-bold text-slate-800 mb-2">Sincronizando Módulos Locales</h2>
-        <p class="text-sm text-slate-500 mb-6">Estableciendo comunicación bidireccional con el servidor de Google Apps Script...</p>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">Estableciendo Sincronización</h2>
+        <p class="text-sm text-slate-500 mb-6">Conectando de forma directa y procesando la estructura de datos...</p>
     </div>
 
     <script>
@@ -370,8 +370,8 @@
 
         const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-        // URL DE TU DEPLOY /EXEC DE GOOGLE APPS SCRIPT
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8trnSzjUfykmk9o8xlHR7aDdqmgUyzetuCpgMYGkVmg7Z5KzfDTC0fBENrKSdKc4s3A/exec';
+        // URL DE ENLACE DE TU PLANILLA GOOGLE SHEETS
+        const ENLACE_BASE_INPUT = 'https://docs.google.com/spreadsheets/d/1jIAiLNjiwSnGrdBeiJ_ie5TRcDh8ocIuSTTvIYP9_5A/edit?usp=sharing';
 
         function setStatus(icon, color, text, sub) {
             document.getElementById('statusIcon').className = `fa-solid ${icon} ${color}`;
@@ -380,16 +380,21 @@
             document.getElementById('statusSub').textContent = sub;
         }
 
-        // FUNCIÓN DE CONEXIÓN CORREGIDA CONTRA ERRORES DE CORS / REDIRECCIÓN
+        // CONTROLADOR HÍBRIDO AUTOMÁTICO DE PETICIONES (PREVIENE ERRORES DE CORS)
         async function cargarDesdeSheets() {
             try {
-                // Forzar bypass de caché del navegador añadiendo un timestamp único a la petición
-                const urlConTimestamp = `${APPS_SCRIPT_URL}?_=${new Date().getTime()}`;
+                let targetUrl = ENLACE_BASE_INPUT;
+
+                // Si detecta un formato de planilla de edición estándar, lo convierte al formato CSV público para evitar bloqueos
+                if(targetUrl.includes("docs.google.com/spreadsheets") && targetUrl.includes("/edit")) {
+                    const spreadsheetId = targetUrl.split('/d/')[1].split('/')[0];
+                    targetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&_=${new Date().getTime()}`;
+                } else {
+                    targetUrl = `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}_=${new Date().getTime()}`;
+                }
                 
-                // Fetch explícito configurado para seguir las redirecciones nativas de las macros de Google
-                const res = await fetch(urlConTimestamp, {
+                const res = await fetch(targetUrl, {
                     method: 'GET',
-                    mode: 'cors',
                     redirect: 'follow'
                 });
 
@@ -397,7 +402,6 @@
                 
                 const textData = await res.text();
                 
-                // Detección inteligente de la respuesta del servidor (Soporta JSON Estructurado y formato CSV plano)
                 if (textData.trim().startsWith('[') || textData.trim().startsWith('{')) {
                     const json = JSON.parse(textData);
                     processJSON(json);
@@ -405,22 +409,702 @@
                     processCSV(textData);
                 }
 
-                setStatus('fa-circle-check', 'text-green-400', 'Conectado — BASE SIREX', 'Datos sincronizados en tiempo real');
+                setStatus('fa-circle-check', 'text-green-400', 'Conectado — BASE SIREX', 'Datos procesados correctamente');
             } catch (err) {
-                setStatus('fa-triangle-exclamation', 'text-red-400', 'Error de enlace', 'Revise los permisos o CORS de su Web App');
+                setStatus('fa-triangle-exclamation', 'text-red-400', 'Error de enlace', 'Verifique los accesos compartidos');
                 console.error('Fallo crítico en conexión:', err);
                 
                 document.getElementById('welcomeScreen').innerHTML = `
                     <i class="fa-solid fa-triangle-exclamation text-5xl text-amber-500 mb-4 animate-pulse"></i>
-                    <h2 class="text-xl font-bold text-slate-800 mb-2">Fallo en Enlace CORS o Permisos</h2>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">Error de Conexión o Permiso de Lectura</h2>
                     <p class="text-sm text-slate-500 max-w-sm mx-auto mb-4">
-                        El navegador bloqueó la solicitud. Recuerde que el script en Sheets debe estar implementado como <strong>"Cualquier persona" (Anyone)</strong>.
+                        Para habilitar la lectura directa de la planilla, asegúrese de que el enlace esté configurado como <strong>"Cualquier persona con el enlace puede leer"</strong> en el botón Compartir de Google Sheets.
                     </p>
-                    <div class="text-left bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-[11px] text-slate-600 break-all select-all">
-                        <strong>Endpoint de consulta:</strong><br>${APPS_SCRIPT_URL}
-                    </div>
                 `;
             }
         }
 
         document.addEventListener('DOMContentLoaded', cargarDesdeSheets);
+
+        function parseCSV(text) {
+            const firstLine = text.split('\n')[0];
+            const separator = (firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length ? ';' : ',';
+            let lines = [], row = [""], inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i], next = text[i+1];
+                if (c === '"') {
+                    if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (c === separator && !inQuotes) {
+                    row.push('');
+                } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                    if (c === '\r' && next === '\n') { i++; }
+                    lines.push(row); row = [''];
+                } else { row[row.length - 1] += c; }
+            }
+            if (row.length > 1 || row[0] !== '') lines.push(row);
+            return lines;
+        }
+
+        function processCSV(text) {
+            const rows = parseCSV(text);
+            if (rows.length < 2) return;
+
+            const headers = rows[0].map(h => h.trim().toUpperCase().replace(/\s+/g, ' '));
+            const idxSirex = headers.findIndex(h => h.includes("SIREX"));
+            const idxFecha = headers.findIndex(h => h.includes("FECHA") || h.includes("F INICIO"));
+            const idxExp = headers.findIndex(h => h.includes("EXPEDIENTE"));
+            const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA"));
+            const idxFba = headers.findIndex(h => h.includes("FBA") || h.includes("INTERVINIENTE"));
+            const idxCara = headers.findIndex(h => h.includes("CARATULA"));
+            const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO DAÑADO") || (h.includes("DAÑADO") && !h.includes("INCAUTADO")));
+            const idxCont = headers.findIndex(h => h.includes("CONTROL"));
+            const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
+            const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA") || h.includes("DESTINO VICTIMA"));
+            const idxImputado = headers.findIndex(h => h.trim() === "IMPUTADO");
+            const idxDestinoImputado = headers.findIndex(h => h.includes("DESTINO DEL IMPUTADO") || h.includes("DESTINO IMPUTADO"));
+
+            rawData = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const r = rows[i];
+                if (r.length <= 1 || !r[idxSirex] || r[idxSirex].trim() === "") continue;
+
+                let fechaOriginal = r[idxFecha]?.trim() || '';
+                let partes = fechaOriginal.split('/');
+                let año = NaN, mes = NaN;
+                if(partes.length === 3) {
+                    año = parseInt(partes[2]); mes = parseInt(partes[1]);
+                }
+
+                rawData.push({
+                    sirex: r[idxSirex].trim(), 
+                    fecha: fechaOriginal, 
+                    mes: mes, 
+                    año: año,
+                    expediente: r[idxExp]?.trim() || 'S/D', 
+                    dependencia: r[idxDep]?.trim() || 'S/D',
+                    fba: r[idxFba]?.trim() || 'NINGUNO', 
+                    caratula: r[idxCara]?.trim() || 'S/D',
+                    elementoDañado: r[idxElementoDañado]?.trim() || 'NINGUNO', 
+                    control: r[idxCont]?.trim() || 'NINGUNO',
+                    victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
+                    destinoVictima: idxDestinoVictima !== -1 ? (r[idxDestinoVictima]?.trim() || 'S/D') : 'S/D',
+                    imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D',
+                    destinoImputado: idxDestinoImputado !== -1 ? (r[idxDestinoImputado]?.trim() || 'S/D') : 'S/D'
+                });
+            }
+
+            inicializarDashboard();
+        }
+
+        function processJSON(jsonArray) {
+            rawData = jsonArray.map(item => {
+                let fechaOriginal = item.fecha || item.FECHA || item.f_inicio || item['FECHA INICIO'] || '';
+                let partes = fechaOriginal.toString().split('/');
+                let año = NaN, mes = NaN;
+                if(partes.length === 3) {
+                    año = parseInt(partes[2]); mes = parseInt(partes[1]);
+                }
+
+                return {
+                    sirex: (item.sirex || item.SIREX || '').toString(),
+                    fecha: fechaOriginal,
+                    mes: mes,
+                    año: año,
+                    expediente: item.expediente || item.EXPEDIENTE || 'S/D',
+                    dependencia: item.dependencia || item.DEPENDENCIA || 'S/D',
+                    fba: item.fba || item.FBA || item.fba_interviniente || 'NINGUNO',
+                    caratula: item.caratula || item.CARATULA || 'S/D',
+                    elementoDañado: item.elemento_dañado || item['ELEMENTO DAÑADO'] || 'NINGUNO',
+                    control: item.control || item.CONTROL || 'NINGUNO',
+                    victima: item.victima || item.VICTIMA || 'S/D',
+                    destinoVictima: item.destino_victima || item['DESTINO VICTIMA'] || item['DESTINO DE LA VICTIMA'] || 'S/D',
+                    imputado: item.imputado || item.IMPUTADO || 'S/D',
+                    destinoImputado: item.destino_imputado || item['DESTINO IMPUTADO'] || item['DESTINO DEL IMPUTADO'] || 'S/D'
+                };
+            });
+
+            inicializarDashboard();
+        }
+
+        function inicializarDashboard() {
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('dashboardContent').classList.remove('hidden');
+
+            populateInitialFilters();
+            applyFilters();
+        }
+
+        function populateInitialFilters() {
+            const anos = new Set(), fbas = new Set(['TODOS']), deps = new Set(['TODOS']), delitos = new Set(['TODOS']), controles = new Set(['TODOS']);
+
+            rawData.forEach(item => {
+                if(!isNaN(item.año)) anos.add(item.año);
+                if(item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') fbas.add(item.fba);
+                if(item.dependencia && item.dependencia !== 'S/D') deps.add(item.dependencia);
+                if(item.caratula && item.caratula !== 'S/D') delitos.add(item.caratula);
+                if(item.control && item.control !== 'NINGUNO') controles.add(item.control);
+            });
+
+            buildSelectOptions('fbaFilter', fbas, true);
+            buildSelectOptions('depFilter', deps, true);
+            buildSelectOptions('delitoFilter', delitos, true);
+            buildSelectOptions('controlFilter', controles, true);
+
+            const selectAno = document.getElementById('anoFilter');
+            selectAno.innerHTML = '';
+            Array.from(anos).sort((a,b)=>b-a).forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
+            });
+
+            document.getElementById('anoFilter').addEventListener('change', applyFilters);
+            document.getElementById('fbaFilter').addEventListener('change', applyFilters);
+            document.getElementById('depFilter').addEventListener('change', applyFilters);
+            document.getElementById('delitoFilter').addEventListener('change', applyFilters);
+            document.getElementById('controlFilter').addEventListener('change', applyFilters);
+            document.getElementById('searchFilter').addEventListener('input', applyFilters);
+        }
+
+        function buildSelectOptions(selectId, setValues, hasTodos = true) {
+            const select = document.getElementById(selectId); select.innerHTML = '';
+            if(hasTodos) {
+                const opt = document.createElement('option'); opt.value = 'TODOS'; opt.textContent = 'TODOS'; select.appendChild(opt);
+            }
+            Array.from(setValues).sort().forEach(val => {
+                if(val !== 'TODOS') {
+                    const opt = document.createElement('option'); opt.value = val; opt.textContent = val; select.appendChild(opt);
+                }
+            });
+        }
+
+        function normalizarTexto(texto) {
+            return (texto || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        function applyFilters() {
+            const anoVal = parseInt(document.getElementById('anoFilter').value);
+            const fbaVal = document.getElementById('fbaFilter').value;
+            const depVal = document.getElementById('depFilter').value;
+            const delitoVal = document.getElementById('delitoFilter').value;
+            const controlVal = document.getElementById('controlFilter').value;
+            const searchVal = normalizarTexto(document.getElementById('searchFilter').value);
+
+            filteredData = rawData.filter(item => {
+                const matchAno = (searchVal !== "") || isNaN(anoVal) || item.año === anoVal;
+                const matchFba = fbaVal === 'TODOS' || item.fba === fbaVal;
+                const matchDep = depVal === 'TODOS' || item.dependencia === depVal;
+                const matchDelito = delitoVal === 'TODOS' || item.caratula.includes(delitoVal);
+                const matchControl = controlVal === 'TODOS' || item.control === controlVal;
+                
+                let todoElRegistroConcat = normalizarTexto(
+                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.elementoDañado} ${item.victima} ${item.destinoVictima} ${item.imputado} ${item.destinoImputado} ${item.control}`
+                );
+                const matchSearch = !searchVal || todoElRegistroConcat.includes(searchVal);
+
+                return matchAno && matchFba && matchDep && matchDelito && matchControl && matchSearch;
+            });
+
+            currentPage = 1;
+            renderTable();
+            calculateKPIsYAnalisis(anoVal, delitoVal, fbaVal, controlVal, searchVal);
+        }
+
+        function obtenerCaratulaLider(dataArray) {
+            if (!dataArray || dataArray.length === 0) return "Ninguna";
+            const conteos = {};
+            dataArray.forEach(i => {
+                if(i.caratula) conteos[i.caratula] = (conteos[i.caratula] || 0) + 1;
+            });
+            const listaOrdenada = Object.entries(conteos).sort((a,b) => b[1] - a[1]);
+            return listaOrdenada.length > 0 ? `${listaOrdenada[0][0]} (${listaOrdenada[0][1]} casos)` : "Ninguna";
+        }
+
+        function calculateKPIsYAnalisis(anoSeleccionado, delitoFiltro, fbaFiltro, controlFiltro, searchFiltro) {
+            const dataAnoActualGlobal = rawData.filter(i => i.año === anoSeleccionado);
+            
+            const findTopFbaFijo = (subset, filterFn) => {
+                const filteredSubset = subset.filter(filterFn);
+                const counts = {};
+                filteredSubset.forEach(item => { 
+                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') counts[item.fba] = (counts[item.fba] || 0) + 1; 
+                });
+                const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+                return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
+            };
+
+            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => 
+                (i.caratula || '').toLowerCase().includes("lesiones por accidente. art 331")
+            );
+            document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
+            document.getElementById('topDivisionLesiones').textContent = lesiones.division;
+
+            const ley = findTopFbaFijo(dataAnoActualGlobal, i => 
+                (i.caratula || '').toLowerCase().includes("presunta infraccion ley 12569")
+            );
+            document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
+            document.getElementById('topDivisionLey').textContent = ley.division;
+
+            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
+                const caratulaNorm = (i.caratula || '').toLowerCase();
+                return caratulaNorm.includes("abandono de servicio") || 
+                       caratulaNorm.includes("abandono de servicio mas de 72 horas. art 198 inc a");
+            });
+            document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
+            document.getElementById('topDivisionAbandono').textContent = abandono.division;
+
+            let acumuladorSiniestrosMovil = 0;
+            const conteoPorFbaMovil = {};
+            
+            rawData.forEach(item => {
+                if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("movil")) {
+                    acumuladorSiniestrosMovil++;
+                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D' && item.fba.trim() !== '') {
+                        conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1;
+                    }
+                }
+            });
+
+            const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
+            let fbaMasAfectado = 'Ninguna';
+            let conteoFbaEspecifico = 0;
+
+            if (fbaSiniestradoOrdenado.length > 0) {
+                fbaMasAfectado = fbaSiniestradoOrdenado[0][0];      
+                conteoFbaEspecifico = fbaSiniestradoOrdenado[0][1]; 
+            }
+
+            document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
+            document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
+
+            const depCounts = {};
+            dataAnoActualGlobal.forEach(item => {
+                const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
+                if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '') {
+                    if (!dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && dep.includes("CRIA")) {
+                        depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1;
+                    }
+                }
+            });
+            const sortedDeps = Object.entries(depCounts).sort((a, b) => b[1] - a[1]);
+            
+            if (sortedDeps.length > 0) {
+                document.getElementById('topCountDependencia').textContent = `${sortedDeps[0][1]} actuaciones`;
+                document.getElementById('topNombreDependencia').textContent = sortedDeps[0][0];
+                document.getElementById('topNombreDependencia').setAttribute('title', sortedDeps[0][0]);
+            } else {
+                document.getElementById('topCountDependencia').textContent = `0 actuaciones`;
+                document.getElementById('topNombreDependencia').textContent = `Ninguna`;
+                document.getElementById('topNombreDependencia').setAttribute('title', `Ninguna`);
+            }
+
+            // --- CÓMPUTO REAL EN TIEMPO REAL DEL MES EN CURSO (JUNIO EN BASE A 2026) ---
+            const hoy = new Date();
+            const mesLimiteEnCurso = hoy.getMonth() + 1; 
+            const añoActualReal = hoy.getFullYear();
+
+            document.getElementById('lblMesEnCursoLimit').textContent = (anoSeleccionado === añoActualReal)
+                ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` 
+                : `Rango Activo: Periodo Anual Consolidado (Enero - Diciembre)`;
+
+            const totalAñoActualFiltrado = filteredData.length;
+            const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
+            
+            const datosMesActualFiltrados = filteredData.filter(i => i.mes === mesLimiteEnCurso && i.año === anoSeleccionado);
+            
+            document.getElementById('lblKpiAnual').textContent = `Intervenciones Año ${anoSeleccionado}`;
+            document.getElementById('kpiTotalAnual').textContent = totalAñoActualFiltrado.toLocaleString('es-AR');
+
+            document.getElementById('lblKpiComparativaAnual').textContent = `Vs. Año Anterior (${anoSeleccionado - 1})`;
+            document.getElementById('kpiTotalAnoAnterior').textContent = totalAñoAnteriorGlobal.toLocaleString('es-AR');
+
+            let variacionPorcentual = 0;
+            if (totalAñoAnteriorGlobal > 0) {
+                variacionPorcentual = ((totalAñoActualFiltrado - totalAñoAnteriorGlobal) / totalAñoAnteriorGlobal) * 100;
+            }
+            const signoVar = variacionPorcentual >= 0 ? '+' : '';
+            const elKpiVariacion = document.getElementById('kpiVariacionAnual');
+            elKpiVariacion.textContent = `${signoVar}${variacionPorcentual.toFixed(1)}% var.`;
+            if (variacionPorcentual > 0) {
+                elKpiVariacion.className = "text-[11px] text-red-600 font-bold pt-1 border-t border-slate-100";
+            } else {
+                elKpiVariacion.className = "text-[11px] text-emerald-600 font-bold pt-1 border-t border-slate-100";
+            }
+
+            document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
+            document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
+
+            const conteoPorMes = Array(13).fill(0);
+            dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
+            let mesMaximo = 1, valorMaximo = 0;
+            for(let m = 1; m <= 12; m++) {
+                if(conteoPorMes[m] > valorMaximo) {
+                    valorMaximo = conteoPorMes[m];
+                    mesMaximo = m;
+                }
+            }
+            document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].toUpperCase() : 'S/D';
+            document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
+
+            const totalDelAñoSeleccionado = dataAnoActualGlobal.length;
+            const porcFiltrado = totalDelAñoSeleccionado > 0 ? ((totalAñoActualFiltrado / totalDelAñoSeleccionado) * 100) : 0;
+            document.getElementById('kpiPorcentajeFiltrado').textContent = `${porcFiltrado.toFixed(1)}%`;
+            document.getElementById('kpiPorcentajeDetalle').textContent = `${totalAñoActualFiltrado.toLocaleString('es-AR')} de ${totalDelAñoSeleccionado.toLocaleString('es-AR')} del ${anoSeleccionado}`;
+
+            document.getElementById('lblGraficoMes').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].toUpperCase()} ${anoSeleccionado}`;
+            document.getElementById('thAnoAnterior').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].substring(0,3)}. ${anoSeleccionado - 1}`;
+            document.getElementById('thAnoActual').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].substring(0,3)}. ${anoSeleccionado}`;
+
+            const dataMesAñoActualGlobal = rawData.filter(i => i.año === anoSeleccionado && i.mes === mesLimiteEnCurso);
+            const dataMesAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1) && i.mes === mesLimiteEnCurso);
+
+            const conteoDelitosActual = {}, conteoDelitosAnterior = {};
+            
+            dataMesAñoActualGlobal.forEach(i => { 
+                if(i.caratula) {
+                    const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula;
+                    conteoDelitosActual[clave] = (conteoDelitosActual[clave] || 0) + 1; 
+                }
+            });
+            dataMesAñoAnteriorGlobal.forEach(i => { 
+                if(i.caratula) {
+                    const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula;
+                    conteoDelitosAnterior[clave] = (conteoDelitosAnterior[clave] || 0) + 1; 
+                }
+            });
+
+            const todasLasCaratulasMes = new Set([...Object.keys(conteoDelitosActual), ...Object.keys(conteoDelitosAnterior)]);
+            const listaComparativaOrdenada = Array.from(todasLasCaratulasMes).map(caratula => {
+                const act = conteoDelitosActual[caratula] || 0;
+                const ant = conteoDelitosAnterior[caratula] || 0;
+                let difPorc = 0;
+                if (ant > 0) difPorc = ((act - ant) / ant) * 100;
+                else if (act > 0) difPorc = 100; 
+                return { caratula, act, ant, difPorc };
+            }).sort((a, b) => b.act - a.act);
+
+            const tbodyComparativo = document.getElementById('comparativeTableBody');
+            tbodyComparativo.innerHTML = '';
+            
+            const top5Comparativa = listaComparativaOrdenada.slice(0, 5);
+
+            listaComparativaOrdenada.forEach(fila => {
+                const tr = document.createElement('tr');
+                let badgeClase = 'bg-gray-100 text-gray-700';
+                let stringPorc = `${fila.difPorc >= 0 ? '+' : ''}${fila.difPorc.toFixed(0)}%`;
+                
+                if (fila.ant === 0 && fila.act > 0) stringPorc = 'Nuevo';
+                if (fila.difPorc > 0) badgeClase = 'bg-red-50 text-red-600 font-bold';
+                if (fila.difPorc < 0) badgeClase = 'bg-emerald-50 text-emerald-600 font-bold';
+
+                tr.innerHTML = `
+                    <td class="p-2 font-medium truncate max-w-xs text-slate-800">${fila.caratula}</td>
+                    <td class="p-2 text-center font-semibold">${fila.ant}</td>
+                    <td class="p-2 text-center font-bold bg-amber-50/60">${fila.act}</td>
+                    <td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${stringPorc}</span></td>
+                `;
+                tbodyComparativo.appendChild(tr);
+            });
+
+            if (chartMonthComp) chartMonthComp.destroy();
+            chartMonthComp = new Chart(document.getElementById('chartMonthComparison'), {
+                type: 'bar',
+                data: {
+                    labels: top5Comparativa.map(x => x.caratula.substring(0, 25) + (x.caratula.length > 25 ? '...' : '')),
+                    datasets: [
+                        {
+                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`,
+                            data: top5Comparativa.map(x => x.ant),
+                            backgroundColor: 'rgba(148, 163, 184, 0.65)'
+                        },
+                        {
+                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`,
+                            data: top5Comparativa.map(x => x.act),
+                            backgroundColor: 'rgba(245, 158, 11, 0.85)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+                        datalabels: { anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' } }
+                    },
+                    scales: { y: { beginAtZero: true, grid: { display: false } } }
+                }
+            });
+
+            const fbaCounts = {};
+            filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
+            const sortedFba = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
+
+            sortedFba.forEach(([fbaName]) => {
+                const subfba = filteredData.filter(i => i.fba === fbaName);
+                topCaratulasPorFBA[fbaName] = obtenerCaratulaLider(subfba);
+            });
+
+            if (chartFBA) chartFBA.destroy();
+            chartFBA = new Chart(document.getElementById('chartFBA'), {
+                type: 'bar',
+                data: {
+                    labels: sortedFba.map(x => x[0]),
+                    datasets: [{
+                        label: 'Actuaciones Registradas',
+                        data: sortedFba.map(x => x[1]),
+                        backgroundColor: colorPalette
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
+                        tooltip: {
+                            callbacks: {
+                                afterBody: (context) => {
+                                    const fbaKey = context[0].label;
+                                    return `Top Delito: ${topCaratulasPorFBA[fbaKey] || 'S/D'}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            const controlCounts = {};
+            filteredData.forEach(i => { if(i.control) controlCounts[i.control] = (controlCounts[i.control] || 0) + 1; });
+            
+            if (chartControl) chartControl.destroy();
+            chartControl = new Chart(document.getElementById('chartControl'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(controlCounts),
+                    datasets: [{
+                        data: Object.values(controlCounts),
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6']
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                let sum = 0;
+                                let dataArr = ctx.chart.data.datasets[0].data;
+                                dataArr.map(data => { sum += data; });
+                                return `${((value*100) / sum).toFixed(0)}%`;
+                            },
+                            color: '#fff', font: { weight: 'bold', size: 11 }
+                        }
+                    }
+                }
+            });
+
+            const matrizAnos = {};
+            rawData.forEach(item => {
+                if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) {
+                    if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0);
+                    matrizAnos[item.año][item.mes]++;
+                }
+            });
+
+            const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, index) => {
+                return {
+                    label: `Año ${año}`,
+                    data: matrizAnos[año].slice(1),
+                    borderColor: paletaMulticolor12Meses[index % paletaMulticolor12Meses.length],
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    pointRadius: 3
+                };
+            });
+
+            if (chartAllYears) chartAllYears.destroy();
+            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), {
+                type: 'line',
+                data: {
+                    labels: NOMBRES_MESES.slice(1),
+                    datasets: datasetsHistoricos
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+                        datalabels: { 
+                            display: true, 
+                            align: 'top', 
+                            anchor: 'end',
+                            color: '#1e293b',
+                            font: { size: 10, weight: 'bold' },
+                            offset: 4
+                        }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500 print:hidden"></i> Distribución de Carga Mensual Unificada (Año ${anoSeleccionado})`;
+            const datasetMesesFiltrado = Array(13).fill(0);
+            filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
+
+            for (let m = 1; m <= 12; m++) {
+                const submes = filteredData.filter(i => i.mes === m);
+                topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(submes);
+            }
+
+            if (chartCurrentYear) chartCurrentYear.destroy();
+            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), {
+                type: 'bar',
+                data: {
+                    labels: NOMBRES_MESES.slice(1),
+                    datasets: [{
+                        label: 'Actuaciones',
+                        data: datasetMesesFiltrado.slice(1),
+                        backgroundColor: paletaMulticolor12Meses
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
+                        tooltip: {
+                            callbacks: {
+                                afterBody: (context) => {
+                                    const mesKey = context[0].label;
+                                    return `Líder: ${topCaratulasPorMesActual[mesKey] || 'S/D'}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            if (chartEvolution) chartEvolution.destroy();
+            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), {
+                type: 'line',
+                data: {
+                    labels: NOMBRES_MESES.slice(1),
+                    datasets: [{
+                        label: `Evolución ${anoSeleccionado}`,
+                        data: datasetMesesFiltrado.slice(1),
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#1E3A8A',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function renderTable() {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedItems = filteredData.slice(start, end);
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
+
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+            if(paginatedItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
+                document.getElementById('pageIndicator').textContent = "Página 0 de 0";
+                document.getElementById('btnFirst').disabled = true;
+                document.getElementById('btnPrev').disabled = true;
+                document.getElementById('btnNext').disabled = true;
+                document.getElementById('btnLast').disabled = true;
+                return;
+            }
+
+            paginatedItems.forEach(item => {
+                tbody.appendChild(generarFilaHTML(item));
+            });
+
+            document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
+            
+            document.getElementById('btnFirst').disabled = (currentPage === 1);
+            document.getElementById('btnPrev').disabled = (currentPage === 1);
+            document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
+            document.getElementById('btnLast').disabled = (currentPage === totalPages || totalPages === 0);
+        }
+
+        function generarFilaHTML(item) {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition-colors";
+            
+            let badgeControlClase = "bg-slate-100 text-slate-700";
+            const ctrlNorm = (item.control || '').toUpperCase();
+            if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-100 text-emerald-800 font-semibold";
+            if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
+            if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
+
+            const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' 
+                ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` 
+                : item.victima;
+
+            const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' 
+                ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
+                : item.imputado;
+
+            tr.innerHTML = `
+                <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
+                <td class="px-3 py-3 whitespace-nowrap">${item.fecha}</td>
+                <td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td>
+                <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
+                <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
+                <td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td>
+                <td class="px-3 py-3 text-slate-600 font-medium break-words">${item.elementoDañado}</td>
+                <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td>
+                <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td>
+                <td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>
+            `;
+            return tr;
+        }
+
+        function imprimirListadoCompleto() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            filteredData.forEach(item => {
+                tbody.appendChild(generarFilaHTML(item));
+            });
+            window.print();
+            renderTable();
+        }
+
+        document.getElementById('btnFirst').addEventListener('click', () => {
+            if (currentPage > 1) { currentPage = 1; renderTable(); }
+        });
+
+        document.getElementById('btnPrev').addEventListener('click', () => {
+            if (currentPage > 1) { currentPage--; renderTable(); }
+        });
+
+        document.getElementById('btnNext').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < totalPages) { currentPage++; renderTable(); }
+        });
+
+        document.getElementById('btnLast').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < totalPages) { currentPage = totalPages; renderTable(); }
+        });
+    </script>
+</body>
+</html>
