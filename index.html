@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>F.B.A. - Analítica de Actuaciones Sumariales Administrativas</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
@@ -59,7 +60,6 @@
 
     <main class="p-4 sm:p-6 max-w-[1600px] mx-auto hidden" id="dashboardContent">
         
-        <!-- BARRA DE FILTROS -->
         <div class="bg-white p-4 rounded-xl shadow-xs mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end border border-slate-100 print:hidden">
             <div>
                 <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Filtrar por Año</label>
@@ -83,7 +83,6 @@
             </div>
         </div>
 
-        <!-- TABLA OPERATIVA -->
         <div class="bg-white rounded-xl shadow-xs overflow-hidden border border-slate-100 mb-6 print-table-container">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 print:hidden">
                 <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tabla Operativa Activa</span>
@@ -126,7 +125,6 @@
             </div>
         </div>
 
-        <!-- KPIs CARD GRID -->
         <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Siniestralidad e Infracciones del Año por Dependencia Líder</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="bg-white rounded-xl shadow-sm p-5 border-t-4 border-red-500 flex flex-col justify-between">
@@ -210,17 +208,19 @@
                 </div>
                 <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100" id="kpiMesMaximoDetalle">0 actuacion/es</p>
             </div>
-            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500 flex flex-col justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Representación de Filtros</span>
-                <div class="flex items-baseline justify-between">
-                    <h2 class="text-5xl font-black text-amber-600 tracking-tight leading-none my-2" id="kpiPorcentajeFiltrado">0%</h2>
-                    <div class="text-amber-500 bg-amber-50 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-percent"></i></div>
+            
+            <div class="bg-slate-900 text-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500 flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wide block mb-1">
+                    <i class="fa-solid fa-bolt text-xs animate-pulse mr-1"></i>Último Registro Cargado
+                </span>
+                <div>
+                    <h2 class="text-xl font-mono font-black text-white tracking-tight mt-1" id="kpiUltimoSirex">S/D</h2>
+                    <p class="text-[11px] text-slate-300 font-medium mt-1 truncate" id="kpiUltimoDetalle">Buscando novedad...</p>
                 </div>
-                <p class="text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-100" id="kpiPorcentajeDetalle">0 de 0 actuacion/es</p>
+                <p class="text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-800" id="kpiUltimaFecha">Fecha: --/--/----</p>
             </div>
         </div>
 
-        <!-- SECCIÓN GRÁFICOS Y COMPARATIVAS -->
         <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white p-5 rounded-xl shadow-xs border border-slate-100">
                 <div class="flex justify-between items-center mb-3">
@@ -329,27 +329,12 @@
 
         const ENLACE_BASE_INPUT = 'https://docs.google.com/spreadsheets/d/1jIAiLNjiwSnGrdBeiJ_ie5TRcDh8ocIuSTTvIYP9_5A/edit?usp=sharing';
 
-        function setStatus(icon, color, text, sub) {
-            document.getElementById('statusIcon').className = `fa-solid ${icon} ${color}`;
-            document.getElementById('statusText').textContent = text;
-            document.getElementById('statusText').className = `text-sm font-semibold ${color}`;
-            document.getElementById('statusSub').textContent = sub;
-        }
-
-        // PARSER INTELIGENTE MULTI-FECHA (SEPARA LA FECHA DE INICIO DE LA DE ÚLTIMA NOVEDAD EN CELDAS COMPUESTAS)
+        // PARSER DE FECHAS DE ALTA FIABILIDAD CONTRA CELDAS COMPUESTAS O DOBLES
         function extraerMesYAño(fechaStr) {
             if (!fechaStr) return { mes: NaN, año: NaN };
-            
-            // Si la celda contiene saltos de línea (formato celda compuesta), nos quedamos rigurosamente con la primera línea
             let stringLimpio = fechaStr.toString().split(/[\r\n]+/)[0].trim();
-            
-            // Si contiene guiones o puntos, los unificamos a barras inclinadas
             stringLimpio = stringLimpio.replace(/[-.]/g, '/');
-            
-            // Si la celda contiene texto extra o espacios, extraemos el primer bloque que parezca una fecha
-            if (stringLimpio.includes(" ")) {
-                stringLimpio = stringLimpio.split(" ")[0];
-            }
+            if (stringLimpio.includes(" ")) { stringLimpio = stringLimpio.split(" ")[0]; }
 
             let partes = stringLimpio.split('/');
             if (partes.length !== 3) return { mes: NaN, año: NaN };
@@ -358,53 +343,28 @@
             let p1 = parseInt(partes[1], 10);
             let p2 = parseInt(partes[2], 10);
             
-            // Detección e inversión de formato nativo ISO (AAAA/MM/DD)
-            if (partes[0].length === 4) {
-                return { mes: p1, año: p0 };
-            }
-            
-            // Formato estándar Latinoamericano (DD/MM/AAAA)
-            return { mes: p1, año: p2 };
+            if (partes[0].length === 4) return { mes: p1, año: p0 }; // Formato AAAA/MM/DD
+            return { mes: p1, año: p2 }; // Formato DD/MM/AAAA
         }
 
+        // CONEXIÓN DIRECTA CON BYPASS DE CACHÉ
         async function cargarDesdeSheets() {
             try {
                 let targetUrl = ENLACE_BASE_INPUT;
-
                 if(targetUrl.includes("docs.google.com/spreadsheets") && targetUrl.includes("/edit")) {
                     const spreadsheetId = targetUrl.split('/d/')[1].split('/')[0];
                     targetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&_=${new Date().getTime()}`;
-                } else {
-                    targetUrl = `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}_=${new Date().getTime()}`;
                 }
                 
-                const res = await fetch(targetUrl, {
-                    method: 'GET',
-                    redirect: 'follow'
-                });
-
+                const res = await fetch(targetUrl, { method: 'GET', redirect: 'follow' });
                 if (!res.ok) throw new Error(`HTTP Error! Status: ${res.status}`);
                 const textData = await res.text();
                 
-                if (textData.trim().startsWith('[') || textData.trim().startsWith('{')) {
-                    const json = JSON.parse(textData);
-                    processJSON(json);
-                } else {
-                    processCSV(textData);
-                }
-
+                processCSV(textData);
                 setStatus('fa-circle-check', 'text-green-400', 'Conectado — BASE SIREX', 'Datos procesados correctamente');
             } catch (err) {
                 setStatus('fa-triangle-exclamation', 'text-red-400', 'Error de enlace', 'Verifique los accesos compartidos');
-                console.error('Fallo crítico en conexión:', err);
-                
-                document.getElementById('welcomeScreen').innerHTML = `
-                    <i class="fa-solid fa-triangle-exclamation text-5xl text-amber-500 mb-4 animate-pulse"></i>
-                    <h2 class="text-xl font-bold text-slate-800 mb-2">Error de Conexión o Permiso de Lectura</h2>
-                    <p class="text-sm text-slate-500 max-w-sm mx-auto mb-4">
-                        Para habilitar la lectura directa de la planilla, asegúrese de que el enlace esté configurado como <strong>"Cualquier persona con el enlace puede leer"</strong> en el botón Compartir de Google Sheets.
-                    </p>
-                `;
+                console.error(err);
             }
         }
 
@@ -476,31 +436,17 @@
                 });
             }
 
-            inicializarDashboard();
-        }
-
-        function processJSON(jsonArray) {
-            rawData = jsonArray.map(item => {
-                let fechaOriginal = item.fecha || item.FECHA || item.f_inicio || item['FECHA INICIO'] || '';
-                let { mes, año } = extraerMesYAño(fechaOriginal);
-
-                return {
-                    sirex: (item.sirex || item.SIREX || '').toString(),
-                    fecha: fechaOriginal,
-                    mes: mes,
-                    año: año,
-                    expediente: item.expediente || item.EXPEDIENTE || 'S/D',
-                    dependencia: item.dependencia || item.DEPENDENCIA || 'S/D',
-                    fba: item.fba || item.FBA || item.fba_interviniente || 'NINGUNO',
-                    caratula: item.caratula || item.CARATULA || 'S/D',
-                    elementoDañado: item.elemento_dañado || item['ELEMENTO DAÑADO'] || 'NINGUNO',
-                    control: item.control || item.CONTROL || 'NINGUNO',
-                    victima: item.victima || item.VICTIMA || 'S/D',
-                    destinoVictima: item.destino_victima || item['DESTINO VICTIMA'] || item['DESTINO DE LA VICTIMA'] || 'S/D',
-                    imputado: item.imputado || item.IMPUTADO || 'S/D',
-                    destinoImputado: item.destino_imputado || item['DESTINO IMPUTADO'] || item['DESTINO DEL IMPUTADO'] || 'S/D'
-                };
-            });
+            // CARGA DE TARJETA INTELIGENTE: EXTRAER ÚLTIMO REGISTRO DE LA BASE DE DATOS DIRECTAMENTE
+            if(rawData.length > 0) {
+                const ultimoRegistro = rawData[rawData.length - 1];
+                document.getElementById('kpiUltimoSirex').textContent = `SIREX: ${ultimoRegistro.sirex}`;
+                document.getElementById('kpiUltimoDetalle').textContent = `${ultimoRegistro.caratula}`;
+                document.getElementById('kpiUltimoDetalle').setAttribute('title', ultimoRegistro.caratula);
+                
+                // Limpiar la fecha de novedades para mostrar solo la fecha limpia en el pie de la tarjeta
+                const fechaLimpiaUltimo = ultimoRegistro.fecha.toString().split(/[\r\n]+/)[0].trim();
+                document.getElementById('kpiUltimaFecha').textContent = `Inicio: ${fechaLimpiaUltimo}`;
+            }
 
             inicializarDashboard();
         }
@@ -508,7 +454,6 @@
         function inicializarDashboard() {
             document.getElementById('welcomeScreen').classList.add('hidden');
             document.getElementById('dashboardContent').classList.remove('hidden');
-
             populateInitialFilters();
             applyFilters();
         }
@@ -531,10 +476,8 @@
 
             const selectAno = document.getElementById('anoFilter');
             selectAno.innerHTML = '';
-            
             Array.from(anos).sort((a,b)=>b-a).forEach(val => {
-                const opt = document.createElement('option');
-                opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
+                const opt = document.createElement('option'); opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
             });
 
             document.getElementById('anoFilter').addEventListener('change', applyFilters);
@@ -592,9 +535,7 @@
         function obtenerCaratulaLider(dataArray) {
             if (!dataArray || dataArray.length === 0) return "Ninguna";
             const conteos = {};
-            dataArray.forEach(i => {
-                if(i.caratula) conteos[i.caratula] = (conteos[i.caratula] || 0) + 1;
-            });
+            dataArray.forEach(i => { if(i.caratula) conteos[i.caratula] = (conteos[i.caratula] || 0) + 1; });
             const listaOrdenada = Object.entries(conteos).sort((a,b) => b[1] - a[1]);
             return listaOrdenada.length > 0 ? `${listaOrdenada[0][0]} (${listaOrdenada[0][1]} casos)` : "Ninguna";
         }
@@ -612,75 +553,54 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => 
-                (i.caratula || '').toLowerCase().includes("lesiones por accidente. art 331")
-            );
+            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("lesiones por accidente. art 331"));
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuacion/es`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
-            const ley = findTopFbaFijo(dataAnoActualGlobal, i => 
-                (i.caratula || '').toLowerCase().includes("presunta infraccion ley 12569")
-            );
+            const ley = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("presunta infraccion ley 12569"));
             document.getElementById('topCountLey').textContent = `${ley.total} actuacion/es`;
             document.getElementById('topDivisionLey').textContent = ley.division;
 
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
                 const caratulaNorm = (i.caratula || '').toLowerCase();
-                return caratulaNorm.includes("abandono de servicio") || 
-                       caratulaNorm.includes("abandono de servicio mas de 72 horas. art 198 inc a");
+                return caratulaNorm.includes("abandono de servicio") || caratulaNorm.includes("abandono de servicio mas de 72 horas. art 198 inc a");
             });
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
-            let acumuladorSiniestrosMovil = 0;
-            const conteoPorFbaMovil = {};
-            
+            let acumuladorSiniestrosMovil = 0; const conteoPorFbaMovil = {};
             rawData.forEach(item => {
                 if (item.año === anoSeleccionado && normalizarTexto(item.elementoDañado).includes("movil")) {
                     acumuladorSiniestrosMovil++;
-                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D' && item.fba.trim() !== '') {
-                        conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1;
-                    }
+                    if (item.fba && item.fba !== 'NINGUNO' && item.fba !== 'S/D') conteoPorFbaMovil[item.fba] = (conteoPorFbaMovil[item.fba] || 0) + 1;
                 }
             });
-
             const fbaSiniestradoOrdenado = Object.entries(conteoPorFbaMovil).sort((a, b) => b[1] - a[1]);
-            let fbaMasAfectado = 'Ninguna';
-            let conteoFbaEspecifico = 0;
-
-            if (fbaSiniestradoOrdenado.length > 0) {
-                fbaMasAfectado = fbaSiniestradoOrdenado[0][0];      
-                conteoFbaEspecifico = fbaSiniestradoOrdenado[0][1]; 
-            }
-
+            let fbaMasAfectado = 'Ninguna', conteoFbaEspecifico = 0;
+            if (fbaSiniestradoOrdenado.length > 0) { fbaMasAfectado = fbaSiniestradoOrdenado[0][0]; conteoFbaEspecifico = fbaSiniestradoOrdenado[0][1]; }
             document.getElementById('topCountMovil').textContent = `${conteoFbaEspecifico} moviles dañado/s`;
             document.getElementById('topDivisionMovil').textContent = fbaMasAfectado;
 
             const depCounts = {};
             dataAnoActualGlobal.forEach(item => {
                 const dep = item.dependencia ? item.dependencia.trim().toUpperCase() : 'S/D';
-                if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '') {
-                    if (!dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && dep.includes("CRIA")) {
-                        depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1;
-                    }
+                if (dep !== 'S/D' && dep !== 'NINGUNO' && dep !== '' && !dep.startsWith("DIR FBA") && !dep.startsWith("FBA") && dep.includes("CRIA")) {
+                    depCounts[item.dependencia.trim()] = (depCounts[item.dependencia.trim()] || 0) + 1;
                 }
             });
             const sortedDeps = Object.entries(depCounts).sort((a, b) => b[1] - a[1]);
-            
             if (sortedDeps.length > 0) {
                 document.getElementById('topCountDependencia').textContent = `${sortedDeps[0][1]} actuaciones`;
                 document.getElementById('topNombreDependencia').textContent = sortedDeps[0][0];
-                document.getElementById('topNombreDependencia').setAttribute('title', sortedDeps[0][0]);
             } else {
                 document.getElementById('topCountDependencia').textContent = `0 actuaciones`;
                 document.getElementById('topNombreDependencia').textContent = `Ninguna`;
-                document.getElementById('topNombreDependencia').setAttribute('title', `Ninguna`);
             }
 
-            // --- COMPUTACIÓN BASADA EN FECHA DE SISTEMA REAL (JUNIO 2026) ---
+            // --- COMPUTACIÓN BASADA EN FECHA DE SISTEMA REAL EN CURSO ---
             const hoy = new Date();
-            const mesLimiteEnCurso = hoy.getMonth() + 1; // 6 para Junio
-            const añoActualReal = hoy.getFullYear();    // 2026
+            const mesLimiteEnCurso = hoy.getMonth() + 1;
+            const añoActualReal = hoy.getFullYear();
 
             document.getElementById('lblMesEnCursoLimit').textContent = (anoSeleccionado === añoActualReal)
                 ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` 
@@ -688,334 +608,126 @@
 
             const totalAñoActualFiltrado = filteredData.length;
             const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
-            
             const datosMesActualFiltrados = filteredData.filter(i => i.mes === mesLimiteEnCurso && i.año === anoSeleccionado);
             
             document.getElementById('lblKpiAnual').textContent = `Intervenciones Año ${anoSeleccionado}`;
             document.getElementById('kpiTotalAnual').textContent = totalAñoActualFiltrado.toLocaleString('es-AR');
-
             document.getElementById('lblKpiComparativaAnual').textContent = `Vs. Año Anterior (${anoSeleccionado - 1})`;
             document.getElementById('kpiTotalAnoAnterior').textContent = totalAñoAnteriorGlobal.toLocaleString('es-AR');
 
-            let variacionPorcentual = 0;
-            if (totalAñoAnteriorGlobal > 0) {
-                variacionPorcentual = ((totalAñoActualFiltrado - totalAñoAnteriorGlobal) / totalAñoAnteriorGlobal) * 100;
-            }
-            const signoVar = variacionPorcentual >= 0 ? '+' : '';
+            let variacionPorcentual = 0; if (totalAñoAnteriorGlobal > 0) variacionPorcentual = ((totalAñoActualFiltrado - totalAñoAnteriorGlobal) / totalAñoAnteriorGlobal) * 100;
             const elKpiVariacion = document.getElementById('kpiVariacionAnual');
-            elKpiVariacion.textContent = `${signoVar}${variacionPorcentual.toFixed(1)}% var.`;
-            if (variacionPorcentual > 0) {
-                elKpiVariacion.className = "text-[11px] text-red-600 font-bold pt-1 border-t border-slate-100";
-            } else {
-                elKpiVariacion.className = "text-[11px] text-emerald-600 font-bold pt-1 border-t border-slate-100";
-            }
+            elKpiVariacion.textContent = `${variacionPorcentual >= 0 ? '+' : ''}${variacionPorcentual.toFixed(1)}% var.`;
+            elKpiVariacion.className = variacionPorcentual > 0 ? "text-[11px] text-red-600 font-bold pt-1 border-t border-slate-100" : "text-[11px] text-emerald-600 font-bold pt-1 border-t border-slate-100";
 
             document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
 
-            const conteoPorMes = Array(13).fill(0);
-            dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
+            const conteoPorMes = Array(13).fill(0); dataAnoActualGlobal.forEach(item => { if(item.mes >= 1 && item.mes <= 12) conteoPorMes[item.mes]++; });
             let mesMaximo = 1, valorMaximo = 0;
-            for(let m = 1; m <= 12; m++) {
-                if(conteoPorMes[m] > valorMaximo) {
-                    valorMaximo = conteoPorMes[m];
-                    mesMaximo = m;
-                }
-            }
+            for(let m = 1; m <= 12; m++) { if(conteoPorMes[m] > valorMaximo) { valorMaximo = conteoPorMes[m]; mesMaximo = m; } }
             document.getElementById('kpiMesMaximo').textContent = valorMaximo > 0 ? NOMBRES_MESES[mesMaximo].toUpperCase() : 'S/D';
             document.getElementById('kpiMesMaximoDetalle').textContent = valorMaximo > 0 ? `${valorMaximo} actuacion/es` : '0 actuaciones';
 
-            const totalDelAñoSeleccionado = dataAnoActualGlobal.length;
-            const porcFiltrado = totalDelAñoSeleccionado > 0 ? ((totalAñoActualFiltrado / totalDelAñoSeleccionado) * 100) : 0;
-            document.getElementById('kpiPorcentajeFiltrado').textContent = `${porcFiltrado.toFixed(1)}%`;
-            document.getElementById('kpiPorcentajeDetalle').textContent = `${totalAñoActualFiltrado.toLocaleString('es-AR')} de ${totalDelAñoSeleccionado.toLocaleString('es-AR')} del ${anoSeleccionado}`;
+            // RENDER DE GRÁFICOS COMPARATIVOS
+            renderizarGraficosYTablas(anoSeleccionado, mesLimiteEnCurso, dataAnoActualGlobal);
+        }
 
+        function renderizarGraficosYTablas(anoSeleccionado, mesLimiteEnCurso, dataAnoActualGlobal) {
             document.getElementById('lblGraficoMes').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].toUpperCase()} ${anoSeleccionado}`;
             document.getElementById('thAnoAnterior').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].substring(0,3)}. ${anoSeleccionado - 1}`;
             document.getElementById('thAnoActual').textContent = `${NOMBRES_MESES[mesLimiteEnCurso].substring(0,3)}. ${anoSeleccionado}`;
 
             const dataMesAñoActualGlobal = rawData.filter(i => i.año === anoSeleccionado && i.mes === mesLimiteEnCurso);
             const dataMesAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1) && i.mes === mesLimiteEnCurso);
-
             const conteoDelitosActual = {}, conteoDelitosAnterior = {};
             
-            dataMesAñoActualGlobal.forEach(i => { 
-                if(i.caratula) {
-                    const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula;
-                    conteoDelitosActual[clave] = (conteoDelitosActual[clave] || 0) + 1; 
-                }
-            });
-            dataMesAñoAnteriorGlobal.forEach(i => { 
-                if(i.caratula) {
-                    const clave = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula;
-                    conteoDelitosAnterior[clave] = (conteoDelitosAnterior[clave] || 0) + 1; 
-                }
-            });
+            dataMesAñoActualGlobal.forEach(i => { if(i.caratula) { const c = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula; conteoDelitosActual[c] = (conteoDelitosActual[c] || 0) + 1; } });
+            dataMesAñoAnteriorGlobal.forEach(i => { if(i.caratula) { const c = i.caratula.toUpperCase().includes("ISA 21100") ? "ISA 21100" : i.caratula; conteoDelitosAnterior[c] = (conteoDelitosAnterior[c] || 0) + 1; } });
 
             const todasLasCaratulasMes = new Set([...Object.keys(conteoDelitosActual), ...Object.keys(conteoDelitosAnterior)]);
             const listaComparativaOrdenada = Array.from(todasLasCaratulasMes).map(caratula => {
-                const act = conteoDelitosActual[caratula] || 0;
-                const ant = conteoDelitosAnterior[caratula] || 0;
-                let difPorc = 0;
-                if (ant > 0) difPorc = ((act - ant) / ant) * 100;
-                else if (act > 0) difPorc = 100; 
-                return { caratula, act, ant, difPorc };
+                const act = conteoDelitosActual[caratula] || 0; const ant = conteoDelitosAnterior[caratula] || 0;
+                return { caratula, act, ant, difPorc: ant > 0 ? ((act - ant) / ant) * 100 : (act > 0 ? 100 : 0) };
             }).sort((a, b) => b.act - a.act);
 
-            const tbodyComparativo = document.getElementById('comparativeTableBody');
-            tbodyComparativo.innerHTML = '';
-            
+            const tbodyComparativo = document.getElementById('comparativeTableBody'); tbodyComparativo.innerHTML = '';
             const top5Comparativa = listaComparativaOrdenada.slice(0, 5);
 
             listaComparativaOrdenada.forEach(fila => {
                 const tr = document.createElement('tr');
-                let badgeClase = 'bg-gray-100 text-gray-700';
-                let stringPorc = `${fila.difPorc >= 0 ? '+' : ''}${fila.difPorc.toFixed(0)}%`;
-                
-                if (fila.ant === 0 && fila.act > 0) stringPorc = 'Nuevo';
-                if (fila.difPorc > 0) badgeClase = 'bg-red-50 text-red-600 font-bold';
-                if (fila.difPorc < 0) badgeClase = 'bg-emerald-50 text-emerald-600 font-bold';
-
-                tr.innerHTML = `
-                    <td class="p-2 font-medium truncate max-w-xs text-slate-800">${fila.caratula}</td>
-                    <td class="p-2 text-center font-semibold">${fila.ant}</td>
-                    <td class="p-2 text-center font-bold bg-amber-50/60">${fila.act}</td>
-                    <td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${stringPorc}</span></td>
-                `;
+                let badgeClase = fila.difPorc > 0 ? 'bg-red-50 text-red-600 font-bold' : (fila.difPorc < 0 ? 'bg-emerald-50 text-emerald-600 font-bold' : 'bg-gray-100 text-gray-700');
+                tr.innerHTML = `<td class="p-2 font-medium truncate max-w-xs text-slate-800">${fila.caratula}</td><td class="p-2 text-center font-semibold">${fila.ant}</td><td class="p-2 text-center font-bold bg-amber-50/60">${fila.act}</td><td class="p-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${fila.ant===0?'Nuevo':(fila.difPorc>=0?'+':'')+fila.difPorc.toFixed(0)+'%'}</span></td>`;
                 tbodyComparativo.appendChild(tr);
             });
 
+            // Re-instanciar ChartMonth Comparison
             if (chartMonthComp) chartMonthComp.destroy();
             chartMonthComp = new Chart(document.getElementById('chartMonthComparison'), {
                 type: 'bar',
                 data: {
                     labels: top5Comparativa.map(x => x.caratula.substring(0, 25) + (x.caratula.length > 25 ? '...' : '')),
-                    datasets: [
-                        {
-                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`,
-                            data: top5Comparativa.map(x => x.ant),
-                            backgroundColor: 'rgba(148, 163, 184, 0.65)'
-                        },
-                        {
-                            label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`,
-                            data: top5Comparativa.map(x => x.act),
-                            backgroundColor: 'rgba(245, 158, 11, 0.85)'
-                        }
-                    ]
+                    datasets: [{ label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`, data: top5Comparativa.map(x => x.ant), backgroundColor: 'rgba(148, 163, 184, 0.65)' }, { label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`, data: top5Comparativa.map(x => x.act), backgroundColor: 'rgba(245, 158, 11, 0.85)' }]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
-                        datalabels: { anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' } }
-                    },
-                    scales: { y: { beginAtZero: true, grid: { display: false } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' } } }, scales: { y: { beginAtZero: true, grid: { display: false } } } }
             });
 
-            const fbaCounts = {};
-            filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
+            // Concentración FBA
+            const fbaCounts = {}; filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
             const sortedFba = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
-
-            sortedFba.forEach(([fbaName]) => {
-                const subfba = filteredData.filter(i => i.fba === fbaName);
-                topCaratulasPorFBA[fbaName] = obtenerCaratulaLider(subfba);
-            });
+            sortedFba.forEach(([fbaName]) => { topCaratulasPorFBA[fbaName] = obtenerCaratulaLider(filteredData.filter(i => i.fba === fbaName)); });
 
             if (chartFBA) chartFBA.destroy();
             chartFBA = new Chart(document.getElementById('chartFBA'), {
                 type: 'bar',
-                data: {
-                    labels: sortedFba.map(x => x[0]),
-                    datasets: [{
-                        label: 'Actuaciones Registradas',
-                        data: sortedFba.map(x => x[1]),
-                        backgroundColor: colorPalette
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
-                        tooltip: {
-                            callbacks: {
-                                afterBody: (context) => {
-                                    const fbaKey = context[0].label;
-                                    return `Top Delito: ${topCaratulasPorFBA[fbaKey] || 'S/D'}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: { y: { beginAtZero: true } }
-                }
+                data: { labels: sortedFba.map(x => x[0]), datasets: [{ data: sortedFba.map(x => x[1]), backgroundColor: colorPalette }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Top Delito: ${topCaratulasPorFBA[ctx[0].label] || 'S/D'}` } } } }
             });
 
-            const controlCounts = {};
-            filteredData.forEach(i => { if(i.control) controlCounts[i.control] = (controlCounts[i.control] || 0) + 1; });
-            
+            // Control resolutivo doughnut
+            const controlCounts = {}; filteredData.forEach(i => { if(i.control) controlCounts[i.control] = (controlCounts[i.control] || 0) + 1; });
             if (chartControl) chartControl.destroy();
             chartControl = new Chart(document.getElementById('chartControl'), {
                 type: 'doughnut',
-                data: {
-                    labels: Object.keys(controlCounts),
-                    datasets: [{
-                        data: Object.values(controlCounts),
-                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6']
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-                        datalabels: {
-                            formatter: (value, ctx) => {
-                                let sum = 0;
-                                let dataArr = ctx.chart.data.datasets[0].data;
-                                dataArr.map(data => { sum += data; });
-                                return `${((value*100) / sum).toFixed(0)}%`;
-                            },
-                            color: '#fff', font: { weight: 'bold', size: 11 }
-                        }
-                    }
-                }
+                data: { labels: Object.keys(controlCounts), datasets: [{ data: Object.values(controlCounts), backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: { formatter: (val, ctx) => { let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d); return `${((val*100) / sum).toFixed(0)}%`; }, color: '#fff', font: { weight: 'bold', size: 11 } } } }
             });
 
-            const matrizAnos = {};
-            rawData.forEach(item => {
-                if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) {
-                    if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0);
-                    matrizAnos[item.año][item.mes]++;
-                }
-            });
-
-            const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, index) => {
-                return {
-                    label: `Año ${año}`,
-                    data: matrizAnos[año].slice(1),
-                    borderColor: paletaMulticolor12Meses[index % paletaMulticolor12Meses.length],
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    tension: 0.2,
-                    pointRadius: 3
-                };
-            });
-
+            // Históricos
+            const matrizAnos = {}; rawData.forEach(item => { if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) { if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0); matrizAnos[item.año][item.mes]++; } });
+            const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, idx) => ({ label: `Año ${año}`, data: matrizAnos[año].slice(1), borderColor: paletaMulticolor12Meses[idx % paletaMulticolor12Meses.length], backgroundColor: 'transparent', borderWidth: 2, tension: 0.2, pointRadius: 3 }));
             if (chartAllYears) chartAllYears.destroy();
-            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), {
-                type: 'line',
-                data: {
-                    labels: NOMBRES_MESES.slice(1),
-                    datasets: datasetsHistoricos
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
-                        datalabels: { 
-                            display: true, 
-                            align: 'top', 
-                            anchor: 'end',
-                            color: '#1e293b',
-                            font: { size: 10, weight: 'bold' },
-                            offset: 4
-                        }
-                    },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
+            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: datasetsHistoricos }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } }, datalabels: { display: true, align: 'top', anchor: 'end', color: '#1e293b', font: { size: 10, weight: 'bold' } } } } });
 
+            // Distribución mensual año actual
             document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-500 print:hidden"></i> Distribución de Carga Mensual Unificada (Año ${anoSeleccionado})`;
-            const datasetMesesFiltrado = Array(13).fill(0);
-            filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
-
-            for (let m = 1; m <= 12; m++) {
-                const submes = filteredData.filter(i => i.mes === m);
-                topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(submes);
-            }
-
+            const datasetMesesFiltrado = Array(13).fill(0); filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
+            for (let m = 1; m <= 12; m++) { topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(filteredData.filter(i => i.mes === m)); }
             if (chartCurrentYear) chartCurrentYear.destroy();
-            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), {
-                type: 'bar',
-                data: {
-                    labels: NOMBRES_MESES.slice(1),
-                    datasets: [{
-                        label: 'Actuaciones',
-                        data: datasetMesesFiltrado.slice(1),
-                        backgroundColor: paletaMulticolor12Meses
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } },
-                        tooltip: {
-                            callbacks: {
-                                afterBody: (context) => {
-                                    const mesKey = context[0].label;
-                                    return `Líder: ${topCaratulasPorMesActual[mesKey] || 'S/D'}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
+            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), { type: 'bar', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), backgroundColor: paletaMulticolor12Meses }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Líder: ${topCaratulasPorMesActual[ctx[0].label] || 'S/D'}` } } } } });
 
+            // Línea de evolución
             if (chartEvolution) chartEvolution.destroy();
-            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), {
-                type: 'line',
-                data: {
-                    labels: NOMBRES_MESES.slice(1),
-                    datasets: [{
-                        label: `Evolución ${anoSeleccionado}`,
-                        data: datasetMesesFiltrado.slice(1),
-                        borderColor: '#3B82F6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                        fill: true,
-                        tension: 0.3,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#1E3A8A',
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top' } },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
+            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#1E3A8A', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top' } } } });
         }
 
         function renderTable() {
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
+            const start = (currentPage - 1) * rowsPerPage; const end = start + rowsPerPage;
             const paginatedItems = filteredData.slice(start, end);
-
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
             document.getElementById('tableCounter').textContent = `${filteredData.length.toLocaleString('es-AR')} registros`;
-
             const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
             if(paginatedItems.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-sm text-slate-400 font-medium">Ningún registro coincide con los filtros aplicados actualmente.</td></tr>`;
                 document.getElementById('pageIndicator').textContent = "Página 0 de 0";
-                document.getElementById('btnFirst').disabled = true;
-                document.getElementById('btnPrev').disabled = true;
-                document.getElementById('btnNext').disabled = true;
-                document.getElementById('btnLast').disabled = true;
+                document.getElementById('btnFirst').disabled = true; document.getElementById('btnPrev').disabled = true;
+                document.getElementById('btnNext').disabled = true; document.getElementById('btnLast').disabled = true;
                 return;
             }
 
-            paginatedItems.forEach(item => {
-                tbody.appendChild(generarFilaHTML(item));
-            });
-
+            paginatedItems.forEach(item => tbody.appendChild(generarFilaHTML(item)));
             document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${totalPages}`;
-            
             document.getElementById('btnFirst').disabled = (currentPage === 1);
             document.getElementById('btnPrev').disabled = (currentPage === 1);
             document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
@@ -1023,68 +735,31 @@
         }
 
         function generarFilaHTML(item) {
-            const tr = document.createElement('tr');
-            tr.className = "hover:bg-slate-50 transition-colors";
-            
-            let badgeControlClase = "bg-slate-100 text-slate-700";
-            const ctrlNorm = (item.control || '').toUpperCase();
+            const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 transition-colors";
+            let badgeControlClase = "bg-slate-100 text-slate-700"; const ctrlNorm = (item.control || '').toUpperCase();
             if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-100 text-emerald-800 font-semibold";
             if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-100 text-amber-800 font-semibold";
             if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-100 text-blue-800 font-semibold";
 
-            const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' 
-                ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` 
-                : item.victima;
-
-            const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' 
-                ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` 
-                : item.imputado;
-
-            // Reemplazo visual estético: en la tabla operativa renderizamos saltos de línea legibles si es compuesta
+            const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' ? `${item.victima} — <span class="text-slate-500 font-normal">Destino: ${item.destinoVictima}</span>` : item.victima;
+            const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' ? `${item.imputado} — <span class="text-slate-500 font-normal">Destino: ${item.destinoImputado}</span>` : item.imputado;
             const fechaFormateadaTabla = item.fecha.toString().replace(/[\r\n]+/g, '<br><span class="text-[10px] text-amber-600 font-bold">Novedad:</span> ');
 
-            tr.innerHTML = `
-                <td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td>
-                <td class="px-3 py-3 text-slate-700 leading-tight">${fechaFormateadaTabla}</td>
-                <td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td>
-                <td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td>
-                <td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td>
-                <td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td>
-                <td class="px-3 py-3 text-slate-600 font-medium break-words">${item.elementoDañado}</td>
-                <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td>
-                <td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td>
-                <td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>
-            `;
+            tr.innerHTML = `<td class="px-3 py-3 font-mono font-bold text-slate-900 overflow-hidden break-all">${item.sirex}</td><td class="px-3 py-3 text-slate-700 leading-tight">${fechaFormateadaTabla}</td><td class="px-3 py-3 font-medium text-slate-700 break-all">${item.expediente}</td><td class="px-3 py-3 whitespace-normal break-words" title="${item.dependencia}">${item.dependencia}</td><td class="px-3 py-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-800 rounded-md text-[11px] font-medium block text-center truncate">${item.fba}</span></td><td class="px-3 py-3 font-semibold text-slate-800 whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td><td class="px-3 py-3 text-slate-600 font-medium break-words">${item.elementoDañado}</td><td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoVictimaCompleto}</td><td class="px-3 py-3 text-[11px] text-slate-900 font-medium whitespace-normal break-words leading-tight bg-slate-50/40">${textoImputadoCompleto}</td><td class="px-3 py-3"><span class="px-2 py-1 rounded-sm text-[11px] block text-center ${badgeControlClase}">${item.control}</span></td>`;
             return tr;
         }
 
         function imprimirListadoCompleto() {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-            filteredData.forEach(item => {
-                tbody.appendChild(generarFilaHTML(item));
-            });
-            window.print();
-            renderTable();
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
+            filteredData.forEach(item => tbody.appendChild(generarFilaHTML(item)));
+            window.print(); renderTable();
         }
 
-        document.getElementById('btnFirst').addEventListener('click', () => {
-            if (currentPage > 1) { currentPage = 1; renderTable(); }
-        });
-
-        document.getElementById('btnPrev').addEventListener('click', () => {
-            if (currentPage > 1) { currentPage--; renderTable(); }
-        });
-
-        document.getElementById('btnNext').addEventListener('click', () => {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            if (currentPage < totalPages) { currentPage++; renderTable(); }
-        });
-
-        document.getElementById('btnLast').addEventListener('click', () => {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            if (currentPage < totalPages) { currentPage = totalPages; renderTable(); }
-        });
+        // Listeners de Paginación
+        document.getElementById('btnFirst').addEventListener('click', () => { if (currentPage > 1) { currentPage = 1; renderTable(); } });
+        document.getElementById('btnPrev').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
+        document.getElementById('btnNext').addEventListener('click', () => { const tp = Math.ceil(filteredData.length / rowsPerPage); if (currentPage < tp) { currentPage++; renderTable(); } });
+        document.getElementById('btnLast').addEventListener('click', () => { const tp = Math.ceil(filteredData.length / rowsPerPage); if (currentPage < tp) { currentPage = tp; renderTable(); } });
     </script>
 </body>
 </html>
