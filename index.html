@@ -45,8 +45,8 @@
         </div>
         <div id="statusBadge" class="flex items-center gap-3 bg-slate-900/90 px-4 py-2.5 rounded-xl border border-slate-800/80 shadow-inner w-full sm:w-auto print:hidden">
             <div class="relative flex h-2.5 w-2.5">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span id="statusDot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
             </div>
             <div>
                 <p id="statusText" class="text-xs font-bold font-mono uppercase tracking-widest text-amber-400">Conectando Terminal...</p>
@@ -172,7 +172,7 @@
                 </div>
                 <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60">Casos en periodo operativo</p>
             </div>
-            <div class="bg-slate-950/40 rounded-2xl p-5 border item border-slate-900 border-l-4 border-l-red-500 flex flex-col justify-between shadow-sm">
+            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-red-500 flex flex-col justify-between shadow-sm">
                 <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Mes Máxima Actividad</span>
                 <div class="flex items-baseline justify-between mt-2">
                     <h2 class="text-2xl font-black text-red-400 tracking-tight leading-none" id="kpiMesMaximo">S/D</h2>
@@ -327,7 +327,6 @@
         let topCaratulasPorFBA = {};
         let topCaratulasPorMesActual = {};
 
-        // Paletas de diseño oscuras de alto contraste
         const colorPalette = [
             'rgba(59, 130, 246, 0.85)', 'rgba(245, 158, 11, 0.85)', 'rgba(16, 185, 129, 0.85)',
             'rgba(139, 92, 246, 0.85)', 'rgba(239, 68, 68, 0.85)', 'rgba(236, 72, 153, 0.85)'
@@ -340,13 +339,22 @@
 
         const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+        // URL ASIGNADA RIGUROSAMENTE
         const ENLACE_BASE_INPUT = 'https://docs.google.com/spreadsheets/d/1jIAiLNjiwSnGrdBeiJ_ie5TRcDh8ocIuSTTvIYP9_5A/edit?usp=sharing';
 
-        // MOTOR EXTRACTOR DE FECHAS SOBERANO: PARSEA FORMATOS LATINOS Y FORMATOS NATIVOS DE EXPORTACIÓN GOOGLE (AAAA-MM-DD)
+        function setStatus(icon, color, text, sub, isStable = false) {
+            document.getElementById('statusText').textContent = text;
+            document.getElementById('statusText').className = `text-xs font-bold font-mono uppercase tracking-widest ${color}`;
+            document.getElementById('statusSub').textContent = sub;
+            if (isStable) {
+                document.getElementById('statusPing').className = "hidden";
+                document.getElementById('statusDot').className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400 shadow-[0_0_8px_#10b981]";
+            }
+        }
+
+        // MOTOR PARSER DE FECHAS SOBERANO CON LOGICA DE AISLAMIENTO MULTI-LINEA
         function extraerMesYAño(fechaStr) {
             if (!fechaStr) return { mes: NaN, año: NaN };
-            
-            // Forzar solo la primera línea por si la celda trae saltos de línea con historial
             let stringLimpio = fechaStr.toString().split(/[\r\n]+/)[0].trim();
             stringLimpio = stringLimpio.replace(/[-.]/g, '/');
             if (stringLimpio.includes(" ")) { stringLimpio = stringLimpio.split(" ")[0]; }
@@ -358,12 +366,8 @@
             let p1 = parseInt(partes[1], 10);
             let p2 = parseInt(partes[2], 10);
             
-            // Si el bloque 0 tiene 4 dígitos significa que vino en formato ISO AAAA/MM/DD nativo de Sheets export
-            if (partes[0].length === 4) {
-                return { mes: p1, año: p0 };
-            }
-            // Formato normal DD/MM/AAAA
-            return { mes: p1, año: p2 };
+            if (partes[0].length === 4) return { mes: p1, año: p0 }; // Formato ISO AAAA/MM/DD
+            return { mes: p1, año: p2 }; // Formato Estándar Latinoamericano DD/MM/AAAA
         }
 
         async function cargarDesdeSheets() {
@@ -379,9 +383,9 @@
                 const textData = await res.text();
                 
                 processCSV(textData);
-                setStatus('fa-circle-check', 'text-green-400', 'CONEXIÓN ESTABLE', 'Estructura lógica sumarial validada');
+                setStatus('fa-circle-check', 'text-green-400', 'CONEXIÓN ESTABLE', 'Estructura lógica sumarial validada', true);
             } catch (err) {
-                setStatus('fa-triangle-exclamation', 'text-red-400', 'FALLO DE ENLACE', 'Verifique permisos del enlace');
+                setStatus('fa-triangle-exclamation', 'text-red-400', 'FALLO DE ENLACE', 'Verifique permisos de Google Drive', false);
                 console.error(err);
             }
         }
@@ -409,12 +413,11 @@
             return lines;
         }
 
-        // EMERGEN LAS RESOLUCIONES LÓGICAS DE MAPEO DIRECTO DE CABECERAS ORIGINALES DEL CSV ADJUNTADO
         function processCSV(text) {
             const rows = parseCSV(text);
             if (rows.length < 2) return;
 
-            // Sanitizar cabeceras removiendo espacios invisibles que rompen el indexado
+            // REMOCIÓN AGRESIVA DE ESPACIOS INVISIBLES Y DUPLICADOS EN CABECERAS
             const headers = rows[0].map(h => h.toString().trim().toUpperCase().replace(/\s+/g, ' '));
             
             const idxSirex = headers.findIndex(h => h.startsWith("SIREX"));
@@ -458,7 +461,6 @@
                 });
             }
 
-            // TARJETA INTELIGENTE: EXTRAER EN TIEMPO REAL EL ÚLTIMO REGISTRO REAL VÁLIDO DE LA PLANILLA
             if(rawData.length > 0) {
                 const ultimoRegistro = rawData[rawData.length - 1];
                 document.getElementById('kpiUltimoSirex').textContent = `${ultimoRegistro.sirex}`;
@@ -496,7 +498,6 @@
             buildSelectOptions('controlFilter', controles, true);
 
             const selectAno = document.getElementById('anoFilter'); selectAno.innerHTML = '';
-            // Forzar que el año más nuevo (2026) quede arriba por defecto
             Array.from(anos).sort((a,b)=>b-a).forEach(val => {
                 const opt = document.createElement('option'); opt.value = val; opt.textContent = val; selectAno.appendChild(opt);
             });
@@ -615,7 +616,7 @@
                 document.getElementById('topNombreDependencia').textContent = `Ninguna`;
             }
 
-            // --- SINCRONIZACIÓN TEMPORAL EXACTA AUTOMÁTICA ---
+            // --- CRONOLOGÍA ESTACIONAL DE ALTA PRECISIÓN ---
             const hoy = new Date();
             const mesLimiteEnCurso = hoy.getMonth() + 1; 
             const añoActualReal = hoy.getFullYear();
@@ -678,7 +679,6 @@
                 tbodyComparativo.appendChild(tr);
             });
 
-            // Re-instanciar Grafico Comparativo de Barra
             if (chartMonthComp) chartMonthComp.destroy();
             chartMonthComp = new Chart(document.getElementById('chartMonthComparison'), {
                 type: 'bar',
