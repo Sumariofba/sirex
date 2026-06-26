@@ -210,7 +210,7 @@
                             <th class="px-4 py-3.5 w-[220px]">DEP. INSTRUCTORA</th>
                             <th class="px-4 py-3.5 w-[130px]">FBA INTERV.</th>
                             <th class="px-4 py-3.5 w-[250px]">CARATULA SUMARIAL</th>
-                            <th class="px-4 py-3.5 w-[150px]">ELEMENTO DAÑADO</th> 
+                            <th class="px-4 py-3.5 w-[180px]">ELEMENTO DAÑADO</th> 
                             <th class="px-4 py-3.5 w-[290px]">VICTIMA / DESTINO</th>
                             <th class="px-4 py-3.5 w-[290px]">IMPUTADO / DESTINO</th>
                             <th class="px-4 py-3.5 w-[120px]">CONTROL</th> 
@@ -425,6 +425,9 @@
             const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA"));
             const idxImputado = headers.findIndex(h => h.trim() === "IMPUTADO");
             const idxDestinoImputado = headers.findIndex(h => h.includes("DESTINO DEL IMPUTADO"));
+            
+            // MAPEO DINÁMICO DE LA COLUMNA M (DATOS ELEMENTO PROVISTO)
+            const idxElementoProvisto = headers.findIndex(h => h.includes("PROVISTO") || h.includes("ELEMENTO PROVISTO"));
 
             rawData = [];
 
@@ -449,7 +452,8 @@
                     victima: idxVictima !== -1 ? (r[idxVictima]?.trim() || 'S/D') : 'S/D',
                     destinoVictima: idxDestinoVictima !== -1 ? (r[idxDestinoVictima]?.trim() || 'S/D') : 'S/D',
                     imputado: idxImputado !== -1 ? (r[idxImputado]?.trim() || 'S/D') : 'S/D',
-                    destinoImputado: idxDestinoImputado !== -1 ? (r[idxDestinoImputado]?.trim() || 'S/D') : 'S/D'
+                    destinoImputado: idxDestinoImputado !== -1 ? (r[idxDestinoImputado]?.trim() || 'S/D') : 'S/D',
+                    elementoProvisto: idxElementoProvisto !== -1 ? (r[idxElementoProvisto]?.trim() || '') : ''
                 });
             }
 
@@ -534,7 +538,7 @@
                 const matchControl = controlVal === 'TODOS' || item.control === controlVal;
                 
                 let todoElRegistroConcat = normalizarTexto(
-                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.elementoDañado} ${item.victima} ${item.destinoVictima} ${item.imputado} ${item.destinoImputado} ${item.control}`
+                    `${item.sirex} ${item.fecha} ${item.expediente} ${item.dependencia} ${item.fba} ${item.caratula} ${item.elementoDañado} ${item.elementoProvisto} ${item.victima} ${item.destinoVictima} ${item.imputado} ${item.destinoImputado} ${item.control}`
                 );
                 const matchSearch = !searchVal || todoElRegistroConcat.includes(searchVal);
 
@@ -788,9 +792,13 @@
 
             const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' ? `${item.victima} — <span class="text-slate-500">Destino: ${item.destinoVictima}</span>` : item.victima;
             const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' ? `${item.imputado} — <span class="text-slate-500">Destino: ${item.destinoImputado}</span>` : item.imputado;
+            
+            // CONCATENACIÓN ESTILIZADA PARA ELEMENTO DAÑADO / ELEMENTO PROVISTO
+            const textoElementoCompleto = item.elementoProvisto && item.elementoProvisto !== 'S/D' && item.elementoProvisto !== '' ? `${item.elementoDañado} — <span class="text-slate-500">Provisto: ${item.elementoProvisto}</span>` : item.elementoDañado;
+            
             const fechaFormateadaTabla = item.fecha.toString().replace(/[\r\n]+/g, '<br><span class="text-[10px] text-amber-500 font-bold">Novedad:</span> ');
 
-            tr.innerHTML = `<td class="px-4 py-3 font-mono font-bold text-amber-400 overflow-hidden break-all bg-slate-950/20">${item.sirex}</td><td class="px-4 py-3 text-slate-300 leading-tight">${fechaFormateadaTabla}</td><td class="px-4 py-3 font-mono text-slate-400 break-all">${item.expediente}</td><td class="px-4 py-3 text-xs text-slate-300 break-words font-medium" title="${item.dependencia}">${item.dependencia}</td><td class="px-4 py-3"><span class="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-md text-[10px] font-mono block text-center truncate">${item.fba}</span></td><td class="px-4 py-3 font-bold text-white whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td><td class="px-4 py-3 text-slate-400 break-words font-medium">${item.elementoDañado}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10">${textoVictimaCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10">${textoImputadoCompleto}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] block text-center ${badgeControlClase}">${item.control}</span></td>`;
+            tr.innerHTML = `<td class="px-4 py-3 font-mono font-bold text-amber-400 overflow-hidden break-all bg-slate-950/20">${item.sirex}</td><td class="px-4 py-3 text-slate-300 leading-tight">${fechaFormateadaTabla}</td><td class="px-4 py-3 font-mono text-slate-400 break-all">${item.expediente}</td><td class="px-4 py-3 text-xs text-slate-300 break-words font-medium" title="${item.dependencia}">${item.dependencia}</td><td class="px-4 py-3"><span class="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-md text-[10px] font-mono block text-center truncate">${item.fba}</span></td><td class="px-4 py-3 font-bold text-white whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td><td class="px-4 py-3 text-slate-300 whitespace-normal break-words leading-tight font-medium bg-slate-900/10">${textoElementoCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10">${textoVictimaCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10">${textoImputadoCompleto}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] block text-center ${badgeControlClase}">${item.control}</span></td>`;
             return tr;
         }
 
