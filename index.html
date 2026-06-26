@@ -39,7 +39,7 @@
                 <i class="fa-solid fa-shield-halved text-2xl text-slate-950"></i>
             </div>
             <div>
-                <h1 class="text-xl font-black tracking-wide text-white uppercase bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Dir. Fuerza Barrial de Approximation</h1>
+                <h1 class="text-xl font-black tracking-wide text-white uppercase bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Dir. Fuerza Barrial de Aproximación</h1>
                 <h2 class="text-sm font-semibold text-amber-400/90 tracking-wider uppercase mt-0.5">Analítica de Actuaciones Sumariales Administrativas (A.S.A.)</h2>
             </div>
         </div>
@@ -105,7 +105,7 @@
                 <div class="mt-4 pt-2 border-t border-slate-900">
                     <p class="text-xs font-semibold text-slate-400 truncate" id="topDivisionLesiones">Buscando...</p>
                 </div>
-            </div>
+            }
             <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-purple-500 flex flex-col justify-between shadow-lg">
                 <div>
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Pta. Inf. Ley 12569</span>
@@ -193,7 +193,7 @@
             </div>
         </div>
 
-        <div class="bg-slate-930 rounded-2xl border border-slate-900 overflow-hidden mb-6 shadow-2xl print-table-container">
+        <div class="bg-slate-950/30 rounded-2xl border border-slate-900 overflow-hidden mb-6 shadow-2xl print-table-container">
             <div class="p-4 border-b border-slate-900 flex justify-between items-center bg-slate-950/80 print:hidden">
                 <span class="text-xs font-black tracking-widest text-slate-400 uppercase">Tabla Operativa Sumarial Activa</span>
                 <button onclick="imprimirListadoCompleto()" class="bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2 border border-slate-800 cursor-pointer transition-colors">
@@ -327,14 +327,10 @@
         let topCaratulasPorFBA = {};
         let topCaratulasPorMesActual = {};
 
-        const colorPalette = [
-            'rgba(59, 130, 246, 0.85)', 'rgba(245, 158, 11, 0.85)', 'rgba(16, 185, 129, 0.85)',
-            'rgba(139, 92, 246, 0.85)', 'rgba(239, 68, 68, 0.85)', 'rgba(236, 72, 153, 0.85)'
-        ];
-
+        // Paleta extendida de 12 colores únicos y contrastantes (para evitar repeticiones)
         const paletaMulticolor12Meses = [
             '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', 
-            '#ec4899', '#64748b', '#a855f7', '#14b8a6', '#eab308', '#f97316'
+            '#ec4899', '#f97316', '#a855f7', '#14b8a6', '#eab308', '#64748b'
         ];
 
         const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -417,7 +413,6 @@
             const rows = parseCSV(text);
             if (rows.length < 2) return;
 
-            // REMOCIÓN AGRESIVA DE ESPACIOS INVISIBLES Y DUPLICADOS EN CABECERAS
             const headers = rows[0].map(h => h.toString().trim().toUpperCase().replace(/\s+/g, ' '));
             
             const idxSirex = headers.findIndex(h => h.startsWith("SIREX"));
@@ -624,7 +619,6 @@
                 document.getElementById('topNombreDependencia').textContent = `Ninguna`;
             }
 
-            // --- CRONOLOGÍA ESTACIONAL DE ALTA PRECISIÓN ---
             const hoy = new Date();
             const mesLimiteEnCurso = hoy.getMonth() + 1; 
             const añoActualReal = hoy.getFullYear();
@@ -668,7 +662,6 @@
             const dataMesAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1) && i.mes === mesLimiteEnCurso);
             const conteoDelitosActual = {}, conteoDelitosAnterior = {};
             
-            // Recuento Año Actual con Motor de Agrupación de prefijo ISA 21100
             dataMesAñoActualGlobal.forEach(i => { 
                 if(i.caratula) { 
                     let c = i.caratula.trim(); 
@@ -679,7 +672,6 @@
                 } 
             });
 
-            // Recuento Año Anterior con Motor de Agrupación de prefijo ISA 21100
             dataMesAñoAnteriorGlobal.forEach(i => { 
                 if(i.caratula) { 
                     let c = i.caratula.trim(); 
@@ -716,7 +708,7 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#94a3b8', boxWidth: 12, font: { size: 10 } } }, datalabels: { anchor: 'end', align: 'top', color: '#f8fafc', font: { size: 9, weight: 'bold' } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#64748b' } } } }
             });
 
-            // Concentración FBA
+            // --- GRÁFICO FBA: ASIGNACIÓN DE COLORES MULTICOLOR INDIVIDUALES ---
             const fbaCounts = {}; filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
             const sortedFba = Object.entries(fbaCounts).sort((a,b)=>b[1]-a[1]).slice(0, 8);
             sortedFba.forEach(([fbaName]) => { topCaratulasPorFBA[fbaName] = obtenerCaratulaLider(filteredData.filter(i => i.fba === fbaName)); });
@@ -724,7 +716,13 @@
             if (chartFBA) chartFBA.destroy();
             chartFBA = new Chart(document.getElementById('chartFBA'), {
                 type: 'bar',
-                data: { labels: sortedFba.map(x => x[0]), datasets: [{ data: sortedFba.map(x => x[1]), backgroundColor: '#3b82f6' }] },
+                data: { 
+                    labels: sortedFba.map(x => x[0]), 
+                    datasets: [{ 
+                        data: sortedFba.map(x => x[1]), 
+                        backgroundColor: paletaMulticolor12Meses.slice(0, sortedFba.length) // Vector de colores únicos
+                    }] 
+                },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Top Delito: ${topCaratulasPorFBA[ctx[0].label] || 'S/D'}` } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } }
             });
 
@@ -743,12 +741,23 @@
             if (chartAllYears) chartAllYears.destroy();
             chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: datasetsHistoricos }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#94a3b8', boxWidth: 12, font: { size: 10 } } }, datalabels: { display: true, align: 'top', anchor: 'end', color: '#94a3b8', font: { size: 9 } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } } });
 
-            // Distribución mensual año actual
+            // --- GRÁFICO ESTACIONAL: COLORES MÚLTIPLES PARA LOS 12 MESES ---
             document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-400"></i> Distribución Estacional de Carga Unificada (Año ${anoSeleccionado})`;
             const datasetMesesFiltrado = Array(13).fill(0); filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
             for (let m = 1; m <= 12; m++) { topCaratulasPorMesActual[NOMBRES_MESES[m]] = obtenerCaratulaLider(filteredData.filter(i => i.mes === m)); }
+            
             if (chartCurrentYear) chartCurrentYear.destroy();
-            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), { type: 'bar', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), backgroundColor: '#10b981' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Líder: ${topCaratulasPorMesActual[ctx[0].label] || 'S/D'}` } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } } });
+            chartCurrentYear = new Chart(document.getElementById('chartCurrentYearMonthly'), { 
+                type: 'bar', 
+                data: { 
+                    labels: NOMBRES_MESES.slice(1), 
+                    datasets: [{ 
+                        data: datasetMesesFiltrado.slice(1), 
+                        backgroundColor: paletaMulticolor12Meses // Pasa el array completo de 12 colores únicos
+                    }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Líder: ${topCaratulasPorMesActual[ctx[0].label] || 'S/D'}` } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } } 
+            });
 
             // Línea de evolución
             if (chartEvolution) chartEvolution.destroy();
