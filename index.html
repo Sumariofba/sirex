@@ -43,18 +43,19 @@
         }
     </style>
 </head>
-<body class="bg-[#090d16] text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300 data-[theme=light]:bg-slate-100 data-[theme=light]:text-slate-800" id="bodyRoot">
+<body class="bg-[#090d16] text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300 data-[theme=light]:bg-slate-100 data-[theme=light]:text-slate-900" id="bodyRoot">
 
     <!-- Navbar Principal -->
     <nav class="bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50 transition-colors duration-300 data-[theme=light]:bg-white data-[theme=light]:border-slate-200 shadow-xs" id="navMain">
         <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
             <div class="flex items-center gap-4">
-                <div class="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg shadow-orange-500/10">
-                    <i class="fa-solid fa-shield-halved text-2xl text-slate-950"></i>
+                <!-- Escudo Institucional FBA Reemplazado -->
+                <div class="flex items-center justify-center">
+                    <img src="image_72e19f.png" alt="Escudo Oficial FBA" class="h-16 w-auto drop-shadow-md">
                 </div>
                 <div>
-                    <h1 class="text-xl font-black tracking-wide text-white uppercase bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent data-[theme=light]:from-slate-950 data-[theme=light]:to-slate-700" id="navTitle">Dir. Fuerza Barrial de Aproximación</h1>
-                    <h2 class="text-sm font-semibold text-amber-400/90 tracking-wider uppercase mt-0.5 data-[theme=light]:text-amber-600" id="navSub">Analítica de Actuaciones Sumariales Administrativas (A.S.A.)</h2>
+                    <h1 class="text-xl font-black tracking-wide text-white uppercase bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent data-[theme=light]:from-slate-950 data-[theme=light]:to-slate-800" id="navTitle">Dir. Fuerza Barrial de Aproximación</h1>
+                    <h2 class="text-sm font-semibold text-amber-400/90 tracking-wider uppercase mt-0.5 data-[theme=light]:text-amber-600 font-bold" id="navSub">Analítica de Actuaciones Sumariales Administrativas (A.S.A.)</h2>
                 </div>
             </div>
             <button onclick="toggleTheme()" class="sm:hidden p-3 rounded-xl bg-slate-900 border border-slate-800 text-amber-400 cursor-pointer transition-all data-[theme=light]:bg-slate-200 data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700" id="themeToggleBtnMobile">
@@ -74,7 +75,7 @@
                 </div>
                 <div>
                     <p id="statusText" class="text-xs font-bold font-mono uppercase tracking-widest text-amber-400 data-[theme=light]:text-amber-600">Conectando Terminal...</p>
-                    <p id="statusSub" class="text-[10px] text-slate-500 data-[theme=light]:text-slate-400">Sincronizando registros CSV nativos</p>
+                    <p id="statusSub" class="text-[10px] text-slate-500 data-[theme=light]:text-slate-500">Sincronizando registros CSV nativos</p>
                 </div>
             </div>
         </div>
@@ -83,10 +84,10 @@
     <!-- Sub-Navbar Barra de Búsqueda -->
     <nav class="bg-slate-950/40 border-b border-slate-900 px-6 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 print:hidden transition-colors duration-300 data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200" id="navSubSearch">
         <div class="flex items-center gap-3 w-full sm:w-auto">
-            <span class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-widest data-[theme=light]:text-slate-500">
+            <span class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-widest data-[theme=light]:text-slate-600">
                 <i class="fa-solid fa-server text-blue-500 animate-pulse"></i> Núcleo de Eventos:
             </span>
-            <span class="text-xs bg-blue-500/10 text-blue-400 font-mono font-black px-3 py-1 rounded-lg border border-blue-500/20 shadow-xs data-[theme=light]:bg-blue-50 data-[theme=light]:text-blue-600 data-[theme=light]:border-blue-200" id="tableCounter">0 registros</span>
+            <span class="text-xs bg-blue-500/10 text-blue-400 font-mono font-black px-3 py-1 rounded-lg border border-blue-500/20 shadow-xs data-[theme=light]:bg-blue-50 data-[theme=light]:text-blue-700 data-[theme=light]:border-blue-200" id="tableCounter">0 registros</span>
         </div>
         <div class="w-full sm:w-96 relative">
             <input type="text" id="searchFilter" placeholder="Buscar por SIREX, Imputado, Dependencia..." class="w-full bg-slate-900/60 border border-slate-800 text-white placeholder-slate-500 text-xs rounded-xl p-2.5 pl-9 focus:ring-2 focus:ring-amber-500 focus:border-transparent focus:outline-hidden transition-all shadow-inner data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-900">
@@ -100,72 +101,72 @@
         <!-- Fila de Filtros Selectores -->
         <div class="bg-slate-950/40 backdrop-blur-xs p-5 rounded-2xl border border-slate-900 mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end shadow-2xl print:hidden data-[theme=light]:bg-white data-[theme=light]:border-slate-200" id="filterRow">
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">Año Fiscal</label>
-                <select id="anoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-600">Año Fiscal</label>
+                <select id="anoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-900"></select>
             </div>
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">FBA Interviniente</label>
-                <select id="fbaFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-600">FBA Interviniente</label>
+                <select id="fbaFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-900"></select>
             </div>
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">Dependencia Instructora</label>
-                <select id="depFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-600">Dependencia Instructora</label>
+                <select id="depFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-900"></select>
             </div>
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">Tipificación de Carátula</label>
-                <select id="delitoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-600">Tipificación de Carátula</label>
+                <select id="delitoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-900"></select>
             </div>
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">Estado de Control</label>
-                <select id="controlFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-600">Estado de Control</label>
+                <select id="controlFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-900"></select>
             </div>
         </div>
 
-        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2 data-[theme=light]:text-slate-500">
+        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2 data-[theme=light]:text-slate-700">
             <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Focos de Criticidad y Alerta Siniestral
         </h3>
         
-        <!-- Bloque Tarjetas Inteligentes de Criticidad -->
+        <!-- Bloque Tarjetas Inteligentes de Criticidad (Fondo blanco nítido en modo claro) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 w-full" id="cardsGrid1">
             <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-red-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:bg-white data-[theme=light]:from-white data-[theme=light]:to-white data-[theme=light]:border-slate-200">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lesiones por Accidente</span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1 data-[theme=light]:text-slate-600">Lesiones por Accidente</span>
                     <h3 class="text-2xl font-black text-red-400 tracking-tight data-[theme=light]:text-red-600" id="topCountLesiones">0 casos</h3>
                 </div>
                 <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-600" id="topDivisionLesiones">Buscando...</p>
+                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-700" id="topDivisionLesiones">Buscando...</p>
                 </div>
             </div>
             <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-purple-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:bg-white data-[theme=light]:from-white data-[theme=light]:to-white data-[theme=light]:border-slate-200">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Pta. Inf. Ley 12569</span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1 data-[theme=light]:text-slate-600">Pta. Inf. Ley 12569</span>
                     <h3 class="text-2xl font-black text-purple-400 tracking-tight data-[theme=light]:text-purple-600" id="topCountLey">0 casos</h3>
                 </div>
                 <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-600" id="topDivisionLey">Buscando...</p>
+                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-700" id="topDivisionLey">Buscando...</p>
                 </div>
             </div>
             <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-amber-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:bg-white data-[theme=light]:from-white data-[theme=light]:to-white data-[theme=light]:border-slate-200">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Abandono de Servicio</span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1 data-[theme=light]:text-slate-600">Abandono de Servicio</span>
                     <h3 class="text-2xl font-black text-amber-400 tracking-tight data-[theme=light]:text-amber-600" id="topCountAbandono">0 casos</h3>
                 </div>
                 <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-600" id="topDivisionAbandono">Buscando...</p>
+                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-700" id="topDivisionAbandono">Buscando...</p>
                 </div>
             </div>
             <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-blue-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:bg-white data-[theme=light]:from-white data-[theme=light]:to-white data-[theme=light]:border-slate-200">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Móviles Dañados</span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1 data-[theme=light]:text-slate-600">Móviles Dañados</span>
                     <h3 class="text-2xl font-black text-blue-400 tracking-tight data-[theme=light]:text-blue-600" id="topCountMovil">0 móviles</h3>
                 </div>
                 <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
-                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-600" id="topDivisionMovil">Buscando...</p>
+                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-700" id="topDivisionMovil">Buscando...</p>
                 </div>
             </div>
             <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-emerald-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:bg-white data-[theme=light]:from-white data-[theme=light]:to-white data-[theme=light]:border-slate-200">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Cria Instructora Líder</span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1 data-[theme=light]:text-slate-600">Cria Instructora Líder</span>
                     <h3 class="text-2xl font-black text-emerald-400 tracking-tight data-[theme=light]:text-emerald-600" id="topCountDependencia">0 casos</h3>
                 </div>
                 <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
@@ -174,51 +175,51 @@
             </div>
         </div>
 
-        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2 data-[theme=light]:text-slate-500">
+        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2 data-[theme=light]:text-slate-700">
             <i class="fa-solid fa-chart-pie text-indigo-500"></i> Métricas Clave del Flujo Operativo
         </h3>
         
-        <!-- Bloque Tarjetas Inteligentes KPIs -->
+        <!-- Bloque Tarjetas KPIs (Fondo blanco nítido y letras oscuras legibles) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 w-full" id="cardsGrid2">
             <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-indigo-500 flex flex-col justify-between shadow-sm min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
-                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1" id="lblKpiAnual">Intervenciones Año</span>
+                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1 data-[theme=light]:text-slate-600" id="lblKpiAnual">Intervenciones Año</span>
                 <div class="flex items-baseline justify-between mt-2">
-                    <h2 class="text-4xl font-black text-white tracking-tight leading-none data-[theme=light]:text-slate-900" id="kpiTotalAnual">0</h2>
+                    <h2 class="text-4xl font-black text-white tracking-tight leading-none data-[theme=light]:text-slate-950" id="kpiTotalAnual">0</h2>
                     <div class="text-indigo-400 bg-indigo-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-calendar"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60 data-[theme=light]:border-slate-100">Registros consolidados</p>
             </div>
             <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-violet-500 flex flex-col justify-between shadow-sm min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
-                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1" id="lblKpiComparativaAnual">Vs. Año Anterior</span>
+                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1 data-[theme=light]:text-slate-600" id="lblKpiComparativaAnual">Vs. Año Anterior</span>
                 <div class="flex items-baseline justify-between mt-2">
-                    <h2 class="text-4xl font-black text-white tracking-tight leading-none data-[theme=light]:text-slate-900" id="kpiTotalAnoAnterior">0</h2>
+                    <h2 class="text-4xl font-black text-white tracking-tight leading-none data-[theme=light]:text-slate-950" id="kpiTotalAnoAnterior">0</h2>
                     <div class="text-violet-400 bg-violet-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-right-left"></i></div>
                 </div>
                 <p class="text-[11px] font-bold mt-3 pt-2 border-t border-slate-900/60 data-[theme=light]:border-slate-100" id="kpiVariacionAnual">0% var.</p>
             </div>
             <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-emerald-500 flex flex-col justify-between shadow-sm min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
-                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1" id="lblKpiMensual">Intervenciones Mes Actual</span>
+                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1 data-[theme=light]:text-slate-600" id="lblKpiMensual">Intervenciones Mes Actual</span>
                 <div class="flex items-baseline justify-between mt-2">
-                    <h2 class="text-4xl font-black text-emerald-400 tracking-tight leading-none data-[theme=light]:text-emerald-600" id="kpiTotalMensual">0</h2>
+                    <h2 class="text-4xl font-black text-emerald-400 tracking-tight leading-none data-[theme=light]:text-emerald-700" id="kpiTotalMensual">0</h2>
                     <div class="text-emerald-400 bg-emerald-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-clock"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60 data-[theme=light]:border-slate-100">Casos en periodo operativo</p>
             </div>
             <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-red-500 flex flex-col justify-between shadow-sm min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
-                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Mes Máxima Actividad</span>
+                <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1 data-[theme=light]:text-slate-600">Mes Máxima Actividad</span>
                 <div class="flex items-baseline justify-between mt-2">
-                    <h2 class="text-2xl font-black text-red-400 tracking-tight leading-none data-[theme=light]:text-red-600" id="kpiMesMaximo">S/D</h2>
+                    <h2 class="text-2xl font-black text-red-400 tracking-tight leading-none data-[theme=light]:text-red-700" id="kpiMesMaximo">S/D</h2>
                     <div class="text-red-400 bg-red-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-fire"></i></div>
                 </div>
                 <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60 data-[theme=light]:border-slate-100" id="kpiMesMaximoDetalle">0 actuaciones</p>
             </div>
             <div class="bg-gradient-to-br from-slate-950 to-slate-900 rounded-2xl p-5 border border-amber-500/30 border-l-4 border-l-amber-500 flex flex-col justify-between shadow-xl min-w-0 data-[theme=light]:bg-white data-[theme=light]:from-white data-[theme=light]:to-white data-[theme=light]:border-slate-200">
-                <span class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-1 flex items-center gap-1.5 data-[theme=light]:text-amber-600">
+                <span class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-1 flex items-center gap-1.5 data-[theme=light]:text-amber-700">
                     <i class="fa-solid fa-bolt animate-pulse"></i> Última Novedad Base
                 </span>
                 <div>
-                    <h2 class="text-lg font-mono font-black text-white tracking-tight mt-1 data-[theme=light]:text-slate-900" id="kpiUltimoSirex">S/D</h2>
-                    <p class="text-[11px] text-slate-400 font-medium mt-0.5 truncate max-w-[220px] data-[theme=light]:text-slate-600" id="kpiUltimoDetalle">Sincronizando...</p>
+                    <h2 class="text-lg font-mono font-black text-white tracking-tight mt-1 data-[theme=light]:text-slate-950" id="kpiUltimoSirex">S/D</h2>
+                    <p class="text-[11px] text-slate-400 font-medium mt-0.5 truncate max-w-[220px] data-[theme=light]:text-slate-700" id="kpiUltimoDetalle">Sincronizando...</p>
                 </div>
                 <p class="text-[10px] text-slate-500 font-mono pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100" id="kpiUltimaFecha">Fecha: --/--/----</p>
             </div>
@@ -227,14 +228,14 @@
         <!-- Tabla Operativa -->
         <div class="bg-slate-950/30 rounded-2xl border border-slate-900 overflow-hidden mb-6 shadow-2xl print-table-container data-[theme=light]:bg-white data-[theme=light]:border-slate-200" id="tableContainer">
             <div class="p-4 border-b border-slate-900 flex justify-between items-center bg-slate-950/80 print:hidden data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200">
-                <span class="text-xs font-black tracking-widest text-slate-400 uppercase data-[theme=light]:text-slate-700">Tabla Operativa Sumarial Activa</span>
-                <button onclick="imprimirListadoCompleto()" class="bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2 border border-slate-800 cursor-pointer transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700 data-[theme=light]:hover:bg-slate-100">
+                <span class="text-xs font-black tracking-widest text-slate-400 uppercase data-[theme=light]:text-slate-800">Tabla Operativa Sumarial Activa</span>
+                <button onclick="imprimirListadoCompleto()" class="bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2 border border-slate-800 cursor-pointer transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-800 data-[theme=light]:hover:bg-slate-100">
                     <i class="fa-solid fa-print text-amber-500"></i> Imprimir Todo el Historial
                 </button>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-slate-400 min-w-[1550px] table-fixed data-[theme=light]:text-slate-700" id="mainTable">
-                    <thead class="text-xs text-slate-400 uppercase bg-slate-950/60 font-mono tracking-wider border-b border-slate-900 data-[theme=light]:bg-slate-100 data-[theme=light]:text-slate-700 data-[theme=light]:border-slate-200">
+                <table class="w-full text-xs text-left text-slate-400 min-w-[1550px] table-fixed data-[theme=light]:text-slate-800" id="mainTable">
+                    <thead class="text-xs text-slate-400 uppercase bg-slate-950/60 font-mono tracking-wider border-b border-slate-900 data-[theme=light]:bg-slate-100 data-[theme=light]:text-slate-800 data-[theme=light]:border-slate-200">
                         <tr>
                             <th class="px-4 py-3.5 w-[100px]">SIREX N°</th>
                             <th class="px-4 py-3.5 w-[110px]">FECHA INICIO</th>
@@ -248,18 +249,18 @@
                             <th class="px-4 py-3.5 w-[120px]">CONTROL</th> 
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-900/60 text-slate-300 bg-slate-950/10 data-[theme=light]:divide-slate-200 data-[theme=light]:bg-white data-[theme=light]:text-slate-800"></tbody>
+                    <tbody id="tableBody" class="divide-y divide-slate-900/60 text-slate-300 bg-slate-950/10 data-[theme=light]:divide-slate-200 data-[theme=light]:bg-white data-[theme=light]:text-slate-900"></tbody>
                 </table>
             </div>
             <div class="p-4 flex items-center justify-between border-t border-slate-900 bg-slate-950/40 text-xs print:hidden data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200">
                 <div class="flex items-center gap-2">
-                    <button id="btnFirst" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700"><i class="fa-solid fa-angles-left text-[10px]"></i> Primera</button>
-                    <button id="btnPrev" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700"><i class="fa-solid fa-angle-left text-[10px]"></i> Anterior</button>
+                    <button id="btnFirst" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-800"><i class="fa-solid fa-angles-left text-[10px]"></i> Primera</button>
+                    <button id="btnPrev" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-800"><i class="fa-solid fa-angle-left text-[10px]"></i> Anterior</button>
                 </div>
-                <span id="pageIndicator" class="font-bold text-slate-400 font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700">Página 1 de 1</span>
+                <span id="pageIndicator" class="font-bold text-slate-400 font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-800">Página 1 de 1</span>
                 <div class="flex items-center gap-2">
-                    <button id="btnNext" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700">Siguiente <i class="fa-solid fa-angle-right text-[10px]"></i></button>
-                    <button id="btnLast" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700">Última <i class="fa-solid fa-angles-right text-[10px]"></i></button>
+                    <button id="btnNext" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-800">Siguiente <i class="fa-solid fa-angle-right text-[10px]"></i></button>
+                    <button id="btnLast" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-800">Última <i class="fa-solid fa-angles-right text-[10px]"></i></button>
                 </div>
             </div>
         </div>
@@ -280,8 +281,8 @@
                     <i class="fa-solid fa-chart-line text-emerald-400"></i> Desglose Temporal y Porcentual de Cambios
                 </h4>
                 <div class="overflow-y-auto max-h-72 border border-slate-900 rounded-xl data-[theme=light]:border-slate-200">
-                    <table class="w-full text-xs text-left text-slate-300 data-[theme=light]:text-slate-800">
-                        <thead class="bg-slate-950 text-slate-400 font-mono uppercase tracking-wider sticky top-0 border-b border-slate-900 data-[theme=light]:bg-slate-100 data-[theme=light]:text-slate-700 data-[theme=light]:border-slate-200">
+                    <table class="w-full text-xs text-left text-slate-300 data-[theme=light]:text-slate-900">
+                        <thead class="bg-slate-950 text-slate-400 font-mono uppercase tracking-wider sticky top-0 border-b border-slate-900 data-[theme=light]:bg-slate-100 data-[theme=light]:text-slate-800 data-[theme=light]:border-slate-200">
                             <tr>
                                 <th class="p-3">Carátula / Tipificación</th>
                                 <th class="p-3 text-center" id="thAnoAnterior">Mes Año Ant.</th>
@@ -311,10 +312,10 @@
         </div>
 
         <div class="flex items-center justify-between mb-3">
-            <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase flex items-center gap-2 data-[theme=light]:text-slate-500">
+            <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase flex items-center gap-2 data-[theme=light]:text-slate-600">
                 <i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Histograma Histórico y Líneas de Carga Global
             </h3>
-            <span class="text-[11px] text-blue-400 font-mono font-bold bg-blue-500/10 px-3 py-1 rounded-md border border-blue-500/20 data-[theme=light]:bg-blue-50 data-[theme=light]:text-blue-600 data-[theme=light]:border-blue-200" id="lblMesEnCursoLimit"></span>
+            <span class="text-[11px] text-blue-400 font-mono font-bold bg-blue-500/10 px-3 py-1 rounded-md border border-blue-500/20 data-[theme=light]:bg-blue-50 data-[theme=light]:text-blue-700 data-[theme=light]:border-blue-200" id="lblMesEnCursoLimit"></span>
         </div>
         
         <!-- Bloque de Histogramas Temporales Completo -->
@@ -429,8 +430,8 @@
             document.getElementById('navSub').setAttribute('data-theme', theme);
         }
 
-        function getThemeColorText() { return currentTheme === 'light' ? '#334155' : '#94a3b8'; }
-        function getThemeColorGrid() { return currentTheme === 'light' ? '#e2e8f0' : '#1e293b'; }
+        function getThemeColorText() { return currentTheme === 'light' ? '#1e293b' : '#94a3b8'; }
+        function getThemeColorGrid() { return currentTheme === 'light' ? '#cbd5e1' : '#1e293b'; }
 
         function setStatus(icon, color, text, sub, isStable = false) {
             document.getElementById('statusText').textContent = text;
@@ -726,7 +727,7 @@
 
             document.getElementById('lblMesEnCursoLimit').textContent = (anoSeleccionado === añoActualReal)
                 ? `Rango Activo: Enero hasta ${NOMBRES_MESES[mesLimiteEnCurso]} (Mes en curso)` 
-                : `Rango Active: Periodo Anual Consolidado (Enero - Diciembre)`;
+                : `Rango Activo: Periodo Anual Consolidado (Enero - Diciembre)`;
 
             const totalAñoActualFiltrado = filteredData.length;
             const totalAñoAnteriorGlobal = rawData.filter(i => i.año === (anoSeleccionado - 1)).length;
@@ -740,7 +741,7 @@
             let variacionPorcentual = 0; if (totalAñoAnteriorGlobal > 0) variacionPorcentual = ((totalAñoActualFiltrado - totalAñoAnteriorGlobal) / totalAñoAnteriorGlobal) * 100;
             const elKpiVariacion = document.getElementById('kpiVariacionAnual');
             elKpiVariacion.textContent = `${variacionPorcentual >= 0 ? '+' : ''}${variacionPorcentual.toFixed(1)}% var.`;
-            elKpiVariacion.className = variacionPorcentual > 0 ? "text-[11px] text-red-400 font-bold pt-1 border-t border-slate-900" : "text-[11px] text-emerald-400 font-bold pt-1 border-t border-slate-900";
+            elKpiVariacion.className = variacionPorcentual > 0 ? "text-[11px] text-red-500 font-bold pt-1 border-t border-slate-900" : "text-[11px] text-emerald-600 font-bold pt-1 border-t border-slate-900";
 
             document.getElementById('lblKpiMensual').textContent = `Intervenciones ${NOMBRES_MESES[mesLimiteEnCurso]}`;
             document.getElementById('kpiTotalMensual').textContent = datosMesActualFiltrados.length.toLocaleString('es-AR');
@@ -793,9 +794,9 @@
                 toggleTableRowTheme(tr);
                 let badgeClase = fila.difPorc > 0 ? 'bg-red-500/10 text-red-400 font-bold border border-red-500/20' : (fila.difPorc < 0 ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20' : 'bg-slate-900 text-slate-400');
                 if(currentTheme === 'light') {
-                    badgeClase = fila.difPorc > 0 ? 'bg-red-50 text-red-600 font-bold border border-red-200' : (fila.difPorc < 0 ? 'bg-emerald-50 text-emerald-600 font-bold border border-emerald-200' : 'bg-slate-100 text-slate-600');
+                    badgeClase = fila.difPorc > 0 ? 'bg-red-50 text-red-600 font-bold border border-red-200' : (fila.difPorc < 0 ? 'bg-emerald-50 text-emerald-600 font-bold border border-emerald-200' : 'bg-slate-100 text-slate-700');
                 }
-                tr.innerHTML = `<td class="p-3 font-medium truncate max-w-xs text-white data-[theme=light]:text-slate-800">${fila.caratula}</td><td class="p-3 text-center font-semibold text-slate-400 data-[theme=light]:text-slate-500">${fila.ant}</td><td class="p-3 text-center font-bold bg-amber-500/5 text-amber-400 data-[theme=light]:text-amber-600">${fila.act}</td><td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${fila.ant===0?'Nuevo':(fila.difPorc>=0?'+':'')+fila.difPorc.toFixed(0)+'%'}</span></td>`;
+                tr.innerHTML = `<td class="p-3 font-medium truncate max-w-xs text-white data-[theme=light]:text-slate-900">${fila.caratula}</td><td class="p-3 text-center font-semibold text-slate-400 data-[theme=light]:text-slate-600">${fila.ant}</td><td class="p-3 text-center font-bold bg-amber-500/5 text-amber-400 data-[theme=light]:text-amber-600">${fila.act}</td><td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${fila.ant===0?'Nuevo':(fila.difPorc>=0?'+':'')+fila.difPorc.toFixed(0)+'%'}</span></td>`;
                 tbodyComparativo.appendChild(tr);
             });
 
@@ -834,7 +835,7 @@
             chartControl = new Chart(document.getElementById('chartControl'), {
                 type: 'doughnut',
                 data: { labels: Object.keys(controlCounts), datasets: [{ data: Object.values(controlCounts), backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'] }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: axisTextColor, boxWidth: 10, font: { size: 10 } } }, datalabels: { formatter: (val, ctx) => { let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d); return `${((val*100) / sum).toFixed(0)}%`; }, color: '#fff', font: { weight: 'bold', size: 11 } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: axisTextColor, boxWidth: 10, font: { size: 10 } } }, datalabels: { formatter: (val, ctx) => { let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d); return `${((val*100) / sum).toFixed(0)}%`; }, color: currentTheme === 'light' ? '#0f172a' : '#fff', font: { weight: 'bold', size: 11 } } } }
             });
 
             const matrizAnos = {}; rawData.forEach(item => { if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) { if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0); matrizAnos[item.año][item.mes]++; } });
@@ -860,7 +861,7 @@
             });
 
             if (chartEvolution) chartEvolution.destroy();
-            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), borderColor: '#3b82f6', backgroundColor: currentTheme === 'light' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#1e3a8a', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top', color: '#3b82f6' } }, scales: { x: { ticks: { color: axisTextColor } }, y: { ticks: { color: axisTextColor }, grid: { color: gridBorderColor } } } } });
+            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), borderColor: '#3b82f6', backgroundColor: currentTheme === 'light' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#1e3a8a', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top', color: '#3b82f6' } }, scales: { x: { ticks: { color: axisTextColor } }, y: { ticks: { color: axisTextColor }, grid: { color: gridBorderColor } } } } });
         }
 
         function normalizarTexto(texto) {
@@ -892,21 +893,21 @@
 
         function generarFilaHTML(item) {
             const tr = document.createElement('tr'); 
-            tr.className = "hover:bg-slate-900/40 border-b border-slate-900 transition-colors data-[theme=light]:border-slate-200 data-[theme=light]:hover:bg-slate-100/60";
+            tr.className = "hover:bg-slate-900/40 border-b border-slate-900 transition-colors data-[theme=light]:border-slate-200 data-[theme=light]:hover:bg-slate-100/80";
             toggleTableRowTheme(tr);
             
             let badgeControlClase = "bg-slate-800 text-slate-400"; const ctrlNorm = (item.control || '').toUpperCase();
-            if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20 data-[theme=light]:bg-emerald-50 data-[theme=light]:text-emerald-600 data-[theme=light]:border-emerald-200";
-            if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20 data-[theme=light]:bg-amber-50 data-[theme=light]:text-amber-600 data-[theme=light]:border-amber-200";
-            if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-500/10 text-blue-400 font-semibold border border-blue-500/20 data-[theme=light]:bg-blue-50 data-[theme=light]:text-blue-600 data-[theme=light]:border-blue-200";
+            if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20 data-[theme=light]:bg-emerald-100 data-[theme=light]:text-emerald-800 data-[theme=light]:border-emerald-300";
+            if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20 data-[theme=light]:bg-amber-100 data-[theme=light]:text-amber-800 data-[theme=light]:border-amber-300";
+            if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-500/10 text-blue-400 font-semibold border border-blue-500/20 data-[theme=light]:bg-blue-100 data-[theme=light]:text-blue-800 data-[theme=light]:border-blue-300";
 
-            const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' ? `${item.victima} — <span class="text-slate-500">Destino: ${item.destinoVictima}</span>` : item.victima;
-            const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' ? `${item.imputado} — <span class="text-slate-500">Destino: ${item.destinoImputado}</span>` : item.imputado;
-            const textoElementoCompleto = item.elementoProvisto && item.elementoProvisto !== 'S/D' && item.elementoProvisto !== '' ? `${item.elementoDañado} — <span class="text-slate-500">Provisto: ${item.elementoProvisto}</span>` : item.elementoDañado;
+            const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' ? `${item.victima} — <span class="text-slate-500 data-[theme=light]:text-slate-600">Destino: ${item.destinoVictima}</span>` : item.victima;
+            const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' ? `${item.imputado} — <span class="text-slate-500 data-[theme=light]:text-slate-600">Destino: ${item.destinoImputado}</span>` : item.imputado;
+            const textoElementoCompleto = item.elementoProvisto && item.elementoProvisto !== 'S/D' && item.elementoProvisto !== '' ? `${item.elementoDañado} — <span class="text-slate-500 data-[theme=light]:text-slate-600">Provisto: ${item.elementoProvisto}</span>` : item.elementoDañado;
             
             const fechaFormateadaTabla = item.fecha.toString().replace(/[\r\n]+/g, '<br><span class="text-[10px] text-amber-500 font-bold data-[theme=light]:text-amber-600">Novedad:</span> ');
 
-            tr.innerHTML = `<td class="px-4 py-3 font-mono font-bold text-amber-400 overflow-hidden break-all bg-slate-950/20 data-[theme=light]:bg-slate-50 data-[theme=light]:text-amber-600">${item.sirex}</td><td class="px-4 py-3 text-slate-300 leading-tight data-[theme=light]:text-slate-700">${fechaFormateadaTabla}</td><td class="px-4 py-3 font-mono text-slate-400 break-all data-[theme=light]:text-slate-600">${item.expediente}</td><td class="px-4 py-3 text-xs text-slate-300 break-words font-medium data-[theme=light]:text-slate-700" title="${item.dependencia}">${item.dependencia}</td><td class="px-4 py-3"><span class="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-md text-[10px] font-mono block text-center truncate data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-600">${item.fba}</span></td><td class="px-4 py-3 font-bold text-white whitespace-normal break-words data-[theme=light]:text-slate-900" title="${item.caratula}">${item.caratula}</td><td class="px-4 py-3 text-slate-300 whitespace-normal break-words leading-tight font-medium bg-slate-900/10 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-700">${textoElementoCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-600">${textoVictimaCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-600">${textoImputadoCompleto}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] block text-center ${badgeControlClase}">${item.control}</span></td>`;
+            tr.innerHTML = `<td class="px-4 py-3 font-mono font-bold text-amber-400 overflow-hidden break-all bg-slate-950/20 data-[theme=light]:bg-slate-50 data-[theme=light]:text-amber-700">${item.sirex}</td><td class="px-4 py-3 text-slate-300 leading-tight data-[theme=light]:text-slate-900 font-medium">${fechaFormateadaTabla}</td><td class="px-4 py-3 font-mono text-slate-400 break-all data-[theme=light]:text-slate-700">${item.expediente}</td><td class="px-4 py-3 text-xs text-slate-300 break-words font-medium data-[theme=light]:text-slate-800" title="${item.dependencia}">${item.dependencia}</td><td class="px-4 py-3"><span class="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-md text-[10px] font-mono block text-center truncate data-[theme=light]:bg-slate-100 data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-800">${item.fba}</span></td><td class="px-4 py-3 font-bold text-white whitespace-normal break-words data-[theme=light]:text-slate-950" title="${item.caratula}">${item.caratula}</td><td class="px-4 py-3 text-slate-300 whitespace-normal break-words leading-tight font-medium bg-slate-900/10 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-800">${textoElementoCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-700">${textoVictimaCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-700">${textoImputadoCompleto}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] block text-center ${badgeControlClase}">${item.control}</span></td>`;
             return tr;
         }
 
