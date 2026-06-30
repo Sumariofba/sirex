@@ -11,11 +11,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Estilizaciones de scrollbars modernas para ambiente oscuro */
+        /* Estilizaciones de scrollbars modernas adaptables */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #090d16; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        ::-webkit-scrollbar-track { background: var(--bg-track, #090d16); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-thumb, #1e293b); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--bg-thumb-hover, #334155); }
+
+        :root {
+            --bg-track: #090d16;
+            --bg-thumb: #1e293b;
+            --bg-thumb-hover: #334155;
+        }
+
+        .light-mode {
+            --bg-track: #f1f5f9;
+            --bg-thumb: #cbd5e1;
+            --bg-thumb-hover: #94a3b8;
+        }
 
         @media print {
             @page { size: landscape; margin: 0.5cm; }
@@ -26,183 +38,205 @@
             .overflow-x-auto { overflow: visible !important; max-height: none !important; }
             table { width: 100% !important; table-layout: auto !important; min-width: 100% !important; }
             th, td { font-size: 8px !important; padding: 4px !important; word-break: break-word !important; color: black !important; }
-            .bg-slate-900, .bg-slate-950, .bg-slate-900\/50 { background: transparent !important; }
+            .bg-slate-900, .bg-slate-950, .bg-slate-900\/50, .dark\:bg-slate-900, .dark\:bg-slate-950 { background: transparent !important; }
             tr { page-break-inside: avoid; break-inside: avoid; border-bottom: 1px solid #cbd5e1 !important; }
         }
     </style>
 </head>
-<body class="bg-[#090d16] text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-slate-950">
+<body class="bg-[#090d16] text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300 data-[theme=light]:bg-slate-50 data-[theme=light]:text-slate-800" id="bodyRoot">
 
-    <nav class="bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
-        <div class="flex items-center gap-4">
-            <div class="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg shadow-orange-500/10">
-                <i class="fa-solid fa-shield-halved text-2xl text-slate-950"></i>
+    <!-- Navbar Principal -->
+    <nav class="bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50 transition-colors duration-300 data-[theme=light]:bg-white/90 data-[theme=light]:border-slate-200 shadow-sm">
+        <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg shadow-orange-500/10">
+                    <i class="fa-solid fa-shield-halved text-2xl text-slate-950"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-wide text-white uppercase bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent data-[theme=light]:from-slate-900 data-[theme=light]:to-slate-700">Dir. Fuerza Barrial de Aproximación</h1>
+                    <h2 class="text-sm font-semibold text-amber-400/90 tracking-wider uppercase mt-0.5 data-[theme=light]:text-amber-600">Analítica de Actuaciones Sumariales Administrativas (A.S.A.)</h2>
+                </div>
             </div>
-            <div>
-                <h1 class="text-xl font-black tracking-wide text-white uppercase bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Dir. Fuerza Barrial de Aproximación</h1>
-                <h2 class="text-sm font-semibold text-amber-400/90 tracking-wider uppercase mt-0.5">Analítica de Actuaciones Sumariales Administrativas (A.S.A.)</h2>
-            </div>
+            
+            <!-- Botón de Alternancia de Modo (Móvil) -->
+            <button onclick="toggleTheme()" class="sm:hidden p-3 rounded-xl bg-slate-900 border border-slate-800 text-amber-400 cursor-pointer transition-all data-[theme=light]:bg-slate-100 data-[theme=light]:border-slate-200 data-[theme=light]:text-amber-600" id="themeToggleBtnMobile">
+                <i class="fa-solid fa-sun text-lg"></i>
+            </button>
         </div>
-        <div id="statusBadge" class="flex items-center gap-3 bg-slate-900/90 px-4 py-2.5 rounded-xl border border-slate-800/80 shadow-inner w-full sm:w-auto print:hidden">
-            <div class="relative flex h-2.5 w-2.5">
-                <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span id="statusDot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-            </div>
-            <div>
-                <p id="statusText" class="text-xs font-bold font-mono uppercase tracking-widest text-amber-400">Conectando Terminal...</p>
-                <p id="statusSub" class="text-[10px] text-slate-500">Sincronizando registros CSV nativos</p>
+        
+        <div class="flex items-center gap-3 w-full sm:w-auto print:hidden">
+            <!-- Botón de Alternancia de Modo (Escritorio) -->
+            <button onclick="toggleTheme()" class="hidden sm:flex p-3 rounded-xl bg-slate-900 border border-slate-800 text-amber-400 cursor-pointer hover:bg-slate-800 transition-all data-[theme=light]:bg-slate-100 data-[theme=light]:border-slate-200 data-[theme=light]:text-amber-600 data-[theme=light]:hover:bg-slate-200" id="themeToggleBtn" title="Cambiar Modo Lumínico">
+                <i class="fa-solid fa-sun text-lg"></i>
+            </button>
+
+            <div id="statusBadge" class="flex items-center gap-3 bg-slate-900/90 px-4 py-2.5 rounded-xl border border-slate-800/80 shadow-inner w-full sm:w-auto data-[theme=light]:bg-slate-100 data-[theme=light]:border-slate-200">
+                <div class="relative flex h-2.5 w-2.5">
+                    <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span id="statusDot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                </div>
+                <div>
+                    <p id="statusText" class="text-xs font-bold font-mono uppercase tracking-widest text-amber-400 data-[theme=light]:text-amber-600">Conectando Terminal...</p>
+                    <p id="statusSub" class="text-[10px] text-slate-500 data-[theme=light]:text-slate-400">Sincronizando registros CSV nativos</p>
+                </div>
             </div>
         </div>
     </nav>
 
-    <nav class="bg-slate-950/40 border-b border-slate-900 px-6 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 print:hidden">
+    <!-- Sub-Navbar de Filtros Rápidos -->
+    <nav class="bg-slate-950/40 border-b border-slate-900 px-6 py-3 flex flex-col sm:flex-row justify-between items-center gap-3 print:hidden transition-colors duration-300 data-[theme=light]:bg-slate-100/60 data-[theme=light]:border-slate-200">
         <div class="flex items-center gap-3 w-full sm:w-auto">
-            <span class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-widest">
+            <span class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase tracking-widest data-[theme=light]:text-slate-500">
                 <i class="fa-solid fa-server text-blue-500 animate-pulse"></i> Núcleo de Eventos:
             </span>
-            <span class="text-xs bg-blue-500/10 text-blue-400 font-mono font-black px-3 py-1 rounded-lg border border-blue-500/20 shadow-xs" id="tableCounter">0 registros</span>
+            <span class="text-xs bg-blue-500/10 text-blue-400 font-mono font-black px-3 py-1 rounded-lg border border-blue-500/20 shadow-xs data-[theme=light]:bg-blue-50 data-[theme=light]:text-blue-600 data-[theme=light]:border-blue-200" id="tableCounter">0 registros</span>
         </div>
         <div class="w-full sm:w-96 relative">
-            <input type="text" id="searchFilter" placeholder="Buscar por SIREX, Imputado, Dependencia..." class="w-full bg-slate-900/60 border border-slate-800 text-white placeholder-slate-500 text-xs rounded-xl p-2.5 pl-9 focus:ring-2 focus:ring-amber-500 focus:border-transparent focus:outline-hidden transition-all shadow-inner">
+            <input type="text" id="searchFilter" placeholder="Buscar por SIREX, Imputado, Dependencia..." class="w-full bg-slate-900/60 border border-slate-800 text-white placeholder-slate-500 text-xs rounded-xl p-2.5 pl-9 focus:ring-2 focus:ring-amber-500 focus:border-transparent focus:outline-hidden transition-all shadow-inner data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-900">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-slate-600 text-xs"></i>
         </div>
     </nav>
 
+    <!-- Contenedor Principal Dashboard -->
     <main class="p-4 sm:p-6 max-w-[1700px] mx-auto hidden transition-all duration-300" id="dashboardContent">
         
-        <div class="bg-slate-950/40 backdrop-blur-xs p-5 rounded-2xl border border-slate-900 mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end shadow-2xl print:hidden">
+        <!-- Selectores Estatales -->
+        <div class="bg-slate-950/40 backdrop-blur-xs p-5 rounded-2xl border border-slate-900 mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end shadow-2xl print:hidden data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">Año Fiscal</label>
-                <select id="anoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">Año Fiscal</label>
+                <select id="anoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
             </div>
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">FBA Interviniente</label>
-                <select id="fbaFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">FBA Interviniente</label>
+                <select id="fbaFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
             </div>
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">Dependencia Instructora</label>
-                <select id="depFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">Dependencia Instructora</label>
+                <select id="depFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
             </div>
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">Tipificación de Carátula</label>
-                <select id="delitoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">Tipificación de Carátula</label>
+                <select id="delitoFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
             </div>
             <div>
-                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5">Estado de Control</label>
-                <select id="controlFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors"></select>
+                <label class="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-1.5 data-[theme=light]:text-slate-500">Estado de Control</label>
+                <select id="controlFilter" class="w-full bg-slate-900 border border-slate-800 text-white text-xs font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-colors data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-800"></select>
             </div>
         </div>
 
-        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2">
+        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2 data-[theme=light]:text-slate-500">
             <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Focos de Criticidad y Alerta Siniestral
         </h3>
+        <!-- Tarjetas de Alerta -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 w-full">
-            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-red-500 flex flex-col justify-between shadow-lg min-w-0">
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-red-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:from-white data-[theme=light]:to-slate-50 data-[theme=light]:border-slate-200">
                 <div>
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Lesiones por Accidente</span>
-                    <h3 class="text-2xl font-black text-red-400 tracking-tight" id="topCountLesiones">0 casos</h3>
+                    <h3 class="text-2xl font-black text-red-400 tracking-tight data-[theme=light]:text-red-600" id="topCountLesiones">0 casos</h3>
                 </div>
-                <div class="mt-4 pt-2 border-t border-slate-900">
-                    <p class="text-xs font-semibold text-slate-400 truncate" id="topDivisionLesiones">Buscando...</p>
+                <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-600" id="topDivisionLesiones">Buscando...</p>
                 </div>
             </div>
-            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-purple-500 flex flex-col justify-between shadow-lg min-w-0">
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-purple-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:from-white data-[theme=light]:to-slate-50 data-[theme=light]:border-slate-200">
                 <div>
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Pta. Inf. Ley 12569</span>
-                    <h3 class="text-2xl font-black text-purple-400 tracking-tight" id="topCountLey">0 casos</h3>
+                    <h3 class="text-2xl font-black text-purple-400 tracking-tight data-[theme=light]:text-purple-600" id="topCountLey">0 casos</h3>
                 </div>
-                <div class="mt-4 pt-2 border-t border-slate-900">
-                    <p class="text-xs font-semibold text-slate-400 truncate" id="topDivisionLey">Buscando...</p>
+                <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-600" id="topDivisionLey">Buscando...</p>
                 </div>
             </div>
-            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-amber-500 flex flex-col justify-between shadow-lg min-w-0">
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-amber-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:from-white data-[theme=light]:to-slate-50 data-[theme=light]:border-slate-200">
                 <div>
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Abandono de Servicio</span>
-                    <h3 class="text-2xl font-black text-amber-400 tracking-tight" id="topCountAbandono">0 casos</h3>
+                    <h3 class="text-2xl font-black text-amber-400 tracking-tight data-[theme=light]:text-amber-600" id="topCountAbandono">0 casos</h3>
                 </div>
-                <div class="mt-4 pt-2 border-t border-slate-900">
-                    <p class="text-xs font-semibold text-slate-400 truncate" id="topDivisionAbandono">Buscando...</p>
+                <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-600" id="topDivisionAbandono">Buscando...</p>
                 </div>
             </div>
-            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-blue-500 flex flex-col justify-between shadow-lg min-w-0">
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-blue-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:from-white data-[theme=light]:to-slate-50 data-[theme=light]:border-slate-200">
                 <div>
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Móviles Dañados</span>
-                    <h3 class="text-2xl font-black text-blue-400 tracking-tight" id="topCountMovil">0 móviles</h3>
+                    <h3 class="text-2xl font-black text-blue-400 tracking-tight data-[theme=light]:text-blue-600" id="topCountMovil">0 móviles</h3>
                 </div>
-                <div class="mt-4 pt-2 border-t border-slate-900">
-                    <p class="text-xs font-semibold text-slate-400 truncate" id="topDivisionMovil">Buscando...</p>
+                <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
+                    <p class="text-xs font-semibold text-slate-400 truncate data-[theme=light]:text-slate-600" id="topDivisionMovil">Buscando...</p>
                 </div>
             </div>
-            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-emerald-500 flex flex-col justify-between shadow-lg min-w-0">
+            <div class="bg-gradient-to-b from-slate-950/80 to-slate-950/30 rounded-2xl p-5 border border-slate-900 border-t-2 border-t-emerald-500 flex flex-col justify-between shadow-lg min-w-0 data-[theme=light]:from-white data-[theme=light]:to-slate-50 data-[theme=light]:border-slate-200">
                 <div>
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Cria Instructora Líder</span>
-                    <h3 class="text-2xl font-black text-emerald-400 tracking-tight" id="topCountDependencia">0 casos</h3>
+                    <h3 class="text-2xl font-black text-emerald-400 tracking-tight data-[theme=light]:text-emerald-600" id="topCountDependencia">0 casos</h3>
                 </div>
-                <div class="mt-4 pt-2 border-t border-slate-900">
-                    <p class="text-[11px] font-bold text-slate-300 truncate" id="topNombreDependencia" title="Buscando...">Buscando...</p>
+                <div class="mt-4 pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100">
+                    <p class="text-[11px] font-bold text-slate-300 truncate data-[theme=light]:text-slate-700" id="topNombreDependencia" title="Buscando...">Buscando...</p>
                 </div>
             </div>
         </div>
 
-        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2">
+        <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2 data-[theme=light]:text-slate-500">
             <i class="fa-solid fa-chart-pie text-indigo-500"></i> Métricas Clave del Flujo Operativo
         </h3>
+        <!-- KPIs Principales -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 w-full">
-            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-indigo-500 flex flex-col justify-between shadow-sm min-w-0">
+            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-indigo-500 flex flex-col justify-between shadow-sm min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200 data-[theme=light]:border-l-indigo-500">
                 <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1" id="lblKpiAnual">Intervenciones Año</span>
                 <div class="flex items-baseline justify-between mt-2">
-                    <h2 class="text-4xl font-black text-white tracking-tight leading-none" id="kpiTotalAnual">0</h2>
+                    <h2 class="text-4xl font-black text-white tracking-tight leading-none data-[theme=light]:text-slate-900" id="kpiTotalAnual">0</h2>
                     <div class="text-indigo-400 bg-indigo-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-calendar"></i></div>
                 </div>
-                <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60">Registros consolidados</p>
+                <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60 data-[theme=light]:border-slate-100">Registros consolidados</p>
             </div>
-            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-violet-500 flex flex-col justify-between shadow-sm min-w-0">
+            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-violet-500 flex flex-col justify-between shadow-sm min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200 data-[theme=light]:border-l-violet-500">
                 <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1" id="lblKpiComparativaAnual">Vs. Año Anterior</span>
                 <div class="flex items-baseline justify-between mt-2">
-                    <h2 class="text-4xl font-black text-white tracking-tight leading-none" id="kpiTotalAnoAnterior">0</h2>
+                    <h2 class="text-4xl font-black text-white tracking-tight leading-none data-[theme=light]:text-slate-900" id="kpiTotalAnoAnterior">0</h2>
                     <div class="text-violet-400 bg-violet-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-right-left"></i></div>
                 </div>
-                <p class="text-[11px] font-bold mt-3 pt-2 border-t border-slate-900/60" id="kpiVariacionAnual">0% var.</p>
+                <p class="text-[11px] font-bold mt-3 pt-2 border-t border-slate-900/60 data-[theme=light]:border-slate-100" id="kpiVariacionAnual">0% var.</p>
             </div>
-            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-emerald-500 flex flex-col justify-between shadow-sm min-w-0">
+            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-emerald-500 flex flex-col justify-between shadow-sm min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200 data-[theme=light]:border-l-emerald-500">
                 <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1" id="lblKpiMensual">Intervenciones Mes Actual</span>
                 <div class="flex items-baseline justify-between mt-2">
-                    <h2 class="text-4xl font-black text-emerald-400 tracking-tight leading-none" id="kpiTotalMensual">0</h2>
+                    <h2 class="text-4xl font-black text-emerald-400 tracking-tight leading-none data-[theme=light]:text-emerald-600" id="kpiTotalMensual">0</h2>
                     <div class="text-emerald-400 bg-emerald-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-clock"></i></div>
                 </div>
-                <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60">Casos en periodo operativo</p>
+                <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60 data-[theme=light]:border-slate-100">Casos en periodo operativo</p>
             </div>
-            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-red-500 flex flex-col justify-between shadow-sm min-w-0">
+            <div class="bg-slate-950/40 rounded-2xl p-5 border border-slate-900 border-l-4 border-l-red-500 flex flex-col justify-between shadow-sm min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200 data-[theme=light]:border-l-red-500">
                 <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Mes Máxima Actividad</span>
                 <div class="flex items-baseline justify-between mt-2">
-                    <h2 class="text-2xl font-black text-red-400 tracking-tight leading-none" id="kpiMesMaximo">S/D</h2>
+                    <h2 class="text-2xl font-black text-red-400 tracking-tight leading-none data-[theme=light]:text-red-600" id="kpiMesMaximo">S/D</h2>
                     <div class="text-red-400 bg-red-500/10 p-2 rounded-lg text-xs print:hidden"><i class="fa-solid fa-fire"></i></div>
                 </div>
-                <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60" id="kpiMesMaximoDetalle">0 actuaciones</p>
+                <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-900/60 data-[theme=light]:border-slate-100" id="kpiMesMaximoDetalle">0 actuaciones</p>
             </div>
             
-            <div class="bg-gradient-to-br from-slate-950 to-slate-900 rounded-2xl p-5 border border-amber-500/30 border-l-4 border-l-amber-500 flex flex-col justify-between shadow-xl min-w-0">
-                <span class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-1 flex items-center gap-1.5">
+            <div class="bg-gradient-to-br from-slate-950 to-slate-900 rounded-2xl p-5 border border-amber-500/30 border-l-4 border-l-amber-500 flex flex-col justify-between shadow-xl min-w-0 data-[theme=light]:from-white data-[theme=light]:to-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:border-l-amber-500">
+                <span class="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-1 flex items-center gap-1.5 data-[theme=light]:text-amber-600">
                     <i class="fa-solid fa-bolt animate-pulse"></i> Última Novedad Base
                 </span>
                 <div>
-                    <h2 class="text-lg font-mono font-black text-white tracking-tight mt-1" id="kpiUltimoSirex">S/D</h2>
-                    <p class="text-[11px] text-slate-400 font-medium mt-0.5 truncate max-w-[220px]" id="kpiUltimoDetalle">Sincronizando...</p>
+                    <h2 class="text-lg font-mono font-black text-white tracking-tight mt-1 data-[theme=light]:text-slate-900" id="kpiUltimoSirex">S/D</h2>
+                    <p class="text-[11px] text-slate-400 font-medium mt-0.5 truncate max-w-[220px] data-[theme=light]:text-slate-600" id="kpiUltimoDetalle">Sincronizando...</p>
                 </div>
-                <p class="text-[10px] text-slate-500 font-mono pt-2 border-t border-slate-900" id="kpiUltimaFecha">Fecha: --/--/----</p>
+                <p class="text-[10px] text-slate-500 font-mono pt-2 border-t border-slate-900 data-[theme=light]:border-slate-100" id="kpiUltimaFecha">Fecha: --/--/----</p>
             </div>
         </div>
 
-        <div class="bg-slate-950/30 rounded-2xl border border-slate-900 overflow-hidden mb-6 shadow-2xl print-table-container">
-            <div class="p-4 border-b border-slate-900 flex justify-between items-center bg-slate-950/80 print:hidden">
-                <span class="text-xs font-black tracking-widest text-slate-400 uppercase">Tabla Operativa Sumarial Activa</span>
-                <button onclick="imprimirListadoCompleto()" class="bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2 border border-slate-800 cursor-pointer transition-colors">
+        <!-- Tabla Operativa -->
+        <div class="bg-slate-950/30 rounded-2xl border border-slate-900 overflow-hidden mb-6 shadow-2xl print-table-container data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
+            <div class="p-4 border-b border-slate-900 flex justify-between items-center bg-slate-950/80 print:hidden data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200">
+                <span class="text-xs font-black tracking-widest text-slate-400 uppercase data-[theme=light]:text-slate-600">Tabla Operativa Sumarial Activa</span>
+                <button onclick="imprimirListadoCompleto()" class="bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2 border border-slate-800 cursor-pointer transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700 data-[theme=light]:hover:bg-slate-50">
                     <i class="fa-solid fa-print text-amber-500"></i> Imprimir Todo el Historial
                 </button>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left text-slate-400 min-w-[1550px] table-fixed">
-                    <thead class="text-xs text-slate-400 uppercase bg-slate-950/60 font-mono tracking-wider border-b border-slate-900">
+                <table class="w-full text-xs text-left text-slate-400 min-w-[1550px] table-fixed data-[theme=light]:text-slate-600">
+                    <thead class="text-xs text-slate-400 uppercase bg-slate-950/60 font-mono tracking-wider border-b border-slate-900 data-[theme=light]:bg-slate-100 data-[theme=light]:text-slate-700 data-[theme=light]:border-slate-200">
                         <tr>
                             <th class="px-4 py-3.5 w-[100px]">SIREX N°</th>
                             <th class="px-4 py-3.5 w-[110px]">FECHA INICIO</th>
@@ -216,40 +250,42 @@
                             <th class="px-4 py-3.5 w-[120px]">CONTROL</th> 
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-900/60 text-slate-300 bg-slate-950/10"></tbody>
+                    <tbody id="tableBody" class="divide-y divide-slate-900/60 text-slate-300 bg-slate-950/10 data-[theme=light]:divide-slate-200 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-700"></tbody>
                 </table>
             </div>
             
-            <div class="p-4 flex items-center justify-between border-t border-slate-900 bg-slate-950/40 text-xs print:hidden">
+            <!-- Paginación de Tabla -->
+            <div class="p-4 flex items-center justify-between border-t border-slate-900 bg-slate-950/40 text-xs print:hidden data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200">
                 <div class="flex items-center gap-2">
-                    <button id="btnFirst" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors"><i class="fa-solid fa-angles-left text-[10px]"></i> Primera</button>
-                    <button id="btnPrev" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors"><i class="fa-solid fa-angle-left text-[10px]"></i> Anterior</button>
+                    <button id="btnFirst" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700"><i class="fa-solid fa-angles-left text-[10px]"></i> Primera</button>
+                    <button id="btnPrev" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700"><i class="fa-solid fa-angle-left text-[10px]"></i> Anterior</button>
                 </div>
-                <span id="pageIndicator" class="font-bold text-slate-400 font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">Página 1 de 1</span>
+                <span id="pageIndicator" class="font-bold text-slate-400 font-mono bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-600">Página 1 de 1</span>
                 <div class="flex items-center gap-2">
-                    <button id="btnNext" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors">Siguiente <i class="fa-solid fa-angle-right text-[10px]"></i></button>
-                    <button id="btnLast" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors">Última <i class="fa-solid fa-angles-right text-[10px]"></i></button>
+                    <button id="btnNext" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700">Siguiente <i class="fa-solid fa-angle-right text-[10px]"></i></button>
+                    <button id="btnLast" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl disabled:opacity-30 disabled:hover:bg-slate-900 text-slate-300 font-medium cursor-pointer flex items-center gap-1 transition-colors data-[theme=light]:bg-white data-[theme=light]:border-slate-300 data-[theme=light]:text-slate-700">Última <i class="fa-solid fa-angles-right text-[10px]"></i></button>
                 </div>
             </div>
         </div>
 
+        <!-- Bloque de Gráficos Comparativos -->
         <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg min-w-0">
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
                 <div class="flex justify-between items-center mb-4">
-                    <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase flex items-center gap-2">
+                    <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase flex items-center gap-2 data-[theme=light]:text-slate-600">
                         <i class="fa-solid fa-business-time text-sky-400"></i> Distribución de Tipificaciones: Mes Actual vs Anterior
                     </h4>
                     <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded font-mono font-bold uppercase tracking-wider" id="lblGraficoMes">Evolución</span>
                 </div>
                 <div class="h-72"><canvas id="chartMonthComparison"></canvas></div>
             </div>
-            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg min-w-0">
-                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2 data-[theme=light]:text-slate-600">
                     <i class="fa-solid fa-chart-line text-emerald-400"></i> Desglose Temporal y Porcentual de Cambios
                 </h4>
-                <div class="overflow-y-auto max-h-72 border border-slate-900 rounded-xl">
-                    <table class="w-full text-xs text-left text-slate-300">
-                        <thead class="bg-slate-950 text-slate-400 font-mono uppercase tracking-wider sticky top-0 border-b border-slate-900">
+                <div class="overflow-y-auto max-h-72 border border-slate-900 rounded-xl data-[theme=light]:border-slate-200">
+                    <table class="w-full text-xs text-left text-slate-300 data-[theme=light]:text-slate-700">
+                        <thead class="bg-slate-950 text-slate-400 font-mono uppercase tracking-wider sticky top-0 border-b border-slate-900 data-[theme=light]:bg-slate-100 data-[theme=light]:text-slate-700 data-[theme=light]:border-slate-200">
                             <tr>
                                 <th class="p-3">Carátula / Tipificación</th>
                                 <th class="p-3 text-center" id="thAnoAnterior">Mes Año Ant.</th>
@@ -257,21 +293,21 @@
                                 <th class="p-3 text-center">Evolución (%)</th>
                             </tr>
                         </thead>
-                        <tbody id="comparativeTableBody" class="divide-y divide-slate-900"></tbody>
+                        <tbody id="comparativeTableBody" class="divide-y divide-slate-900 data-[theme=light]:divide-slate-200"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 w-full">
-            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg lg:col-span-2 min-w-0">
-                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg lg:col-span-2 min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2 data-[theme=light]:text-slate-600">
                     <i class="fa-solid fa-palette text-indigo-400"></i> Densidad de Casos por División FBA Interviniente
                 </h4>
                 <div class="h-64"><canvas id="chartFBA"></canvas></div>
             </div>
-            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg min-w-0">
-                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2 data-[theme=light]:text-slate-600">
                     <i class="fa-solid fa-filter text-purple-400"></i> Porcentaje de Resolución Operativa (Control)
                 </h4>
                 <div class="h-64 flex justify-center"><canvas id="chartControl"></canvas></div>
@@ -279,27 +315,28 @@
         </div>
 
         <div class="flex items-center justify-between mb-3">
-            <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase flex items-center gap-2">
+            <h3 class="text-[11px] font-black tracking-widest text-slate-400 uppercase flex items-center gap-2 data-[theme=light]:text-slate-500">
                 <i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Histograma Histórico y Líneas de Carga Global
             </h3>
             <span class="text-[11px] text-blue-400 font-mono font-bold bg-blue-500/10 px-3 py-1 rounded-md border border-blue-500/20" id="lblMesEnCursoLimit"></span>
         </div>
         
+        <!-- Contenedores de Series de Tiempo -->
         <div class="flex flex-col gap-6 mb-6 w-full">
-            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg w-full min-w-0">
-                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2">
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg w-full min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2 data-[theme=light]:text-slate-600">
                     <i class="fa-solid fa-chart-area text-indigo-400"></i> Serie de Tiempo Comparativa Unificada (Años Detectados en Base)
                 </h4>
                 <div class="h-80"><canvas id="chartAllYearsMonthly"></canvas></div>
             </div>
-            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg w-full min-w-0">
-                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2" id="titleCurrentYearInterventions">
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg w-full min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2 data-[theme=light]:text-slate-600" id="titleCurrentYearInterventions">
                     <i class="fa-solid fa-chart-bar text-emerald-400"></i> Distribución Estacional de Carga
                 </h4>
                 <div class="h-80"><canvas id="chartCurrentYearMonthly"></canvas></div>
             </div>
-            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg w-full min-w-0">
-                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2">
+            <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-900 shadow-lg w-full min-w-0 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
+                <h4 class="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2 data-[theme=light]:text-slate-600">
                     <i class="fa-solid fa-wave-square text-blue-400"></i> Vector de Tendencia del Período Seleccionado
                 </h4>
                 <div class="h-80"><canvas id="chartEvolutionLine"></canvas></div>
@@ -307,10 +344,11 @@
         </div>
     </main>
 
-    <div id="welcomeScreen" class="max-w-md mx-auto mt-32 text-center p-8 bg-slate-950 rounded-2xl border border-slate-900 shadow-2xl transition-all duration-300">
+    <!-- Pantalla de Carga -->
+    <div id="welcomeScreen" class="max-w-md mx-auto mt-32 text-center p-8 bg-slate-950 rounded-2xl border border-slate-900 shadow-2xl transition-all duration-300 data-[theme=light]:bg-white data-[theme=light]:border-slate-200">
         <i class="fa-solid fa-shield-halved text-5xl text-amber-500 mb-4 animate-pulse"></i>
-        <h2 class="text-lg font-black text-white tracking-wider uppercase mb-2">Iniciando Terminal de Analítica</h2>
-        <p class="text-xs text-slate-400 mb-6 font-mono">Bypasseando caché y mapeando variables estructurales...</p>
+        <h2 class="text-lg font-black text-white tracking-wider uppercase mb-2 data-[theme=light]:text-slate-900">Iniciando Terminal de Analítica</h2>
+        <p class="text-xs text-slate-400 mb-6 font-mono data-[theme=light]:text-slate-500">Bypasseando caché y mapeando variables estructurales...</p>
     </div>
 
     <script>
@@ -320,6 +358,7 @@
         let filteredData = [];
         let currentPage = 1;
         const rowsPerPage = 10;
+        let currentTheme = 'dark'; // Control de tema actual ('dark' | 'light')
 
         let chartFBA = null, chartControl = null, chartMonthComp = null;
         let chartAllYears = null, chartCurrentYear = null, chartEvolution = null;
@@ -333,12 +372,65 @@
         ];
 
         const NOMBRES_MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
         const ENLACE_BASE_INPUT = 'https://docs.google.com/spreadsheets/d/1jIAiLNjiwSnGrdBeiJ_ie5TRcDh8ocIuSTTvIYP9_5A/edit?usp=sharing';
+
+        // Lógica de Alternancia de Temas (Modo Claro / Modo Oscuro)
+        function toggleTheme() {
+            const body = document.getElementById('bodyRoot');
+            const targetElements = document.querySelectorAll('[data-theme]');
+            
+            if (currentTheme === 'dark') {
+                currentTheme = 'light';
+                body.setAttribute('data-theme', 'light');
+                body.classList.add('light-mode');
+                targetElements.forEach(el => el.setAttribute('data-theme', 'light'));
+                actualizarIconosBotonesTema('light');
+            } else {
+                currentTheme = 'dark';
+                body.removeAttribute('data-theme');
+                body.classList.remove('light-mode');
+                targetElements.forEach(el => el.setAttribute('data-theme', 'dark'));
+                actualizarIconosBotonesTema('dark');
+            }
+            
+            // Forzar actualización de colores en gráficos renderizados
+            if(rawData.length > 0) {
+                const anoVal = parseInt(document.getElementById('anoFilter').value, 10);
+                const dataAnoActualGlobal = rawData.filter(i => i.año === anoVal);
+                renderizarGraficosYTablas(anoVal, new Date().getMonth() + 1, dataAnoActualGlobal);
+            }
+        }
+
+        function actualizarIconosBotonesTema(theme) {
+            const btnEscritorio = document.getElementById('themeToggleBtn');
+            const btnMovil = document.getElementById('themeToggleBtnMobile');
+            const innerHTML = theme === 'light' ? '<i class="fa-solid fa-moon text-lg"></i>' : '<i class="fa-solid fa-sun text-lg"></i>';
+            
+            if(btnEscritorio) btnEscritorio.innerHTML = innerHTML;
+            if(btnMovil) btnMovil.innerHTML = innerHTML;
+            
+            // Sincronizar atributos de Tailwind dinámicos
+            btnEscritorio.setAttribute('data-theme', theme);
+            btnMovil.setAttribute('data-theme', theme);
+            document.getElementById('statusBadge').setAttribute('data-theme', theme);
+            document.getElementById('searchFilter').setAttribute('data-theme', theme);
+            document.getElementById('welcomeScreen').setAttribute('data-theme', theme);
+            document.querySelector('nav').setAttribute('data-theme', theme);
+            document.querySelectorAll('nav')[1].setAttribute('data-theme', theme);
+            document.querySelector('main > div').setAttribute('data-theme', theme);
+        }
+
+        // Obtener color adaptativo de grillas e identificadores de texto de ejes para Chart.js
+        function getThemeColorText() { return currentTheme === 'light' ? '#475569' : '#64748b'; }
+        function getThemeColorGrid() { return currentTheme === 'light' ? '#e2e8f0' : '#1e293b'; }
 
         function setStatus(icon, color, text, sub, isStable = false) {
             document.getElementById('statusText').textContent = text;
-            document.getElementById('statusText').className = `text-xs font-bold font-mono uppercase tracking-widest ${color}`;
+            if(!bodyRoot.hasAttribute('data-theme')) {
+                document.getElementById('statusText').className = `text-xs font-bold font-mono uppercase tracking-widest ${color}`;
+            } else {
+                document.getElementById('statusText').className = `text-xs font-bold font-mono uppercase tracking-widest text-amber-600`;
+            }
             document.getElementById('statusSub').textContent = sub;
             if (isStable) {
                 document.getElementById('statusPing').className = "hidden";
@@ -425,8 +517,6 @@
             const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA"));
             const idxImputado = headers.findIndex(h => h.trim() === "IMPUTADO");
             const idxDestinoImputado = headers.findIndex(h => h.includes("DESTINO DEL IMPUTADO"));
-            
-            // MAPEO DINÁMICO DE LA COLUMNA M (DATOS ELEMENTO PROVISTO)
             const idxElementoProvisto = headers.findIndex(h => h.includes("PROVISTO") || h.includes("ELEMENTO PROVISTO"));
 
             rawData = [];
@@ -556,9 +646,7 @@
             dataArray.forEach(i => { 
                 if(i.caratula) {
                     let c = i.caratula.trim();
-                    if (c.toUpperCase().startsWith("ISA 21100")) {
-                        c = "ISA 21100 (Agrupado)";
-                    }
+                    if (c.toUpperCase().startsWith("ISA 21100")) { c = "ISA 21100 (Agrupado)"; }
                     conteos[c] = (conteos[c] || 0) + 1; 
                 }
             });
@@ -666,9 +754,7 @@
             dataMesAñoActualGlobal.forEach(i => { 
                 if(i.caratula) { 
                     let c = i.caratula.trim(); 
-                    if (c.toUpperCase().startsWith("ISA 21100")) {
-                        c = "ISA 21100 (Agrupado)";
-                    }
+                    if (c.toUpperCase().startsWith("ISA 21100")) { c = "ISA 21100 (Agrupado)"; }
                     conteoDelitosActual[c] = (conteoDelitosActual[c] || 0) + 1; 
                 } 
             });
@@ -676,9 +762,7 @@
             dataMesAñoAnteriorGlobal.forEach(i => { 
                 if(i.caratula) { 
                     let c = i.caratula.trim(); 
-                    if (c.toUpperCase().startsWith("ISA 21100")) {
-                        c = "ISA 21100 (Agrupado)";
-                    }
+                    if (c.toUpperCase().startsWith("ISA 21100")) { c = "ISA 21100 (Agrupado)"; }
                     conteoDelitosAnterior[c] = (conteoDelitosAnterior[c] || 0) + 1; 
                 } 
             });
@@ -694,10 +778,18 @@
 
             listaComparativaOrdenada.forEach(fila => {
                 const tr = document.createElement('tr');
+                tr.className = "data-[theme=light]:border-slate-200";
                 let badgeClase = fila.difPorc > 0 ? 'bg-red-500/10 text-red-400 font-bold border border-red-500/20' : (fila.difPorc < 0 ? 'bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20' : 'bg-slate-900 text-slate-400');
-                tr.innerHTML = `<td class="p-3 font-medium truncate max-w-xs text-white">${fila.caratula}</td><td class="p-3 text-center font-semibold text-slate-400">${fila.ant}</td><td class="p-3 text-center font-bold bg-amber-500/5 text-amber-400">${fila.act}</td><td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${fila.ant===0?'Nuevo':(fila.difPorc>=0?'+':'')+fila.difPorc.toFixed(0)+'%'}</span></td>`;
+                if(currentTheme === 'light') {
+                    badgeClase = fila.difPorc > 0 ? 'bg-red-50 text-red-600 font-bold border border-red-200' : (fila.difPorc < 0 ? 'bg-emerald-50 text-emerald-600 font-bold border border-emerald-200' : 'bg-slate-100 text-slate-600');
+                }
+                tr.innerHTML = `<td class="p-3 font-medium truncate max-w-xs text-white data-[theme=light]:text-slate-800">${fila.caratula}</td><td class="p-3 text-center font-semibold text-slate-400 data-[theme=light]:text-slate-500">${fila.ant}</td><td class="p-3 text-center font-bold bg-amber-500/5 text-amber-400 data-[theme=light]:text-amber-600">${fila.act}</td><td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] ${badgeClase}">${fila.ant===0?'Nuevo':(fila.difPorc>=0?'+':'')+fila.difPorc.toFixed(0)+'%'}</span></td>`;
                 tbodyComparativo.appendChild(tr);
             });
+
+            // Re-renderización de Objetos Chart con variables cromáticas del tema activo
+            const axisTextColor = getThemeColorText();
+            const gridBorderColor = getThemeColorGrid();
 
             if (chartMonthComp) chartMonthComp.destroy();
             chartMonthComp = new Chart(document.getElementById('chartMonthComparison'), {
@@ -706,7 +798,7 @@
                     labels: top5Comparativa.map(x => x.caratula.substring(0, 22) + (x.caratula.length > 22 ? '...' : '')),
                     datasets: [{ label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado - 1}`, data: top5Comparativa.map(x => x.ant), backgroundColor: '#475569' }, { label: `${NOMBRES_MESES[mesLimiteEnCurso]} ${anoSeleccionado}`, data: top5Comparativa.map(x => x.act), backgroundColor: '#f59e0b' }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#94a3b8', boxWidth: 12, font: { size: 10 } } }, datalabels: { anchor: 'end', align: 'top', color: '#f8fafc', font: { size: 9, weight: 'bold' } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#64748b' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: axisTextColor, boxWidth: 12, font: { size: 10 } } }, datalabels: { anchor: 'end', align: 'top', color: currentTheme === 'light' ? '#334155' : '#f8fafc', font: { size: 9, weight: 'bold' } } }, scales: { x: { ticks: { color: axisTextColor } }, y: { beginAtZero: true, grid: { color: gridBorderColor }, ticks: { color: axisTextColor } } } }
             });
 
             const fbaCounts = {}; filteredData.forEach(i => { if(i.fba) fbaCounts[i.fba] = (fbaCounts[i.fba] || 0) + 1; });
@@ -723,7 +815,7 @@
                         backgroundColor: paletaMulticolor12Meses.slice(0, sortedFba.length)
                     }] 
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Top Delito: ${topCaratulasPorFBA[ctx[0].label] || 'S/D'}` } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: currentTheme === 'light' ? '#334155' : '#fff', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Top Delito: ${topCaratulasPorFBA[ctx[0].label] || 'S/D'}` } } }, scales: { x: { ticks: { color: axisTextColor } }, y: { ticks: { color: axisTextColor }, grid: { color: gridBorderColor } } } }
             });
 
             const controlCounts = {}; filteredData.forEach(i => { if(i.control) controlCounts[i.control] = (controlCounts[i.control] || 0) + 1; });
@@ -731,13 +823,13 @@
             chartControl = new Chart(document.getElementById('chartControl'), {
                 type: 'doughnut',
                 data: { labels: Object.keys(controlCounts), datasets: [{ data: Object.values(controlCounts), backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'] }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } }, datalabels: { formatter: (val, ctx) => { let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d); return `${((val*100) / sum).toFixed(0)}%`; }, color: '#fff', font: { weight: 'bold', size: 11 } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: axisTextColor, boxWidth: 10, font: { size: 10 } } }, datalabels: { formatter: (val, ctx) => { let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d); return `${((val*100) / sum).toFixed(0)}%`; }, color: '#fff', font: { weight: 'bold', size: 11 } } } }
             });
 
             const matrizAnos = {}; rawData.forEach(item => { if(!isNaN(item.año) && item.mes >= 1 && item.mes <= 12) { if(!matrizAnos[item.año]) matrizAnos[item.año] = Array(13).fill(0); matrizAnos[item.año][item.mes]++; } });
             const datasetsHistoricos = Object.keys(matrizAnos).sort().map((año, idx) => ({ label: `Año ${año}`, data: matrizAnos[año].slice(1), borderColor: paletaMulticolor12Meses[idx % paletaMulticolor12Meses.length], backgroundColor: 'transparent', borderWidth: 2, tension: 0.2, pointRadius: 3 }));
             if (chartAllYears) chartAllYears.destroy();
-            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: datasetsHistoricos }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#94a3b8', boxWidth: 12, font: { size: 10 } } }, datalabels: { display: true, align: 'top', anchor: 'end', color: '#94a3b8', font: { size: 9 } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } } });
+            chartAllYears = new Chart(document.getElementById('chartAllYearsMonthly'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: datasetsHistoricos }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: axisTextColor, boxWidth: 12, font: { size: 10 } } }, datalabels: { display: true, align: 'top', anchor: 'end', color: axisTextColor, font: { size: 9 } } }, scales: { x: { ticks: { color: axisTextColor } }, y: { ticks: { color: axisTextColor }, grid: { color: gridBorderColor } } } } });
 
             document.getElementById('titleCurrentYearInterventions').innerHTML = `<i class="fa-solid fa-chart-bar text-emerald-400"></i> Distribución Estacional de Carga Unificada (Año ${anoSeleccionado})`;
             const datasetMesesFiltrado = Array(13).fill(0); filteredData.forEach(item => { if(item.mes >= 1 && item.mes <= 12) datasetMesesFiltrado[item.mes]++; });
@@ -753,11 +845,11 @@
                         backgroundColor: paletaMulticolor12Meses
                     }] 
                 }, 
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Líder: ${topCaratulasPorMesActual[ctx[0].label] || 'S/D'}` } } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } } 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: currentTheme === 'light' ? '#334155' : '#fff', font: { size: 10, weight: 'bold' } }, tooltip: { callbacks: { afterBody: (ctx) => `Líder: ${topCaratulasPorMesActual[ctx[0].label] || 'S/D'}` } } }, scales: { x: { ticks: { color: axisTextColor } }, y: { ticks: { color: axisTextColor }, grid: { color: gridBorderColor } } } } 
             });
 
             if (chartEvolution) chartEvolution.destroy();
-            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#1e3a8a', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top', color: '#3b82f6' } }, scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } } } } });
+            chartEvolution = new Chart(document.getElementById('chartEvolutionLine'), { type: 'line', data: { labels: NOMBRES_MESES.slice(1), datasets: [{ data: datasetMesesFiltrado.slice(1), borderColor: '#3b82f6', backgroundColor: currentTheme === 'light' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)', fill: true, tension: 0.3, borderWidth: 3, pointBackgroundColor: '#1e3a8a', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'top', align: 'top', color: '#3b82f6' } }, scales: { x: { ticks: { color: axisTextColor } }, y: { ticks: { color: axisTextColor }, grid: { color: gridBorderColor } } } } });
         }
 
         function renderTable() {
@@ -784,21 +876,21 @@
         }
 
         function generarFilaHTML(item) {
-            const tr = document.createElement('tr'); tr.className = "hover:bg-slate-900/40 border-b border-slate-900 transition-colors";
+            const tr = document.createElement('tr'); 
+            tr.className = "hover:bg-slate-900/40 border-b border-slate-900 transition-colors data-[theme=light]:border-slate-200 data-[theme=light]:hover:bg-slate-100/50";
+            
             let badgeControlClase = "bg-slate-800 text-slate-400"; const ctrlNorm = (item.control || '').toUpperCase();
-            if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20";
-            if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20";
-            if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-500/10 text-blue-400 font-semibold border border-blue-500/20";
+            if(ctrlNorm.includes("ARCHIVADO") || ctrlNorm.includes("FINALIZADO")) badgeControlClase = "bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20 data-[theme=light]:bg-emerald-50 data-[theme=light]:text-emerald-600 data-[theme=light]:border-emerald-200";
+            if(ctrlNorm.includes("PROCESO") || ctrlNorm.includes("TRAMITE")) badgeControlClase = "bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20 data-[theme=light]:bg-amber-50 data-[theme=light]:text-amber-600 data-[theme=light]:border-amber-200";
+            if(ctrlNorm.includes("ELEVADO") || ctrlNorm.includes("MINISTERIO")) badgeControlClase = "bg-blue-500/10 text-blue-400 font-semibold border border-blue-500/20 data-[theme=light]:bg-blue-50 data-[theme=light]:text-blue-600 data-[theme=light]:border-blue-200";
 
             const textoVictimaCompleto = item.destinoVictima && item.destinoVictima !== 'S/D' && item.destinoVictima !== '' ? `${item.victima} — <span class="text-slate-500">Destino: ${item.destinoVictima}</span>` : item.victima;
             const textoImputadoCompleto = item.destinoImputado && item.destinoImputado !== 'S/D' && item.destinoImputado !== '' ? `${item.imputado} — <span class="text-slate-500">Destino: ${item.destinoImputado}</span>` : item.imputado;
-            
-            // CONCATENACIÓN ESTILIZADA PARA ELEMENTO DAÑADO / ELEMENTO PROVISTO
             const textoElementoCompleto = item.elementoProvisto && item.elementoProvisto !== 'S/D' && item.elementoProvisto !== '' ? `${item.elementoDañado} — <span class="text-slate-500">Provisto: ${item.elementoProvisto}</span>` : item.elementoDañado;
             
-            const fechaFormateadaTabla = item.fecha.toString().replace(/[\r\n]+/g, '<br><span class="text-[10px] text-amber-500 font-bold">Novedad:</span> ');
+            const fechaFormateadaTabla = item.fecha.toString().replace(/[\r\n]+/g, '<br><span class="text-[10px] text-amber-500 font-bold data-[theme=light]:text-amber-600">Novedad:</span> ');
 
-            tr.innerHTML = `<td class="px-4 py-3 font-mono font-bold text-amber-400 overflow-hidden break-all bg-slate-950/20">${item.sirex}</td><td class="px-4 py-3 text-slate-300 leading-tight">${fechaFormateadaTabla}</td><td class="px-4 py-3 font-mono text-slate-400 break-all">${item.expediente}</td><td class="px-4 py-3 text-xs text-slate-300 break-words font-medium" title="${item.dependencia}">${item.dependencia}</td><td class="px-4 py-3"><span class="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-md text-[10px] font-mono block text-center truncate">${item.fba}</span></td><td class="px-4 py-3 font-bold text-white whitespace-normal break-words" title="${item.caratula}">${item.caratula}</td><td class="px-4 py-3 text-slate-300 whitespace-normal break-words leading-tight font-medium bg-slate-900/10">${textoElementoCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10">${textoVictimaCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10">${textoImputadoCompleto}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] block text-center ${badgeControlClase}">${item.control}</span></td>`;
+            tr.innerHTML = `<td class="px-4 py-3 font-mono font-bold text-amber-400 overflow-hidden break-all bg-slate-950/20 data-[theme=light]:bg-slate-50 data-[theme=light]:text-amber-600">${item.sirex}</td><td class="px-4 py-3 text-slate-300 leading-tight data-[theme=light]:text-slate-700">${fechaFormateadaTabla}</td><td class="px-4 py-3 font-mono text-slate-400 break-all data-[theme=light]:text-slate-500">${item.expediente}</td><td class="px-4 py-3 text-xs text-slate-300 break-words font-medium data-[theme=light]:text-slate-700" title="${item.dependencia}">${item.dependencia}</td><td class="px-4 py-3"><span class="px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-md text-[10px] font-mono block text-center truncate data-[theme=light]:bg-slate-50 data-[theme=light]:border-slate-200 data-[theme=light]:text-slate-600">${item.fba}</span></td><td class="px-4 py-3 font-bold text-white whitespace-normal break-words data-[theme=light]:text-slate-900" title="${item.caratula}">${item.caratula}</td><td class="px-4 py-3 text-slate-300 whitespace-normal break-words leading-tight font-medium bg-slate-900/10 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-700">${textoElementoCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-600">${textoVictimaCompleto}</td><td class="px-4 py-3 text-[11px] text-slate-300 whitespace-normal break-words leading-tight bg-slate-900/10 data-[theme=light]:bg-transparent data-[theme=light]:text-slate-600">${textoImputadoCompleto}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[10px] block text-center ${badgeControlClase}">${item.control}</span></td>`;
             return tr;
         }
 
