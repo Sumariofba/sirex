@@ -685,15 +685,20 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("lesiones"));
+            // 1. CARÁTULA EXACTA: LESIONES POR ACCIDENTE
+            const caratulaLesionesExacta = "lesiones por accidente. art 331";
+            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => normalizarTexto(i.caratula) === normalizarTexto(caratulaLesionesExacta));
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuaciones`;
             document.getElementById('topDivisionLesiones').textContent = lesiones.division;
 
+            // 2. LEY 12569
             const ley = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("12569"));
             document.getElementById('topCountLey').textContent = `${ley.total} actuaciones`;
             document.getElementById('topDivisionLey').textContent = ley.total > 0 ? ley.division : "Sin registros";
 
-            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("abandono"));
+            // 3. CARÁTULA EXACTA: ABANDONO DE SERVICIO
+            const caratulaAbandonoExacta = "Dto. 1050/09. Abandonar el servicio por más de 72 horas sin causa justificada. Interv. AGAI (art. 198, inciso a)";
+            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => normalizarTexto(i.caratula) === normalizarTexto(caratulaAbandonoExacta));
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
             document.getElementById('topDivisionAbandono').textContent = abandono.division;
 
@@ -873,7 +878,7 @@
         }
 
         function normalizarTexto(texto) {
-            return (texto || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return (texto || "").toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         }
 
         function renderTable() {
