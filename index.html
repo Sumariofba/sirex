@@ -685,22 +685,26 @@
                 return sorted.length > 0 ? { division: sorted[0][0], total: sorted[0][1] } : { division: 'Ninguna', total: 0 };
             };
 
-            // 1. CARÁTULA EXACTA: LESIONES POR ACCIDENTE
-            const caratulaLesionesExacta = "lesiones por accidente. art 331";
-            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => normalizarTexto(i.caratula) === normalizarTexto(caratulaLesionesExacta));
+            // 1. LESIONES POR ACCIDENTE (Búsqueda tolerante a formato/espacios)
+            const lesiones = findTopFbaFijo(dataAnoActualGlobal, i => {
+                const text = normalizarTexto(i.caratula);
+                return (text.includes("lesion") && text.includes("accidente") && text.includes("331"));
+            });
             document.getElementById('topCountLesiones').textContent = `${lesiones.total} actuaciones`;
-            document.getElementById('topDivisionLesiones').textContent = lesiones.division;
+            document.getElementById('topDivisionLesiones').textContent = lesiones.total > 0 ? lesiones.division : "Sin registros";
 
             // 2. LEY 12569
             const ley = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("12569"));
             document.getElementById('topCountLey').textContent = `${ley.total} actuaciones`;
             document.getElementById('topDivisionLey').textContent = ley.total > 0 ? ley.division : "Sin registros";
 
-            // 3. CARÁTULA EXACTA: ABANDONO DE SERVICIO
-            const caratulaAbandonoExacta = "Dto. 1050/09. Abandonar el servicio por más de 72 horas sin causa justificada. Interv. AGAI (art. 198, inciso a)";
-            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => normalizarTexto(i.caratula) === normalizarTexto(caratulaAbandonoExacta));
+            // 3. ABANDONO DE SERVICIO (Búsqueda tolerante a formato/espacios)
+            const abandono = findTopFbaFijo(dataAnoActualGlobal, i => {
+                const text = normalizarTexto(i.caratula);
+                return (text.includes("1050") && text.includes("72")) || (text.includes("abandono") && text.includes("servicio"));
+            });
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
-            document.getElementById('topDivisionAbandono').textContent = abandono.division;
+            document.getElementById('topDivisionAbandono').textContent = abandono.total > 0 ? abandono.division : "Sin registros";
 
             let acumuladorSiniestrosMovil = 0; const conteoPorFbaMovil = {};
             rawData.forEach(item => {
