@@ -442,18 +442,27 @@
         function extraerMesYAño(fechaStr) {
             if (!fechaStr) return { mes: NaN, año: NaN };
             let stringLimpio = fechaStr.toString().split(/[\r\n]+/)[0].trim();
-            stringLimpio = stringLimpio.replace(/[-.]/g, '/');
             if (stringLimpio.includes(" ")) { stringLimpio = stringLimpio.split(" ")[0]; }
 
-            let partes = stringLimpio.split('/');
-            if (partes.length !== 3) return { mes: NaN, año: NaN };
-            
-            let p0 = parseInt(partes[0], 10);
-            let p1 = parseInt(partes[1], 10);
-            let p2 = parseInt(partes[2], 10);
-            
-            if (partes[0].length === 4) return { mes: p1, año: p0 };
-            return { mes: p1, año: p2 };
+            if (stringLimpio.includes("-")) {
+                let p = stringLimpio.split("-");
+                if (p.length === 3) {
+                    if (p[0].length === 4) return { mes: parseInt(p[1], 10), año: parseInt(p[0], 10) };
+                    if (p[2].length === 4) return { mes: parseInt(p[1], 10), año: parseInt(p[2], 10) };
+                }
+            }
+
+            let partes = stringLimpio.replace(/\./g, '/').split('/');
+            if (partes.length === 3) {
+                let p0 = parseInt(partes[0], 10);
+                let p1 = parseInt(partes[1], 10);
+                let p2 = parseInt(partes[2], 10);
+                
+                if (partes[0].length === 4) return { mes: p1, año: p0 };
+                return { mes: p1, año: p2 };
+            }
+
+            return { mes: NaN, año: NaN };
         }
 
         async function cargarDesdeSheets() {
@@ -503,34 +512,46 @@
             const rows = parseCSV(text);
             if (rows.length < 2) return;
 
-            const headers = rows[0].map(h => h.toString().trim().toUpperCase().replace(/\s+/g, ' '));
+            let headerRowIdx = 0;
+            for (let i = 0; i < Math.min(rows.length, 5); i++) {
+                const rowStr = rows[i].join(" ").toUpperCase();
+                if (rowStr.includes("SIREX") && rowStr.includes("DEPENDENCIA INSTRUCTORA")) {
+                    headerRowIdx = i;
+                    break;
+                }
+            }
+
+            const headers = rows[headerRowIdx].map(h => h.toString().trim().toUpperCase().replace(/\s+/g, ' '));
             
-            const idxSirex = headers.findIndex(h => h.startsWith("SIREX"));
-            const idxFecha = headers.findIndex(h => h.includes("FECHA"));
+            const idxSirex = headers.findIndex(h => h.includes("SIREX"));
+            const idxFecha = headers.findIndex(h => h.includes("INICIO") || h.includes("FECHA"));
             const idxExp = headers.findIndex(h => h.includes("EXPEDIENTE"));
             const idxDep = headers.findIndex(h => h.includes("DEPENDENCIA INSTRUCTORA"));
             const idxFba = headers.findIndex(h => h.includes("FBA INTERVINIENTE"));
-            const idxCara = headers.findIndex(h => h.includes("CARATULA"));
+            const idxCara = headers.findIndex(h => h.includes("CARATULA") || h.includes("CARÁTULA"));
             const idxElementoDañado = headers.findIndex(h => h.includes("ELEMENTO DAÑADO"));
             const idxCont = headers.findIndex(h => h.trim() === "CONTROL");
             
-            const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA");
-            const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA"));
+            const idxVictima = headers.findIndex(h => h.trim() === "VICTIMA" || h.trim() === "VÍCTIMA");
+            const idxDestinoVictima = headers.findIndex(h => h.includes("DESTINO DE LA VICTIMA") || h.includes("DESTINO DE LA VÍCTIMA"));
             const idxImputado = headers.findIndex(h => h.trim() === "IMPUTADO");
             const idxDestinoImputado = headers.findIndex(h => h.includes("DESTINO DEL IMPUTADO"));
-            const idxElementoProvisto = headers.findIndex(h => h.includes("PROVISTO") || h.includes("ELEMENTO PROVISTO"));
+            const idxElementoProvisto = headers.findIndex(h => h.includes("DATOS ELEMENTO PROVISTO") || h.includes("PROVISTO"));
 
             rawData = [];
 
-            for (let i = 1; i < rows.length; i++) {
+            for (let i = headerRowIdx + 1; i < rows.length; i++) {
                 const r = rows[i];
-                if (r.length <= 1 || !r[idxSirex] || r[idxSirex].trim() === "") continue;
+                if (r.length <= 1 || !r[idxSirex]) continue;
+                
+                const valorSirex = r[idxSirex].trim();
+                if (valorSirex === "" || valorSirex.toUpperCase().startsWith("SIREX N") || valorSirex.toUpperCase() === "SIREX") continue;
 
                 let fechaOriginal = r[idxFecha]?.trim() || '';
                 let { mes, año } = extraerMesYAño(fechaOriginal);
 
                 rawData.push({
-                    sirex: r[idxSirex].trim(), 
+                    sirex: valorSirex, 
                     fecha: fechaOriginal, 
                     mes: mes, 
                     año: año,
@@ -670,7 +691,7 @@
 
             const ley = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("12569"));
             document.getElementById('topCountLey').textContent = `${ley.total} actuaciones`;
-            document.getElementById('topDivisionLey').textContent = lesiones.total > 0 ? ley.division : "Sin registros";
+            document.getElementById('topDivisionLey').textContent = ley.total > 0 ? ley.division : "Sin registros";
 
             const abandono = findTopFbaFijo(dataAnoActualGlobal, i => (i.caratula || '').toLowerCase().includes("abandono"));
             document.getElementById('topCountAbandono').textContent = `${abandono.total} actuaciones`;
